@@ -11,6 +11,7 @@ import {
   Save,
   AlertTriangle,
 } from "lucide-react";
+import { BotaoConteudo } from "@/components/ui/Carregando";
 
 interface ContractModalProps {
   isOpen: boolean;
@@ -381,10 +382,12 @@ export const ContractModal: React.FC<ContractModalProps> = ({
             <button
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-semibold shadow-xs transition"
+              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] disabled:opacity-70 disabled:cursor-not-allowed text-white text-xs font-semibold shadow-xs transition"
             >
-              <Save className="w-4 h-4" />
-              <span>{saving ? "Salvando..." : "Salvar Registro"}</span>
+              <BotaoConteudo carregando={saving} rotuloCarregando="Salvando...">
+                <Save className="w-4 h-4" />
+                <span>Salvar Registro</span>
+              </BotaoConteudo>
             </button>
             <button
               onClick={onClose}

@@ -11,6 +11,7 @@ import {
   ChevronRight,
   AlertTriangle,
 } from "lucide-react";
+import { EsqueletoListaPacientes, BarraProgresso } from "@/components/ui/Carregando";
 
 /**
  * Detecta sinalizacao de risco nas respostas da anamnese.
@@ -129,7 +130,7 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
       <div className="p-3.5 bg-[#fbf3ef] border-b border-[#f0ded8] flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-full bg-[#5d0c1d] text-white flex items-center justify-center font-bold text-sm shadow-xs">
-            JS
+            JA
           </div>
           <div>
             <h2 className="font-serif text-sm font-bold text-[#5d0c1d] leading-tight">
@@ -184,9 +185,18 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
         </div>
       </div>
 
+      {/* Faixa fina no topo quando esta recarregando com a lista ja na tela:
+          da sinal de atividade sem fazer o conteudo piscar. */}
+      <BarraProgresso ativa={isLoading && submissions.length > 0} />
+
       {/* LISTA DE PACIENTES */}
       <div className="overflow-y-auto divide-y divide-[#fbf3ef]" style={{ flex: 1, minHeight: 0 }}>
-        {submissions.length === 0 ? (
+        {isLoading && submissions.length === 0 ? (
+          // Enquanto carrega pela primeira vez, mostra o esqueleto da lista.
+          // Antes aparecia "Nenhum paciente encontrado", o que fazia parecer
+          // que a Joane nao tinha paciente nenhum.
+          <EsqueletoListaPacientes itens={7} />
+        ) : submissions.length === 0 ? (
           <div className="p-8 text-center text-xs text-[#9c8b8e] space-y-2">
             <User className="w-8 h-8 mx-auto text-[#ccb38d]" />
             <p className="font-serif font-bold text-sm text-[#5d0c1d]">Nenhum paciente encontrado</p>

@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Wallet,
 } from "lucide-react";
+import { BotaoConteudo, TelaCarregando } from "@/components/ui/Carregando";
 
 export default function AdminConfiguracoesPage() {
   const router = useRouter();
@@ -95,9 +96,7 @@ export default function AdminConfiguracoesPage() {
     return (
       <div className="min-h-screen flex flex-col bg-[#fff6f4]">
         <AdminHeader />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="w-10 h-10 border-4 border-[#f0ded8] border-t-[#5d0c1d] rounded-full animate-spin" />
-        </div>
+        <TelaCarregando mensagem="Carregando suas configurações..." />
       </div>
     );
   }
@@ -379,10 +378,12 @@ export default function AdminConfiguracoesPage() {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#5d0c1d]/25 transition"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] disabled:opacity-70 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-bold shadow-md shadow-[#5d0c1d]/25 transition"
             >
-              <Save className="w-4 h-4" />
-              <span>{saving ? "Salvando..." : "Salvar Alterações"}</span>
+              <BotaoConteudo carregando={saving} rotuloCarregando="Salvando...">
+                <Save className="w-4 h-4" />
+                <span>Salvar Alterações</span>
+              </BotaoConteudo>
             </button>
           </div>
         </form>

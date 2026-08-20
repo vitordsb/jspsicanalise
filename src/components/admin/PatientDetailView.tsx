@@ -15,6 +15,7 @@ import {
   FileText,
   AlertTriangle,
 } from "lucide-react";
+import { BotaoConteudo } from "@/components/ui/Carregando";
 import { hasRiskFlag } from "./WhatsAppSidebar";
 
 interface PatientDetailViewProps {
@@ -356,10 +357,12 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                 <button
                   onClick={handleSaveNotes}
                   disabled={savingNotes}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-semibold shadow-xs transition"
+                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] disabled:opacity-70 disabled:cursor-not-allowed text-white text-xs font-semibold shadow-xs transition"
                 >
-                  <Save className="w-4 h-4" />
-                  <span>{savingNotes ? "Salvando..." : "Salvar Anotações"}</span>
+                  <BotaoConteudo carregando={savingNotes} rotuloCarregando="Salvando...">
+                    <Save className="w-4 h-4" />
+                    <span>Salvar Anotações</span>
+                  </BotaoConteudo>
                 </button>
               </div>
 

@@ -13,6 +13,7 @@ import {
   Check,
   Layers,
 } from "lucide-react";
+import { EsqueletoCartoes } from "@/components/ui/Carregando";
 
 export default function AdminAnamnesesPage() {
   const [templates, setTemplates] = useState<any[]>([]);
@@ -511,6 +512,13 @@ export default function AdminAnamnesesPage() {
                 {saving ? "Salvando..." : "Salvar Modelo"}
               </button>
             </div>
+          </div>
+        ) : loading ? (
+          /* Esqueleto no lugar da grade enquanto os modelos carregam.
+             Sem isso a area ficava vazia e parecia que nao havia modelo. */
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <EsqueletoCartoes itens={2} altura="h-52" />
+            <EsqueletoCartoes itens={2} altura="h-52" />
           </div>
         ) : (
           /* LISTA DE MODELOS */

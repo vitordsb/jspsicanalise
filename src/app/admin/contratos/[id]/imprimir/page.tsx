@@ -11,6 +11,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { formatCurrency, formatCPF, formatDate, formatDateTime } from "@/lib/formatters";
 import { ESTILOS_IMPRESSAO } from "./estilos";
+import { TelaCarregando } from "@/components/ui/Carregando";
 
 interface ContratoImpressao {
   id: string;
@@ -125,7 +126,7 @@ export default function ImprimirContratoPage({
   }, [id, router]);
 
   if (carregando) {
-    return <p style={{ padding: 32, fontFamily: "system-ui" }}>Carregando contrato...</p>;
+    return <TelaCarregando mensagem="Preparando o contrato para impressão..." />;
   }
   if (erro || !contrato) {
     return <p style={{ padding: 32, fontFamily: "system-ui" }}>{erro || "Contrato não encontrado."}</p>;
