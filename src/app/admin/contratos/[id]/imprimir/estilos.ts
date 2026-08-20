@@ -75,8 +75,13 @@ export const ESTILOS_IMPRESSAO = `
 
 .separador { border: 0; border-top: 0.8pt solid #999; margin: 4mm 0; }
 
-/* Clausulas */
-.clausula { margin: 0 0 4mm 0; break-inside: avoid; }
+/* Clausulas.
+   Sem break-inside avoid aqui de proposito: com ele, uma clausula que nao
+   coubesse no espaco restante pulava inteira para a folha seguinte e deixava
+   um terco da pagina em branco. Em contrato impresso a clausula pode quebrar
+   entre paginas. O que nao pode e titulo orfao no pe da folha, e disso cuida
+   o break-after do titulo somado a orphans e widows nos paragrafos. */
+.clausula { margin: 0 0 4mm 0; }
 .clausula-titulo {
   font-size: 10.5pt;
   font-weight: 700;
@@ -84,6 +89,8 @@ export const ESTILOS_IMPRESSAO = `
   letter-spacing: 0.02em;
   text-align: left;
   margin: 0 0 1.2mm 0;
+  break-after: avoid;
+  page-break-after: avoid;
 }
 
 .encerramento { margin-top: 5mm; }
