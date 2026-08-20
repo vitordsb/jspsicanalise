@@ -15,11 +15,11 @@ export { normalizeCpf, isValidCpf, normalizeCnpj, isValidCnpj } from "./cpf";
 export const loginSchema = z.object({
   email: z
     .string()
-    .email("E-mail invalido.")
+    .email("E-mail inválido.")
     .max(254, "E-mail muito longo."),
   password: z
     .string()
-    .min(1, "Senha nao pode ser vazia.")
+    .min(1, "A senha não pode ficar em branco.")
     .max(200, "Senha muito longa."),
 });
 
@@ -27,35 +27,38 @@ export const checkCpfSchema = z.object({
   cpf: z
     .string()
     .transform(normalizeCpf)
-    .refine((v) => v.length === 11, { message: "CPF deve ter 11 digitos." })
-    .refine(isValidCpf, { message: "CPF invalido (checksum)." }),
+    .refine((v) => v.length === 11, { message: "O CPF deve ter 11 dígitos." })
+    .refine(isValidCpf, { message: "CPF inválido. Confira os números digitados." }),
 });
 
 export const submitAnamnesisSchema = z.object({
   templateId: z.string().min(1, "templateId e obrigatorio."),
+  // A mensagem vai tambem no z.boolean, nao so no refine: quando o campo vem
+  // ausente o Zod falha na checagem de tipo e nunca chega no refine, e o
+  // paciente acabava vendo o texto cru "expected boolean, received undefined".
   lgpdConsent: z
-    .boolean()
+    .boolean({ error: "É preciso aceitar o termo de consentimento para enviar." })
     .refine((v) => v === true, {
-      message: "O consentimento LGPD deve ser aceito para enviar a anamnese.",
+      message: "É preciso aceitar o termo de consentimento para enviar.",
     }),
   personalInfo: z.object({
     fullName: z
       .string()
-      .min(3, "Nome deve ter pelo menos 3 caracteres.")
-      .max(200, "Nome muito longo."),
+      .min(3, "O nome deve ter pelo menos 3 caracteres.")
+      .max(200, "O nome informado é longo demais."),
     email: z
       .string()
-      .email("E-mail invalido.")
+      .email("E-mail inválido.")
       .max(254),
     phone: z
       .string()
-      .min(10, "Telefone invalido.")
+      .min(10, "Telefone inválido.")
       .max(20),
     cpf: z
       .string()
       .transform(normalizeCpf)
-      .refine((v) => v.length === 11, { message: "CPF deve ter 11 digitos." })
-      .refine(isValidCpf, { message: "CPF invalido (checksum)." }),
+      .refine((v) => v.length === 11, { message: "O CPF deve ter 11 dígitos." })
+      .refine(isValidCpf, { message: "CPF inválido. Confira os números digitados." }),
     birthDate: z.string().optional().default(""),
     gender: z.string().optional().default(""),
     occupation: z.string().optional().default(""),
@@ -66,7 +69,7 @@ export const submitAnamnesisSchema = z.object({
     .record(z.string(), z.unknown())
     .refine(
       (v) => JSON.stringify(v).length <= 200_000,
-      { message: "Respostas excedem o tamanho maximo permitido." }
+      { message: "As respostas excedem o tamanho permitido." }
     ),
 });
 

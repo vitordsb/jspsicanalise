@@ -6,12 +6,23 @@ import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { submitAnamnesisSchema } from "@/lib/validate";
 import { ZodError } from "zod";
 
+/** Nome tecnico do campo -> como o paciente o ve no formulario. */
+const NOMES_DE_CAMPO: Record<string, string> = {
+  fullName: "nome completo",
+  email: "e-mail",
+  phone: "telefone",
+  cpf: "CPF",
+  birthDate: "data de nascimento",
+  lgpdConsent: "consentimento",
+  templateId: "formulario",
+};
+
 export async function POST(req: NextRequest) {
   // Rate limit conservador: 3 envios por hora por IP
   const ip = getClientIp(req);
   if (!checkRateLimit(`submit-anamnese:${ip}`, 3, 60 * 60 * 1000)) {
     return NextResponse.json(
-      { error: "Muitas tentativas. Aguarde antes de tentar novamente." },
+      { error: "Muitas tentativas. Aguarde um pouco antes de tentar novamente." },
       { status: 429 }
     );
   }
@@ -30,7 +41,7 @@ export async function POST(req: NextRequest) {
     body = await req.json();
   } catch {
     return NextResponse.json(
-      { error: "Corpo da requisicao invalido." },
+      { error: "Não foi possível ler os dados enviados." },
       { status: 400 }
     );
   }
@@ -40,11 +51,24 @@ export async function POST(req: NextRequest) {
     parsed = submitAnamnesisSchema.parse(body);
   } catch (e) {
     if (e instanceof ZodError) {
-      const firstError = e.issues[0];
-      return NextResponse.json(
-        { error: firstError?.message || "Dados invalidos." },
-        { status: 400 }
-      );
+      const primeiro = e.issues[0];
+      // Rede de seguranca: se escapar alguma mensagem interna do Zod (do tipo
+      // "Invalid input: expected string, received undefined"), o paciente ve
+      // um texto util em vez do jargao da biblioteca. Este formulario e
+      // preenchido por quem esta buscando acolhimento, nao por um dev.
+      const mensagemInterna =
+        !primeiro?.message || /^invalid input|^expected |^required$/i.test(primeiro.message);
+      const chave = primeiro?.path?.filter((p) => typeof p === "string").pop() as
+        | string
+        | undefined;
+      const campo = chave ? NOMES_DE_CAMPO[chave] : undefined;
+      const erro = mensagemInterna
+        ? campo
+          ? `Confira o campo ${campo} e tente novamente.`
+          : "Confira os dados preenchidos e tente novamente."
+        : primeiro.message;
+
+      return NextResponse.json({ error: erro }, { status: 400 });
     }
     throw e;
   }
@@ -69,7 +93,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Sua anamnese ja foi enviada anteriormente e esta em analise pela Dra. Joane Souza Oliveira de Andrade.",
+            "Sua anamnese já foi enviada anteriormente e está em análise pela Dra. Joane Souza Oliveira de Andrade.",
           alreadySubmitted: true,
           submissionId: existingPatient.submissions[0].id,
         },
@@ -83,7 +107,7 @@ export async function POST(req: NextRequest) {
 
     if (!template) {
       return NextResponse.json(
-        { error: "Modelo de anamnese nao encontrado." },
+        { error: "Modelo de anamnese não encontrado." },
         { status: 404 }
       );
     }
