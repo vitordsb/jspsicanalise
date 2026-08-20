@@ -1,0 +1,91 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                String   @id @default(cuid())
+  name              String
+  email             String   @unique
+  password          String
+  role              String   @default("admin")
+  title             String   @default("Psicanalista Clínica & Terapeuta")
+  crp               String   @default("Reg. Psicanálise 12345/BR")
+  phone             String   @default("(11) 99999-9999")
+  notificationEmail String   @default("joane@psicanalise.com.br")
+  clinicName        String   @default("JS Psicanálise & Acolhimento")
+  address           String   @default("Atendimento Presencial e Online")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model AnamnesisTemplate {
+  id          String                @id @default(cuid())
+  title       String
+  description String
+  version     Int                   @default(1)
+  isActive    Boolean               @default(false)
+  sections    String                // JSON string containing sections and questions
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  submissions AnamnesisSubmission[]
+}
+
+model Patient {
+  id            String                @id @default(cuid())
+  fullName      String
+  email         String
+  phone         String
+  birthDate     String
+  cpf           String                @unique
+  gender        String?               @default("")
+  occupation    String?               @default("")
+  maritalStatus String?               @default("")
+  notes         String?               @default("")
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  submissions   AnamnesisSubmission[]
+  contracts     Contract[]
+}
+
+model AnamnesisSubmission {
+  id               String            @id @default(cuid())
+  patientId        String
+  patient          Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  templateId       String
+  template         AnamnesisTemplate @relation(fields: [templateId], references: [id])
+  templateVersion  Int               @default(1)
+  templateSnapshot String            // JSON snapshot of the template
+  answers          String            // JSON key-value pairs of responses
+  status           String            @default("pending") // pending, in_review, approved, archived
+  clinicalNotes    String?           @default("")
+  reviewedAt       DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  contracts        Contract[]
+}
+
+model Contract {
+  id                 String               @id @default(cuid())
+  patientId          String
+  patient            Patient              @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  submissionId       String?
+  submission         AnamnesisSubmission? @relation(fields: [submissionId], references: [id])
+  title              String               @default("Contrato de Prestação de Serviços Psicanalíticos")
+  therapistName      String               @default("Joane Silva")
+  therapistDoc       String               @default("Reg. Psicanálise 12345/BR")
+  therapistAddress   String               @default("Atendimento Online e Consultório")
+  sessionPrice       Float                @default(180.0)
+  frequency          String               @default("Semanal (1x por semana)")
+  durationMinutes    Int                  @default(50)
+  paymentMethod      String               @default("PIX ou Transferência Bancária até o dia 05 de cada mês")
+  cancellationPolicy String               @default("Desmarcações ou reagendamentos devem ser comunicados com no mínimo 24 horas de antecedência. Faltas sem aviso prévio serão cobradas normalmente.")
+  customClauses      String?              @default("")
+  status             String               @default("draft") // draft, generated, signed
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+}

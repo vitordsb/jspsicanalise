@@ -1,26 +1,84 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-primary: #5d0c1d;
+    --color-quaternary: #8b1c31;
+    --color-secondary: #f0ded8;
+    --color-secondary-light: #fbf7f5;
+    --color-tertiary: #c4a984;
+    --color-background: #f8f7f5;
+    --color-card: #ffffff;
+    --color-input: #ffffff;
+    --color-input-border: #ded8d2;
+    --color-text-main: #221a1b;
+    --color-text-muted: #5f5456;
+    --color-text-subtle: #8e8284;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-main);
+    font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  h1, h2, h3, h4, .font-serif {
+    font-family: var(--font-serif), Georgia, serif;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* WhatsApp Web style background pattern in subtle neutral warm tone */
+.whatsapp-bg {
+  background-color: #f6f4f1;
+  background-image: radial-gradient(#dcd5cd 0.85px, transparent 0.85px), radial-gradient(#dcd5cd 0.85px, #f6f4f1 0.85px);
+  background-size: 28px 28px;
+  background-position: 0 0, 14px 14px;
+}
+
+/* Custom soft scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d5ccc4;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #beb3aa;
+}
+
+/* Print styles for Clean A4 Contract & Anamnesis Ficha */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .print-page {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
 }
