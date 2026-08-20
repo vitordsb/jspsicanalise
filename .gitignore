@@ -53,3 +53,11 @@ next-env.d.ts
 .claude/
 .windsurf/
 skills-lock.json
+
+# Contexto de agentes (regra permanente do Vitor)
+CLAUDE.md
+AVISOS.md
+AVISOS_arquivados.md
+ARCHITECTURE.md
+_memoria/
+dev-build/

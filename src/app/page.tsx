@@ -25,7 +25,7 @@ export default function HomePage() {
               Psicóloga & Psicanalista
             </span>
             <span className="font-serif text-lg sm:text-xl font-bold text-[#5d0c1d] block leading-none">
-              Joane Silva
+              Joane Souza Oliveira de Andrade
             </span>
           </div>
         </div>
@@ -174,7 +174,7 @@ export default function HomePage() {
                 Sobre a Terapeuta
               </div>
               <h3 className="font-serif text-3xl sm:text-4xl font-bold text-[#5d0c1d] italic">
-                Dra. Joane Silva
+                Dra. Joane Souza Oliveira de Andrade
               </h3>
               <p className="text-sm sm:text-base text-[#6f5f62] leading-relaxed">
                 Praticante da psicanálise com dedicação à escuta do inconsciente e suas manifestações subjetivas. 

@@ -70,7 +70,7 @@ function LoginForm() {
               Acesso Restrito & Sigiloso
             </span>
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#5d0c1d]">
-              Dra. Joane Silva
+              Dra. Joane Souza Oliveira de Andrade
             </h1>
             <p className="text-xs text-[#6f5f62] mt-0.5">
               Painel de Gestão Clínica e Anamneses

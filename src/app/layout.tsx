@@ -16,9 +16,9 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "JS Psicanálise | Dra. Joane Silva - Acolhimento & Anamnese Clínica",
+  title: "Joane Souza Oliveira de Andrade | Psicanálise Clínica",
   description:
-    "Espaço ético e acolhedor de escuta psicanalítica, anamnese virtual e acompanhamento terapêutico com a Dra. Joane Silva.",
+    "Espaço ético e acolhedor de escuta psicanalítica, anamnese virtual e acompanhamento terapêutico com a Dra. Joane Souza Oliveira de Andrade.",
 };
 
 export default function RootLayout({

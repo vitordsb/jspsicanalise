@@ -1,66 +1,70 @@
 import { PrismaClient } from "@prisma/client";
+import { hashPassword, normalizeCpf } from "../src/lib/auth-seed-helpers";
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("Iniciando seed do banco de dados...");
 
-  // 1. Limpa dados anteriores se existirem
   await prisma.contract.deleteMany();
   await prisma.anamnesisSubmission.deleteMany();
   await prisma.anamnesisTemplate.deleteMany();
   await prisma.patient.deleteMany();
   await prisma.user.deleteMany();
 
-  // 2. Cria Usuário Admin da Joane
+  // Senha do admin via seed: usa ADMIN_PASSWORD env ou "admin" como placeholder.
+  // IMPORTANTE: alterar a senha real via ADMIN_PASSWORD_HASH no .env antes de ir para producao.
+  const adminPassword = process.env.ADMIN_PASSWORD || "admin";
+  const hashedPassword = hashPassword(adminPassword);
+
   const admin = await prisma.user.create({
     data: {
-      name: "Dra. Joane Silva",
+      name: "Dra. Joane Souza Oliveira de Andrade",
       email: "joane@psicanalise.com.br",
-      password: "admin", // Em produção pode ter hash bcrypt
+      password: hashedPassword,
       role: "admin",
-      title: "Psicanalista Clínica & Especialista em Saúde Mental",
-      crp: "Reg. CBO 2515-50 / Psicanálise Clínica",
-      phone: "(11) 98765-4321",
-      notificationEmail: "joane@psicanalise.com.br",
-      clinicName: "JS Psicanálise & Desenvolvimento Humano",
-      address: "Atendimento Clínico Online e Presencial - São Paulo/SP",
+      title: "Psicanalista Clinica e Especialista em Saude Mental",
+      // crp: PENDENTE - aguardando registro oficial da Dra. Joane
+      crp: "",
+      phone: "",
+      notificationEmail: "enaoj22@gmail.com",
+      clinicName: "",
+      address: "Atendimento Clinico Online e Presencial",
     },
   });
 
-  console.log("✓ Administrador Joane criado:", admin.email);
+  console.log("Administrador criado:", admin.email);
 
-  // 3. Cria Template de Anamnese Padrão Completo
   const standardSections = [
     {
       id: "sec_queixa",
-      title: "1. Queixa Principal & Motivo da Busca",
-      description: "Conte um pouco sobre o que te trouxe até a análise e seus sentimentos atuais.",
+      title: "1. Queixa Principal e Motivo da Busca",
+      description: "Conte um pouco sobre o que te trouxe ate a analise e seus sentimentos atuais.",
       questions: [
         {
           id: "q_motivo",
-          label: "O que motivou você a procurar psicanálise/terapia neste momento?",
+          label: "O que motivou voce a procurar psicanalise/terapia neste momento?",
           type: "textarea",
-          placeholder: "Ex: Tenho me sentido muito sobrecarregado(a), com crises de ansiedade recorrentes e dificuldades no relacionamento...",
+          placeholder: "Ex: Tenho me sentido muito sobrecarregado(a), com crises de ansiedade recorrentes...",
           required: true,
         },
         {
           id: "q_tempo_sintomas",
-          label: "Há quanto tempo você percebe esses incômodos ou sentimentos?",
+          label: "Ha quanto tempo voce percebe esses incomodos ou sentimentos?",
           type: "text",
-          placeholder: "Ex: Há cerca de 6 meses, após mudança de emprego",
+          placeholder: "Ex: Ha cerca de 6 meses, apos mudanca de emprego",
           required: true,
         },
         {
           id: "q_experiencia_anterior",
-          label: "Já fez terapia ou acompanhamento psiquiátrico anteriormente?",
+          label: "Ja fez terapia ou acompanhamento psiquiatrico anteriormente?",
           type: "radio",
-          options: ["Nunca fiz", "Sim, já fiz psicoterapia", "Sim, já passei por psiquiatra", "Sim, ambos"],
+          options: ["Nunca fiz", "Sim, ja fiz psicoterapia", "Sim, ja passei por psiquiatra", "Sim, ambos"],
           required: true,
         },
         {
           id: "q_detalhe_anterior",
-          label: "Se já fez, como foi sua experiência?",
+          label: "Se ja fez, como foi sua experiencia?",
           type: "textarea",
           placeholder: "Ex: Fiz por 1 ano, me ajudou bastante mas precisei interromper por tempo...",
           required: false,
@@ -69,149 +73,149 @@ async function main() {
     },
     {
       id: "sec_sintomas",
-      title: "2. Sintomas & Saúde Emocional",
-      description: "Identificação dos sintomas físicos, emocionais e psicológicos que você vivencia.",
+      title: "2. Sintomas e Saude Emocional",
+      description: "Identificacao dos sintomas fisicos, emocionais e psicologicos que voce vivencia.",
       questions: [
         {
           id: "q_sintomas_lista",
-          label: "Quais dos sintomas abaixo você tem vivenciado com frequência nas últimas semanas?",
+          label: "Quais dos sintomas abaixo voce tem vivenciado com frequencia nas ultimas semanas?",
           type: "checkbox",
           options: [
-            "Ansiedade constante / Preocupação excessiva",
-            "Crises de pânico / Taquicardia / Falta de ar",
+            "Ansiedade constante / Preocupacao excessiva",
+            "Crises de panico / Taquicardia / Falta de ar",
             "Tristeza profunda / Vontade de chorar sem motivo aparente",
-            "Insônia ou dificuldade para manter o sono",
-            "Cansaço excessivo e falta de energia",
+            "Insonia ou dificuldade para manter o sono",
+            "Cansaco excessivo e falta de energia",
             "Pensamentos repetitivos ou obsessivos",
-            "Dificuldade de concentração e foco",
-            "Irritabilidade ou oscilações de humor",
-            "Sensação de solidão ou incompreensão",
-            "Dificuldade em impor limites / Dizer 'não'",
+            "Dificuldade de concentracao e foco",
+            "Irritabilidade ou oscilacoes de humor",
+            "Sensacao de solidao ou incompreensao",
+            "Dificuldade em impor limites / Dizer nao",
           ],
           required: true,
         },
         {
           id: "q_escala_impacto",
-          label: "Em uma escala de 1 a 10, qual o impacto desses sintomas na sua rotina diária?",
+          label: "Em uma escala de 1 a 10, qual o impacto desses sintomas na sua rotina diaria?",
           type: "scale_1_10",
-          helpText: "1 = impacto mínimo, 10 = impacto severo/incapacitante",
+          helpText: "1 = impacto minimo, 10 = impacto severo/incapacitante",
           required: true,
         },
         {
           id: "q_medicamentos",
-          label: "Faz uso contínuo de alguma medicação (antidepressivo, ansiolítico, etc.)?",
+          label: "Faz uso continuo de alguma medicacao (antidepressivo, ansiolitico, etc.)?",
           type: "text",
-          placeholder: "Ex: Não uso / Sim, Escitalopram 10mg receitado pelo Dr. Carlos",
+          placeholder: "Ex: Nao uso / Sim, Escitalopram 10mg receitado pelo Dr. Carlos",
           required: false,
         },
       ],
     },
     {
       id: "sec_familia",
-      title: "3. Histórico Pessoal & Relações Familiares",
-      description: "Compreensão da sua rede de apoio, histórico afetivo e dinâmica familiar.",
+      title: "3. Historico Pessoal e Relacoes Familiares",
+      description: "Compreensao da sua rede de apoio, historico afetivo e dinamica familiar.",
       questions: [
         {
           id: "q_estado_civil",
-          label: "Estado civil / Situação amorosa atual:",
+          label: "Estado civil / Situacao amorosa atual:",
           type: "radio",
-          options: ["Solteiro(a)", "Casado(a) / União Estável", "Namorando", "Divorciado(a) / Separado(a)", "Viúvo(a)"],
+          options: ["Solteiro(a)", "Casado(a) / Uniao Estavel", "Namorando", "Divorciado(a) / Separado(a)", "Viuvo(a)"],
           required: true,
         },
         {
           id: "q_filhos",
           label: "Tem filhos? Se sim, quantos e idades:",
           type: "text",
-          placeholder: "Ex: Não tenho / Sim, 2 filhos (5 e 8 anos)",
+          placeholder: "Ex: Nao tenho / Sim, 2 filhos (5 e 8 anos)",
           required: false,
         },
         {
           id: "q_com_quem_mora",
-          label: "Com quem você reside atualmente?",
+          label: "Com quem voce reside atualmente?",
           type: "text",
-          placeholder: "Ex: Moro sozinho(a) / Moro com meu cônjuge e filho",
+          placeholder: "Ex: Moro sozinho(a) / Moro com meu conjuge e filho",
           required: true,
         },
         {
           id: "q_relacao_familia",
-          label: "Como é o seu relacionamento com seus pais e familiares mais próximos?",
+          label: "Como e o seu relacionamento com seus pais e familiares mais proximos?",
           type: "textarea",
-          placeholder: "Conte brevemente sobre a relação com pai, mãe ou figuras de referência...",
+          placeholder: "Conte brevemente sobre a relacao com pai, mae ou figuras de referencia...",
           required: false,
         },
         {
           id: "q_trabalho",
-          label: "Profissão / Ocupação atual e grau de satisfação no trabalho:",
+          label: "Profissao / Ocupacao atual e grau de satisfacao no trabalho:",
           type: "textarea",
-          placeholder: "Ex: Sou designer, trabalho em home office. Me sinto estressado com prazos...",
+          placeholder: "Ex: Sou designer, trabalho em home office...",
           required: false,
         },
       ],
     },
     {
       id: "sec_rotina",
-      title: "4. Rotina, Sono & Estilo de Vida",
-      description: "Hábitos que influenciam sua energia, corpo e mente.",
+      title: "4. Rotina, Sono e Estilo de Vida",
+      description: "Habitos que influenciam sua energia, corpo e mente.",
       questions: [
         {
           id: "q_sono_qualidade",
-          label: "Como você avalia a qualidade do seu sono?",
+          label: "Como voce avalia a qualidade do seu sono?",
           type: "radio",
           options: [
             "Durmo muito bem (7 a 8h restauradoras)",
             "Tenho dificuldade para pegar no sono",
-            "Acordo várias vezes durante a noite",
-            "Acordo cansado(a) mesmo após dormir",
+            "Acordo varias vezes durante a noite",
+            "Acordo cansado(a) mesmo apos dormir",
           ],
           required: true,
         },
         {
           id: "q_atividades_fisicas",
-          label: "Pratica atividade física?",
+          label: "Pratica atividade fisica?",
           type: "radio",
           options: ["Frequentemente (3x ou mais por semana)", "Ocasionalmente (1 a 2x por semana)", "Raramente ou Nunca"],
           required: true,
         },
         {
           id: "q_lazer",
-          label: "O que você costuma fazer para relaxar ou nos momentos livres?",
+          label: "O que voce costuma fazer para relaxar ou nos momentos livres?",
           type: "textarea",
-          placeholder: "Ex: Leitura, passear com cachorro, assistir séries, cozinhar...",
+          placeholder: "Ex: Leitura, passear com cachorro, assistir series, cozinhar...",
           required: false,
         },
       ],
     },
     {
       id: "sec_expectativas",
-      title: "5. Expectativas & Preferências",
-      description: "Alinhamento sobre formato, horários e objetivos terapêuticos.",
+      title: "5. Expectativas e Preferencias",
+      description: "Alinhamento sobre formato, horarios e objetivos terapeuticos.",
       questions: [
         {
           id: "q_expectativa_processo",
-          label: "O que você mais gostaria de transformar ou compreender sobre si mesmo(a) na análise?",
+          label: "O que voce mais gostaria de transformar ou compreender sobre si mesmo(a) na analise?",
           type: "textarea",
-          placeholder: "Ex: Quero aprender a lidar com minhas angústias, me conhecer melhor e ter relações mais saudáveis...",
+          placeholder: "Ex: Quero aprender a lidar com minhas angustias, me conhecer melhor...",
           required: true,
         },
         {
           id: "q_formato_preferido",
-          label: "Qual o formato de atendimento de sua preferência?",
+          label: "Qual o formato de atendimento de sua preferencia?",
           type: "radio",
-          options: ["Online (Google Meet / WhatsApp Vídeo)", "Presencial no Consultório", "Sem preferência / Híbrido"],
+          options: ["Online (Google Meet / WhatsApp Video)", "Presencial no Consultorio", "Sem preferencia / Hibrido"],
           required: true,
         },
         {
           id: "q_disponibilidade_horarios",
-          label: "Qual a sua disponibilidade de horários para as sessões?",
+          label: "Qual a sua disponibilidade de horarios para as sessoes?",
           type: "checkbox",
-          options: ["Manhã (08h às 12h)", "Tarde (13h às 18h)", "Noite (18h às 21h)", "Sábados de manhã"],
+          options: ["Manha (08h as 12h)", "Tarde (13h as 18h)", "Noite (18h as 21h)", "Sabados de manha"],
           required: true,
         },
         {
           id: "q_recado_final",
-          label: "Gostaria de deixar mais alguma observação ou dúvida para a Dra. Joane?",
+          label: "Gostaria de deixar mais alguma observacao ou duvida para a Dra. Joane?",
           type: "textarea",
-          placeholder: "Espaço livre para qualquer comentário adicional...",
+          placeholder: "Espaco livre para qualquer comentario adicional...",
           required: false,
         },
       ],
@@ -220,56 +224,44 @@ async function main() {
 
   const template = await prisma.anamnesisTemplate.create({
     data: {
-      title: "Anamnese Psicanalítica e Clínica - Adulto (Padrão Oficial)",
-      description: "Formulário completo para acolhimento inicial, investigação de queixas e histórico biopsicossocial.",
+      title: "Anamnese Psicanalitica e Clinica - Adulto (Padrao Oficial)",
+      description: "Formulario completo para acolhimento inicial, investigacao de queixas e historico biopsicossocial.",
       version: 1,
       isActive: true,
       sections: JSON.stringify(standardSections),
     },
   });
 
-  console.log("✓ Template de Anamnese criado e ativado:", template.title);
+  console.log("Template de Anamnese criado e ativado:", template.title);
 
-  // 4. Cria Pacientes e Submissões de Teste para o Painel WhatsApp Web
+  // CPFs dos pacientes de teste: sempre so digitos
   const patient1 = await prisma.patient.create({
     data: {
       fullName: "Mariana Albuquerque Santos",
       email: "mariana.santos@email.com",
       phone: "(11) 99123-4567",
       birthDate: "1994-05-18",
-      cpf: "123.456.789-01",
+      cpf: normalizeCpf("123.456.789-01"),
       gender: "Feminino",
       occupation: "Arquiteta e Urbanista",
       maritalStatus: "Solteira",
-      notes: "Paciente procurou por recomendação médica. Relata episódios de angústia aos domingos à noite.",
     },
   });
 
   const answers1 = {
-    q_motivo: "Estou passando por uma fase muito confusa no trabalho e na vida pessoal. Sinto uma angústia constante, um aperto no peito e muito medo do futuro. Quero me entender melhor.",
-    q_tempo_sintomas: "Cerca de 8 meses, piorou bastante no último trimestre.",
-    q_experiencia_anterior: "Sim, já fiz psicoterapia",
-    q_detalhe_anterior: "Fiz psicoterapia TCC há 2 anos, mas sinto que preciso de uma abordagem mais profunda que olhe para minha história.",
-    q_sintomas_lista: [
-      "Ansiedade constante / Preocupação excessiva",
-      "Insônia ou dificuldade para manter o sono",
-      "Pensamentos repetitivos ou obsessivos",
-      "Dificuldade em impor limites / Dizer 'não'",
-    ],
+    q_motivo: "Estou passando por uma fase muito confusa no trabalho e na vida pessoal.",
+    q_tempo_sintomas: "Cerca de 8 meses.",
+    q_experiencia_anterior: "Sim, ja fiz psicoterapia",
+    q_sintomas_lista: ["Ansiedade constante / Preocupacao excessiva", "Insonia ou dificuldade para manter o sono"],
     q_escala_impacto: "8",
-    q_medicamentos: "Não tomo nenhuma medicação atualmente.",
+    q_medicamentos: "Nao tomo nenhuma medicacao.",
     q_estado_civil: "Solteiro(a)",
-    q_filhos: "Não tenho",
-    q_com_quem_mora: "Moro sozinha com 2 gatos em Pinheiros.",
-    q_relacao_familia: "Relação um pouco distante com meu pai e muito cobrança por parte da minha mãe para casar e ter sucesso.",
-    q_trabalho: "Arquiteta autônoma. Trabalho muito, cerca de 10h a 12h por dia, o que me deixa esgotada.",
+    q_com_quem_mora: "Moro sozinha.",
     q_sono_qualidade: "Tenho dificuldade para pegar no sono",
     q_atividades_fisicas: "Ocasionalmente (1 a 2x por semana)",
-    q_lazer: "Pintura em aquarela, leitura de romances e cinema.",
-    q_expectativa_processo: "Quero aprender a dizer não sem culpa, diminuir a autocobrança e ter mais leveza na vida.",
-    q_formato_preferido: "Online (Google Meet / WhatsApp Vídeo)",
-    q_disponibilidade_horarios: ["Noite (18h às 21h)", "Sábados de manhã"],
-    q_recado_final: "Estou ansiosa para começarmos, obrigada pelo acolhimento!",
+    q_expectativa_processo: "Quero aprender a dizer nao sem culpa.",
+    q_formato_preferido: "Online (Google Meet / WhatsApp Video)",
+    q_disponibilidade_horarios: ["Noite (18h as 21h)", "Sabados de manha"],
   };
 
   const sub1 = await prisma.anamnesisSubmission.create({
@@ -280,25 +272,29 @@ async function main() {
       templateSnapshot: JSON.stringify(standardSections),
       answers: JSON.stringify(answers1),
       status: "in_review",
-      clinicalNotes: "Paciente com forte traço de perfeccionismo e angústia ligada a expectativas parentais. Boa abertura para psicanálise.",
+      lgpdConsent: true,
+      lgpdConsentAt: new Date(),
+      clinicalNotes: "Paciente com forte traco de perfeccionismo. Boa abertura para psicanalise.",
       reviewedAt: new Date(),
     },
   });
 
-  // Cria contrato de teste para Mariana
   await prisma.contract.create({
     data: {
       patientId: patient1.id,
       submissionId: sub1.id,
-      title: "Contrato de Prestação de Serviços Psicanalíticos",
-      therapistName: admin.name,
-      therapistDoc: admin.crp,
-      therapistAddress: admin.address,
-      sessionPrice: 200.0,
-      frequency: "Semanal (1 sessão por semana)",
-      durationMinutes: 50,
-      paymentMethod: "PIX mensal até o dia 05 de cada mês",
-      status: "draft",
+      title: "Contrato de Prestacao de Servicos Psicanaliticos",
+      therapistName:         admin.name,
+      professionalDocNumber: admin.crp,
+      therapistAddress:      admin.address,
+      sessionPriceCents:     20000,
+      frequency:             "Semanal (1 sessao por semana)",
+      durationMinutes:       50,
+      paymentMethod:         "PIX mensal ate o dia 05 de cada mes",
+      status:                "rascunho",
+      // Snapshot do paciente
+      patientFullName: patient1.fullName,
+      patientCpf:      patient1.cpf,
     },
   });
 
@@ -308,38 +304,27 @@ async function main() {
       email: "lucas.ferraz@email.com",
       phone: "(11) 98877-6655",
       birthDate: "1988-11-03",
-      cpf: "234.567.890-12",
+      cpf: normalizeCpf("234.567.890-12"),
       gender: "Masculino",
       occupation: "Engenheiro de Software",
       maritalStatus: "Casado",
-      notes: "Sintomas de Burnout e dificuldade de desconexão.",
     },
   });
 
   const answers2 = {
-    q_motivo: "Sensação de esgotamento total, crises de pânico repentinas quando abro o notebook pela manhã. Preciso de ajuda urgente para reorganizar minha mente.",
+    q_motivo: "Sensacao de esgotamento total, crises de panico repentinas.",
     q_tempo_sintomas: "3 meses com crises intensas.",
     q_experiencia_anterior: "Nunca fiz",
-    q_detalhe_anterior: "",
-    q_sintomas_lista: [
-      "Crises de pânico / Taquicardia / Falta de ar",
-      "Cansaço excessivo e falta de energia",
-      "Irritabilidade ou oscilações de humor",
-    ],
+    q_sintomas_lista: ["Crises de panico / Taquicardia / Falta de ar", "Cansaco excessivo e falta de energia"],
     q_escala_impacto: "9",
-    q_medicamentos: "Passei no psiquiatra semana passada e iniciei Sertralina 50mg.",
-    q_estado_civil: "Casado(a) / União Estável",
-    q_filhos: "1 filha de 2 anos",
+    q_medicamentos: "Iniciei Sertralina 50mg.",
+    q_estado_civil: "Casado(a) / Uniao Estavel",
     q_com_quem_mora: "Com minha esposa e filha.",
-    q_relacao_familia: "Família acolhedora, esposa muito parceira, mas me sinto culpado por estar sempre irritado com elas.",
-    q_trabalho: "Engenheiro sênior em multinacional. Muita pressão por entregas.",
-    q_sono_qualidade: "Acordo várias vezes durante a noite",
+    q_sono_qualidade: "Acordo varias vezes durante a noite",
     q_atividades_fisicas: "Raramente ou Nunca",
-    q_lazer: "Jogos eletrônicos quando dá tempo.",
-    q_expectativa_processo: "Quero sair desse estado de alerta permanente e voltar a ter paz.",
-    q_formato_preferido: "Online (Google Meet / WhatsApp Vídeo)",
-    q_disponibilidade_horarios: ["Manhã (08h às 12h)", "Noite (18h às 21h)"],
-    q_recado_final: "Gostaria de agendar a primeira sessão o quanto antes.",
+    q_expectativa_processo: "Quero sair desse estado de alerta permanente.",
+    q_formato_preferido: "Online (Google Meet / WhatsApp Video)",
+    q_disponibilidade_horarios: ["Manha (08h as 12h)", "Noite (18h as 21h)"],
   };
 
   await prisma.anamnesisSubmission.create({
@@ -350,7 +335,9 @@ async function main() {
       templateSnapshot: JSON.stringify(standardSections),
       answers: JSON.stringify(answers2),
       status: "pending",
-      clinicalNotes: "Quadro compatível com Síndrome de Burnout aguda associada a ataques de pânico. Priorizar acolhimento e escuta da urgência subjetiva.",
+      lgpdConsent: true,
+      lgpdConsentAt: new Date(),
+      clinicalNotes: "Quadro compativel com Sindrome de Burnout aguda.",
     },
   });
 
@@ -360,37 +347,26 @@ async function main() {
       email: "beatriz.nogueira@email.com",
       phone: "(21) 97654-3210",
       birthDate: "2001-09-22",
-      cpf: "345.678.901-23",
+      cpf: normalizeCpf("345.678.901-23"),
       gender: "Feminino",
       occupation: "Estudante de Letras",
       maritalStatus: "Solteira",
-      notes: "Encaminhada por amiga de faculdade.",
     },
   });
 
   const answers3 = {
-    q_motivo: "Busco autoconhecimento e compreender padrões repetitivos nos meus relacionamentos afetivos e com amigos.",
-    q_tempo_sintomas: "Desde a adolescência.",
-    q_experiencia_anterior: "Sim, já fiz psicoterapia",
-    q_detalhe_anterior: "Fiz quando tinha 16 anos por 6 meses.",
-    q_sintomas_lista: [
-      "Sensação de solidão ou incompreensão",
-      "Tristeza profunda / Vontade de chorar sem motivo aparente",
-    ],
+    q_motivo: "Busco autoconhecimento e compreender padroes repetitivos nos meus relacionamentos.",
+    q_tempo_sintomas: "Desde a adolescencia.",
+    q_experiencia_anterior: "Sim, ja fiz psicoterapia",
+    q_sintomas_lista: ["Sensacao de solidao ou incompreensao"],
     q_escala_impacto: "6",
-    q_medicamentos: "Nenhum",
     q_estado_civil: "Solteiro(a)",
-    q_filhos: "Não tenho",
-    q_com_quem_mora: "Com minha mãe.",
-    q_relacao_familia: "Relacionamento com a mãe tem muitos conflitos de convivência.",
-    q_trabalho: "Estagiária em editora.",
+    q_com_quem_mora: "Com minha mae.",
     q_sono_qualidade: "Durmo muito bem (7 a 8h restauradoras)",
     q_atividades_fisicas: "Frequentemente (3x ou mais por semana)",
-    q_lazer: "Escrever poesia, ir a museus e saraus.",
-    q_expectativa_processo: "Construir minha autonomia emocional e subjetiva.",
-    q_formato_preferido: "Online (Google Meet / WhatsApp Vídeo)",
-    q_disponibilidade_horarios: ["Tarde (13h às 18h)"],
-    q_recado_final: "",
+    q_expectativa_processo: "Construir minha autonomia emocional.",
+    q_formato_preferido: "Online (Google Meet / WhatsApp Video)",
+    q_disponibilidade_horarios: ["Tarde (13h as 18h)"],
   };
 
   await prisma.anamnesisSubmission.create({
@@ -401,13 +377,15 @@ async function main() {
       templateSnapshot: JSON.stringify(standardSections),
       answers: JSON.stringify(answers3),
       status: "approved",
-      clinicalNotes: "Paciente iniciou processo de análise. Sessões semanais às quartas 15h.",
+      lgpdConsent: true,
+      lgpdConsentAt: new Date(),
+      clinicalNotes: "Paciente iniciou processo de analise.",
       reviewedAt: new Date(),
     },
   });
 
-  console.log("✓ 3 Pacientes e Submissões de teste criados com sucesso!");
-  console.log("Seed finalizado com sucesso! 🎉");
+  console.log("3 pacientes e submissoes de teste criados com sucesso.");
+  console.log("Seed finalizado.");
 }
 
 main()

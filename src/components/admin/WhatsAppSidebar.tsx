@@ -2,12 +2,34 @@
 
 import React from "react";
 import { SubmissionData } from "@/lib/types";
-import { formatDate } from "@/lib/formatters";
+import { formatDate, formatCPF } from "@/lib/formatters";
 import {
   Search,
   RefreshCw,
   User,
+  ChevronLeft,
+  ChevronRight,
+  AlertTriangle,
 } from "lucide-react";
+
+/**
+ * Detecta sinalizacao de risco nas respostas da anamnese.
+ * Retorna true se q_ideacao for uma resposta de risco (nao "Nao" nem "Prefiro nao responder aqui")
+ * ou se q_autolesao for "Sim, recentemente".
+ */
+export function hasRiskFlag(answers: Record<string, unknown>): boolean {
+  const ideacao = answers["q_ideacao"] as string | undefined;
+  const autolesao = answers["q_autolesao"] as string | undefined;
+
+  const riskIdeacao =
+    !!ideacao &&
+    ideacao !== "Não" &&
+    ideacao !== "Prefiro não responder aqui";
+
+  const riskAutolesao = autolesao === "Sim, recentemente";
+
+  return riskIdeacao || riskAutolesao;
+}
 
 interface WhatsAppSidebarProps {
   submissions: SubmissionData[];
@@ -19,6 +41,10 @@ interface WhatsAppSidebarProps {
   onFilterChange: (val: string) => void;
   onRefresh: () => void;
   isLoading: boolean;
+  page?: number;
+  totalPages?: number;
+  total?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
@@ -31,6 +57,10 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
   onFilterChange,
   onRefresh,
   isLoading,
+  page = 1,
+  totalPages = 1,
+  total = 0,
+  onPageChange,
 }) => {
   const filterTabs = [
     { key: "all", label: "Todos" },
@@ -106,7 +136,7 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
               Pacientes & Anamneses
             </h2>
             <p className="text-[11px] text-[#6f5f62]">
-              {submissions.length} registro{submissions.length === 1 ? "" : "s"}
+              {total > 0 ? `${total} registro${total === 1 ? "" : "s"}` : `${submissions.length} registro${submissions.length === 1 ? "" : "s"}`}
             </p>
           </div>
         </div>
@@ -155,7 +185,7 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
       </div>
 
       {/* LISTA DE PACIENTES */}
-      <div className="flex-1 overflow-y-auto divide-y divide-[#fbf3ef]">
+      <div className="overflow-y-auto divide-y divide-[#fbf3ef]" style={{ flex: 1, minHeight: 0 }}>
         {submissions.length === 0 ? (
           <div className="p-8 text-center text-xs text-[#9c8b8e] space-y-2">
             <User className="w-8 h-8 mx-auto text-[#ccb38d]" />
@@ -163,27 +193,43 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
             <p>Tente ajustar os termos da busca ou os filtros acima.</p>
           </div>
         ) : (
-          submissions.map((sub) => {
+          // Fichas com sinalizacao de risco aparecem primeiro
+          [...submissions]
+            .sort((a, b) => {
+              const aRisk = hasRiskFlag(a.answers ?? {}) ? 1 : 0;
+              const bRisk = hasRiskFlag(b.answers ?? {}) ? 1 : 0;
+              return bRisk - aRisk;
+            })
+            .map((sub) => {
             const isSelected = selectedId === sub.id;
             const isPending = sub.status === "pending";
+            const isRisk = hasRiskFlag(sub.answers ?? {});
 
             return (
               <div
                 key={sub.id}
                 onClick={() => onSelect(sub.id)}
                 className={`p-3.5 flex items-start gap-3 cursor-pointer transition relative ${
-                  isSelected
+                  isRisk
+                    ? isSelected
+                      ? "bg-red-50 border-l-4 border-red-600"
+                      : "bg-red-50/60 border-l-4 border-red-400 hover:bg-red-50"
+                    : isSelected
                     ? "bg-[#f8dad2]/50 border-l-4 border-[#5d0c1d]"
                     : "hover:bg-[#fbf3ef] bg-white"
                 }`}
               >
                 {/* AVATAR */}
                 <div
-                  className={`w-12 h-12 rounded-full shrink-0 flex items-center justify-center font-bold text-sm shadow-2xs ${getAvatarBg(
-                    sub.patient.fullName
-                  )}`}
+                  className={`w-12 h-12 rounded-full shrink-0 flex items-center justify-center font-bold text-sm shadow-2xs ${
+                    isRisk ? "bg-red-100 text-red-800" : getAvatarBg(sub.patient.fullName)
+                  }`}
                 >
-                  {getInitials(sub.patient.fullName)}
+                  {isRisk ? (
+                    <AlertTriangle className="w-5 h-5" aria-hidden="true" />
+                  ) : (
+                    getInitials(sub.patient.fullName)
+                  )}
                 </div>
 
                 {/* INFO & PREVIEW */}
@@ -191,7 +237,7 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
                   <div className="flex items-baseline justify-between gap-1 mb-0.5">
                     <h3
                       className={`text-sm font-semibold truncate ${
-                        isPending ? "text-[#5d0c1d] font-bold" : "text-[#241a1c]"
+                        isRisk ? "text-red-800 font-bold" : isPending ? "text-[#5d0c1d] font-bold" : "text-[#241a1c]"
                       }`}
                     >
                       {sub.patient.fullName}
@@ -201,17 +247,25 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
                     </span>
                   </div>
 
+                  {/* Alerta de risco */}
+                  {isRisk && (
+                    <p className="text-[11px] font-bold text-red-700 flex items-center gap-1 mb-1">
+                      <AlertTriangle className="w-3 h-3 shrink-0" aria-hidden="true" />
+                      <span>Atencao: sinalizacao de risco</span>
+                    </p>
+                  )}
+
                   {/* PREVIEW DA QUEIXA / MENSAGEM */}
                   <p className="text-xs text-[#6f5f62] line-clamp-1 mb-1.5 font-normal">
-                    {sub.answers["q_motivo"] ||
+                    {String(sub.answers["q_motivo"] ||
                       sub.answers["motivo"] ||
                       sub.answers["queixa"] ||
-                      "Ficha de anamnese preenchida"}
+                      "Ficha de anamnese preenchida")}
                   </p>
 
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[11px] text-[#9c8b8e] truncate">
-                      CPF: {sub.patient.cpf}
+                      CPF: {formatCPF(sub.patient.cpf)}
                     </span>
                     {getStatusBadge(sub.status)}
                   </div>
@@ -221,6 +275,33 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
           })
         )}
       </div>
+
+      {/* CONTROLES DE PAGINACAO */}
+      {totalPages > 1 && onPageChange && (
+        <div className="shrink-0 border-t border-[#f0ded8] bg-[#fbf3ef] px-3.5 py-2 flex items-center justify-between gap-2">
+          <button
+            onClick={() => onPageChange(page - 1)}
+            disabled={page <= 1 || isLoading}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-[#f0ded8] bg-white text-xs font-semibold text-[#5d0c1d] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#f8dad2] transition"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            <span>Anterior</span>
+          </button>
+
+          <span className="text-[11px] font-medium text-[#6f5f62]">
+            Pag. {page} de {totalPages}
+          </span>
+
+          <button
+            onClick={() => onPageChange(page + 1)}
+            disabled={page >= totalPages || isLoading}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-[#f0ded8] bg-white text-xs font-semibold text-[#5d0c1d] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#f8dad2] transition"
+          >
+            <span>Proxima</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

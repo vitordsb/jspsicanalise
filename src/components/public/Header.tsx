@@ -19,7 +19,7 @@ export const PublicHeader = () => {
               </span>
             </div>
             <span className="font-serif text-xl sm:text-2xl font-semibold tracking-tight text-[#5d0c1d] block leading-none">
-              Joane Silva
+              Joane Souza Oliveira de Andrade
             </span>
           </div>
         </Link>

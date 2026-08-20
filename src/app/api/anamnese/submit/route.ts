@@ -2,38 +2,61 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendAnamnesisNotificationEmail } from "@/lib/mail";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { submitAnamnesisSchema } from "@/lib/validate";
+import { ZodError } from "zod";
 
 export async function POST(req: NextRequest) {
+  // Rate limit conservador: 3 envios por hora por IP
+  const ip = getClientIp(req);
+  if (!checkRateLimit(`submit-anamnese:${ip}`, 3, 60 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "Muitas tentativas. Aguarde antes de tentar novamente." },
+      { status: 429 }
+    );
+  }
+
+  // Limite de payload: 512KB
+  const contentLength = req.headers.get("content-length");
+  if (contentLength && parseInt(contentLength) > 512_000) {
+    return NextResponse.json(
+      { error: "Dados enviados excedem o tamanho permitido." },
+      { status: 413 }
+    );
+  }
+
+  let body: unknown;
   try {
-    const body = await req.json();
-    const { personalInfo, answers, templateId } = body;
+    body = await req.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Corpo da requisicao invalido." },
+      { status: 400 }
+    );
+  }
 
-    if (!personalInfo || !answers || !templateId) {
+  let parsed;
+  try {
+    parsed = submitAnamnesisSchema.parse(body);
+  } catch (e) {
+    if (e instanceof ZodError) {
+      const firstError = e.issues[0];
       return NextResponse.json(
-        { error: "Dados incompletos para envio da anamnese." },
+        { error: firstError?.message || "Dados invalidos." },
         { status: 400 }
       );
     }
+    throw e;
+  }
 
-    const { fullName, email, phone, birthDate, cpf, gender, occupation, maritalStatus } = personalInfo;
+  const { personalInfo, answers, templateId, lgpdConsent } = parsed;
+  // CPF ja normalizado (so digitos) pelo schema
+  const cleanCpf = personalInfo.cpf;
 
-    if (!fullName || !email || !phone || !cpf) {
-      return NextResponse.json(
-        { error: "Nome, e-mail, telefone e CPF são campos obrigatórios." },
-        { status: 400 }
-      );
-    }
-
-    const cleanCpf = cpf.trim();
-
-    // 1. Verifica se paciente com esse CPF já tem uma submissão
+  try {
+    // Verifica paciente existente com CPF normalizado
     const existingPatient = await prisma.patient.findFirst({
-      where: {
-        OR: [
-          { cpf: cleanCpf },
-          { cpf: cleanCpf.replace(/\D/g, "") },
-        ],
-      },
+      where: { cpf: cleanCpf },
       include: {
         submissions: {
           orderBy: { createdAt: "desc" },
@@ -45,40 +68,39 @@ export async function POST(req: NextRequest) {
     if (existingPatient && existingPatient.submissions.length > 0) {
       return NextResponse.json(
         {
-          error: "Sua anamnese já foi enviada anteriormente e está em análise pela Dra. Joane Silva.",
+          error:
+            "Sua anamnese ja foi enviada anteriormente e esta em analise pela Dra. Joane Souza Oliveira de Andrade.",
           alreadySubmitted: true,
           submissionId: existingPatient.submissions[0].id,
-          patientName: existingPatient.fullName,
         },
         { status: 409 }
       );
     }
 
-    // 2. Busca o template da anamnese para salvar o snapshot fiel
     const template = await prisma.anamnesisTemplate.findUnique({
       where: { id: templateId },
     });
 
     if (!template) {
       return NextResponse.json(
-        { error: "Modelo de anamnese não encontrado." },
+        { error: "Modelo de anamnese nao encontrado." },
         { status: 404 }
       );
     }
 
-    // 3. Cria ou atualiza o paciente
+    // Cria ou atualiza o paciente com CPF sempre normalizado (so digitos)
     let patient = existingPatient;
     if (!patient) {
       patient = await prisma.patient.create({
         data: {
-          fullName,
-          email,
-          phone,
-          birthDate: birthDate || "",
+          fullName: personalInfo.fullName,
+          email: personalInfo.email,
+          phone: personalInfo.phone,
+          birthDate: personalInfo.birthDate || "",
           cpf: cleanCpf,
-          gender: gender || "",
-          occupation: occupation || "",
-          maritalStatus: maritalStatus || "",
+          gender: personalInfo.gender || "",
+          occupation: personalInfo.occupation || "",
+          maritalStatus: personalInfo.maritalStatus || "",
         },
         include: { submissions: true },
       });
@@ -86,19 +108,18 @@ export async function POST(req: NextRequest) {
       patient = await prisma.patient.update({
         where: { id: patient.id },
         data: {
-          fullName,
-          email,
-          phone,
-          birthDate: birthDate || patient.birthDate,
-          gender: gender || patient.gender,
-          occupation: occupation || patient.occupation,
-          maritalStatus: maritalStatus || patient.maritalStatus,
+          fullName: personalInfo.fullName,
+          email: personalInfo.email,
+          phone: personalInfo.phone,
+          birthDate: personalInfo.birthDate || patient.birthDate,
+          gender: personalInfo.gender || patient.gender,
+          occupation: personalInfo.occupation || patient.occupation,
+          maritalStatus: personalInfo.maritalStatus || patient.maritalStatus,
         },
         include: { submissions: true },
       });
     }
 
-    // 4. Cria a submissão de anamnese com snapshot
     const submission = await prisma.anamnesisSubmission.create({
       data: {
         patientId: patient.id,
@@ -107,46 +128,52 @@ export async function POST(req: NextRequest) {
         templateSnapshot: template.sections,
         answers: JSON.stringify(answers),
         status: "pending",
+        lgpdConsent: lgpdConsent,
+        lgpdConsentAt: lgpdConsent ? new Date() : null,
       },
     });
 
-    // 5. Busca configuração do admin para pegar o email de notificação
+    // Email de notificacao assincrono
     const adminUser = await prisma.user.findFirst();
-    const recipientEmail = adminUser?.notificationEmail || "joane@psicanalise.com.br";
+    const recipientEmail =
+      adminUser?.notificationEmail || "enaoj22@gmail.com";
 
-    // Extrai a queixa principal para destacar no email
     const chiefComplaint =
-      answers["q_motivo"] ||
-      answers["motivo"] ||
-      answers["queixa"] ||
-      Object.values(answers)[0] ||
+      (answers["q_motivo"] as string) ||
+      (answers["motivo"] as string) ||
+      (answers["queixa"] as string) ||
+      (Object.values(answers)[0] as string) ||
       "";
 
-    // 6. Envia email assíncrono para Joane
     sendAnamnesisNotificationEmail({
-      patientName: fullName,
-      patientEmail: email,
-      patientPhone: phone,
-      patientCpf: cleanCpf,
+      patientName: personalInfo.fullName,
+      patientEmail: personalInfo.email,
+      patientPhone: personalInfo.phone,
+      // CPF removido do email: dado sensivel nao deve trafegar por Gmail
       templateTitle: template.title,
       submissionId: submission.id,
-      chiefComplaint: typeof chiefComplaint === "string" ? chiefComplaint.slice(0, 300) : "",
+      chiefComplaint:
+        typeof chiefComplaint === "string"
+          ? chiefComplaint.slice(0, 300)
+          : "",
       recipientEmail,
     }).catch((err) => {
-      console.error("Falha silenciosa no envio de email:", err);
+      console.error("Falha no envio de email de notificacao:", err);
     });
 
     return NextResponse.json({
       success: true,
-      message: "Anamnese enviada com sucesso!",
+      message: "Anamnese enviada com sucesso.",
       submissionId: submission.id,
       patientId: patient.id,
-      patientName: patient.fullName,
     });
   } catch (error) {
     console.error("Erro ao processar envio de anamnese:", error);
     return NextResponse.json(
-      { error: "Ocorreu um erro ao salvar sua anamnese. Por favor, tente novamente." },
+      {
+        error:
+          "Ocorreu um erro ao salvar sua anamnese. Por favor, tente novamente.",
+      },
       { status: 500 }
     );
   }

@@ -1,6 +1,7 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -13,12 +14,13 @@ model User {
   email             String   @unique
   password          String
   role              String   @default("admin")
-  title             String   @default("Psicanalista Clínica & Terapeuta")
-  crp               String   @default("Reg. Psicanálise 12345/BR")
-  phone             String   @default("(11) 99999-9999")
-  notificationEmail String   @default("joane@psicanalise.com.br")
-  clinicName        String   @default("JS Psicanálise & Acolhimento")
-  address           String   @default("Atendimento Presencial e Online")
+  title             String   @default("Psicanalista Clinica")
+  crp               String   @default("")
+  cpfCnpj           String   @default("")
+  phone             String   @default("")
+  notificationEmail String   @default("enaoj22@gmail.com")
+  clinicName        String   @default("")
+  address           String   @default("")
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
@@ -29,7 +31,7 @@ model AnamnesisTemplate {
   description String
   version     Int                   @default(1)
   isActive    Boolean               @default(false)
-  sections    String                // JSON string containing sections and questions
+  sections    String
   createdAt   DateTime              @default(now())
   updatedAt   DateTime              @updatedAt
   submissions AnamnesisSubmission[]
@@ -45,6 +47,9 @@ model Patient {
   gender        String?               @default("")
   occupation    String?               @default("")
   maritalStatus String?               @default("")
+  nationality   String?               @default("brasileiro(a)")
+  rg            String?               @default("")
+  address       String?               @default("")
   notes         String?               @default("")
   createdAt     DateTime              @default(now())
   updatedAt     DateTime              @updatedAt
@@ -59,33 +64,119 @@ model AnamnesisSubmission {
   templateId       String
   template         AnamnesisTemplate @relation(fields: [templateId], references: [id])
   templateVersion  Int               @default(1)
-  templateSnapshot String            // JSON snapshot of the template
-  answers          String            // JSON key-value pairs of responses
-  status           String            @default("pending") // pending, in_review, approved, archived
+  templateSnapshot String
+  answers          String
+  status           String            @default("pending")
   clinicalNotes    String?           @default("")
+  lgpdConsent      Boolean           @default(false)
+  lgpdConsentAt    DateTime?
+  // Auditoria: nota para registros anteriores ao modulo LGPD (nao implica consentimento)
+  lgpdConsentNote  String?
   reviewedAt       DateTime?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   contracts        Contract[]
 }
 
+// Maquina de estados do contrato:
+// rascunho -> gerado -> aguardando_assinatura -> assinado_recebido -> aprovado
+//                                                                   -> recusado -> aguardando_assinatura (nova tentativa)
 model Contract {
-  id                 String               @id @default(cuid())
-  patientId          String
-  patient            Patient              @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  submissionId       String?
-  submission         AnamnesisSubmission? @relation(fields: [submissionId], references: [id])
-  title              String               @default("Contrato de Prestação de Serviços Psicanalíticos")
-  therapistName      String               @default("Joane Silva")
-  therapistDoc       String               @default("Reg. Psicanálise 12345/BR")
-  therapistAddress   String               @default("Atendimento Online e Consultório")
-  sessionPrice       Float                @default(180.0)
-  frequency          String               @default("Semanal (1x por semana)")
-  durationMinutes    Int                  @default(50)
-  paymentMethod      String               @default("PIX ou Transferência Bancária até o dia 05 de cada mês")
-  cancellationPolicy String               @default("Desmarcações ou reagendamentos devem ser comunicados com no mínimo 24 horas de antecedência. Faltas sem aviso prévio serão cobradas normalmente.")
-  customClauses      String?              @default("")
-  status             String               @default("draft") // draft, generated, signed
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
+  id           String               @id @default(cuid())
+  patientId    String
+  patient      Patient              @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  submissionId String?
+  submission   AnamnesisSubmission? @relation(fields: [submissionId], references: [id])
+
+  title  String @default("Contrato de Prestacao de Servicos Psicanaliticos")
+  // Status: rascunho | gerado | aguardando_assinatura | assinado_recebido | aprovado | recusado
+  status String @default("rascunho")
+
+  // --- Contratada ---
+  therapistName         String @default("Dra. Joane Souza Oliveira de Andrade")
+  therapistCpfCnpj      String @default("")
+  therapistAddress      String @default("")
+  therapistPhone        String @default("")
+  // professionalDocType: "crp" | "cbo" | "associacao" | "nenhum"
+  professionalDocType   String @default("nenhum")
+  // Numero de registro - PENDENTE preenchimento real, sem default inventado
+  professionalDocNumber String @default("")
+
+  // --- Contratante (snapshot no momento da geracao) ---
+  patientFullName      String @default("")
+  patientNationality   String @default("brasileiro(a)")
+  patientMaritalStatus String @default("")
+  patientOccupation    String @default("")
+  patientRg            String @default("")
+  patientCpf           String @default("")
+  patientAddress       String @default("")
+
+  // --- Objeto ---
+  // serviceType: "psicanalise_clinica" | "psicoterapia" | "outro"
+  serviceType String @default("psicanalise_clinica")
+  // modalidade: "presencial" | "online" | "hibrido"
+  modalidade  String @default("online")
+  abordagem   String @default("")
+
+  // --- Sessoes ---
+  durationMinutes      Int    @default(50)
+  frequency            String @default("Semanal (1x por semana)")
+  cancellationHours    Int    @default(24)
+  initialSessionsCount Int    @default(3)
+
+  // --- Pagamento em centavos (ex: 18000 = R$ 180,00) ---
+  sessionPriceCents    Int  @default(18000)
+  evaluationPriceCents Int?
+  paymentDueDay        Int  @default(5)
+  // lateFeePercent: multa em % (ex: 2 = 2%)
+  lateFeePercent       Int  @default(0)
+  // lateInterestPercent: juros mensais em % (ex: 1 = 1% ao mes)
+  lateInterestPercent  Int  @default(0)
+  paymentMethod        String @default("PIX")
+
+  // --- Vigencia e rescisao ---
+  rescissionNoticeDays Int @default(30)
+
+  // --- Foro ---
+  foroCidade String @default("")
+
+  // --- Testemunhas (opcionais) ---
+  hasWitnesses Boolean @default(false)
+  witness1Name String?
+  witness1Cpf  String?
+  witness2Name String?
+  witness2Cpf  String?
+
+  // --- Clausulas extras ---
+  customClauses String? @default("")
+
+  // --- Arquivo assinado ---
+  // Chave no Supabase Storage (nunca o nome enviado pelo usuario)
+  signedFileKey        String?
+  // SHA-256 hex do arquivo recebido - prova de integridade
+  signedFileHash       String?
+  signedFileSizeBytes  Int?
+  signedFileUploadedAt DateTime?
+  // Controle de versoes (incrementado a cada upload de correcao)
+  signedVersion        Int @default(0)
+
+  // --- Decisao (aprovar/recusar) ---
+  decisionAt    DateTime?
+  refusalReason String?   // obrigatorio quando status = recusado
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  events ContractEvent[]
+}
+
+// Historico imutavel de transicoes do contrato (audit trail)
+model ContractEvent {
+  id         String   @id @default(cuid())
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  fromStatus String
+  toStatus   String
+  note       String?
+  createdAt  DateTime @default(now())
 }

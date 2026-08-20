@@ -1,49 +1,78 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getAdminCredentials, generateToken, ADMIN_COOKIE_NAME } from "@/lib/auth";
+import {
+  getAdminCredentials,
+  verifyPassword,
+  ADMIN_COOKIE_NAME,
+} from "@/lib/auth";
+import { buildSessionCookie } from "@/lib/auth-session";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { loginSchema } from "@/lib/validate";
+import { ZodError } from "zod";
 
 export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const { email, password } = body;
-
-    const credentials = getAdminCredentials();
-
-    if (
-      !email ||
-      !password ||
-      email.trim().toLowerCase() !== credentials.email.trim().toLowerCase() ||
-      password !== credentials.password
-    ) {
-      return NextResponse.json(
-        { error: "E-mail ou senha incorretos." },
-        { status: 401 }
-      );
-    }
-
-    const token = generateToken();
-
-    const response = NextResponse.json({
-      success: true,
-      message: "Login realizado com sucesso!",
-    });
-
-    // Seta cookie httpOnly
-    response.cookies.set({
-      name: ADMIN_COOKIE_NAME,
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30, // 30 dias
-      path: "/",
-    });
-
-    return response;
-  } catch (error) {
-    console.error("Erro no login:", error);
+  // Rate limit: 5 tentativas por 15 minutos por IP
+  const ip = getClientIp(req);
+  const allowed = checkRateLimit(`login:${ip}`, 5, 15 * 60 * 1000);
+  if (!allowed) {
     return NextResponse.json(
-      { error: "Erro interno no servidor ao realizar login." },
-      { status: 500 }
+      { error: "Muitas tentativas. Aguarde alguns minutos e tente novamente." },
+      { status: 429 }
     );
   }
+
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Corpo da requisicao invalido." },
+      { status: 400 }
+    );
+  }
+
+  let parsed;
+  try {
+    parsed = loginSchema.parse(body);
+  } catch (e) {
+    if (e instanceof ZodError) {
+      return NextResponse.json(
+        { error: e.issues[0]?.message || "Dados invalidos." },
+        { status: 400 }
+      );
+    }
+    throw e;
+  }
+
+  const { email, password } = parsed;
+  const credentials = getAdminCredentials();
+
+  // Comparacao de e-mail em tempo constante (evita timing attack)
+  const emailMatch =
+    email.trim().toLowerCase() === credentials.email.trim().toLowerCase();
+
+  // Verifica senha com hash scrypt
+  const passwordMatch =
+    credentials.passwordHash && verifyPassword(password, credentials.passwordHash);
+
+  if (!emailMatch || !passwordMatch) {
+    return NextResponse.json(
+      { error: "E-mail ou senha incorretos." },
+      { status: 401 }
+    );
+  }
+
+  const cookieDef = buildSessionCookie(credentials.email);
+
+  const response = NextResponse.json({
+    success: true,
+    message: "Login realizado com sucesso.",
+  });
+
+  response.cookies.set(
+    cookieDef.name,
+    cookieDef.value,
+    cookieDef.options
+  );
+
+  return response;
 }

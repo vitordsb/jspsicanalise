@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { SubmissionData, FormSection } from "@/lib/types";
-import { formatDate, formatDateTime, calculateAge } from "@/lib/formatters";
+import { formatDate, formatDateTime, calculateAge, formatCPF } from "@/lib/formatters";
 import { ContractModal } from "./ContractModal";
 import {
   User,
@@ -13,7 +13,9 @@ import {
   Save,
   CheckCircle2,
   FileText,
+  AlertTriangle,
 } from "lucide-react";
+import { hasRiskFlag } from "./WhatsAppSidebar";
 
 interface PatientDetailViewProps {
   submission: SubmissionData;
@@ -36,6 +38,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
 
   const { patient, answers, templateSnapshot, createdAt, status } = submission;
   const age = calculateAge(patient.birthDate);
+  const riskFlag = hasRiskFlag(answers ?? {});
 
   const handleSaveNotes = async () => {
     setSavingNotes(true);
@@ -53,7 +56,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
 
   const cleanPhone = patient.phone.replace(/\D/g, "");
   const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(
-    `Olá ${patient.fullName.split(" ")[0]}, tudo bem? Sou a Joane Silva, psicóloga/psicanalista. Recebi sua ficha de anamnese e gostaria de conversar com você!`
+    `Olá ${patient.fullName.split(" ")[0]}, tudo bem? Sou a Dra. Joane Souza Oliveira de Andrade, psicóloga/psicanalista. Recebi sua ficha de anamnese e gostaria de conversar com você!`
   )}`;
 
   return (
@@ -76,10 +79,20 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
               )}
             </div>
             <p className="text-xs text-[#6f5f62] truncate">
-              CPF: {patient.cpf} • Recebido em {formatDateTime(createdAt)}
+              CPF: {formatCPF(patient.cpf)} • Recebido em {formatDateTime(createdAt)}
             </p>
           </div>
         </div>
+
+        {/* ALERTA DE RISCO NO TOPO - visivel imediatamente */}
+        {riskFlag && (
+          <div className="shrink-0 ml-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-600 text-white text-xs font-bold shadow">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>Atencao: risco</span>
+            </div>
+          </div>
+        )}
 
         {/* TOP ACTION BUTTONS */}
         <div className="flex items-center gap-2 shrink-0">
@@ -127,6 +140,25 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
         </div>
       </div>
 
+      {/* BANNER DE RISCO - aparece logo abaixo da barra de topo */}
+      {riskFlag && (
+        <div className="bg-red-50 border-b-2 border-red-400 px-4 sm:px-6 py-3 flex items-start gap-3 shrink-0 no-print">
+          <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" aria-hidden="true" />
+          <div className="text-xs text-red-800 space-y-0.5">
+            <p className="font-bold">Sinalizacao de risco identificada nesta ficha</p>
+            <p>
+              {answers["q_ideacao"] && answers["q_ideacao"] !== "Não" && answers["q_ideacao"] !== "Prefiro não responder aqui" && (
+                <span>Ideacao: <strong>{String(answers["q_ideacao"])}</strong>. </span>
+              )}
+              {answers["q_autolesao"] === "Sim, recentemente" && (
+                <span>Autolesao recente sinalizada.</span>
+              )}
+            </p>
+            <p className="text-red-700 font-medium">Prioridade de retorno recomendada.</p>
+          </div>
+        </div>
+      )}
+
       {/* WHATSAPP TABS */}
       <div className="bg-white border-b border-[#f0ded8] px-4 sm:px-6 flex items-center gap-6 shrink-0 no-print">
         <button
@@ -150,7 +182,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
           }`}
         >
           <Sparkles className="w-4 h-4" />
-          <span>Anotações Clínicas da Joane</span>
+          <span>Anotações Clínicas</span>
           {clinicalNotes && (
             <span className="w-2 h-2 rounded-full bg-[#5d0c1d]" />
           )}
@@ -195,7 +227,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
 
                   <div>
                     <span className="text-[#9c8b8e] block">CPF:</span>
-                    <strong className="text-[#241a1c]">{patient.cpf}</strong>
+                    <strong className="text-[#241a1c]">{formatCPF(patient.cpf)}</strong>
                   </div>
 
                   <div>
@@ -392,7 +424,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                       <div className="space-y-1">
                         <h4 className="font-serif font-bold text-sm text-[#5d0c1d]">{contract.title}</h4>
                         <p className="text-xs text-[#6f5f62]">
-                          Sessão: R$ {contract.sessionPrice} • {contract.frequency} • {contract.durationMinutes} min
+                          Sessao: R$ {(contract.sessionPriceCents / 100).toFixed(2)} - {contract.frequency} - {contract.durationMinutes} min
                         </p>
                         <p className="text-[11px] text-[#9c8b8e]">
                           Criado em {formatDateTime(contract.createdAt)}

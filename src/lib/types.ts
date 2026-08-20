@@ -77,10 +77,29 @@ export interface SubmissionData {
   chiefComplaint?: string;
   status: "pending" | "in_review" | "approved" | "archived";
   clinicalNotes?: string;
+  lgpdConsent?: boolean;
+  lgpdConsentAt?: string | null;
   reviewedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   contracts?: ContractData[];
+}
+
+export type ContractStatus =
+  | "rascunho"
+  | "gerado"
+  | "aguardando_assinatura"
+  | "assinado_recebido"
+  | "aprovado"
+  | "recusado";
+
+export interface ContractEvent {
+  id: string;
+  contractId: string;
+  fromStatus: string;
+  toStatus: string;
+  note?: string | null;
+  createdAt: string;
 }
 
 export interface ContractData {
@@ -89,18 +108,76 @@ export interface ContractData {
   patient?: PatientData;
   submissionId?: string | null;
   title: string;
+  status: ContractStatus;
+
+  // Contratada
   therapistName: string;
-  therapistDoc: string;
+  therapistCpfCnpj: string;
   therapistAddress: string;
-  sessionPrice: number;
-  frequency: string;
+  therapistPhone: string;
+  professionalDocType: string;
+  professionalDocNumber: string;
+
+  // Contratante snapshot
+  patientFullName: string;
+  patientNationality: string;
+  patientMaritalStatus: string;
+  patientOccupation: string;
+  patientRg: string;
+  patientCpf: string;
+  patientAddress: string;
+
+  // Objeto
+  serviceType: string;
+  modalidade: string;
+  abordagem: string;
+
+  // Sessoes
   durationMinutes: number;
+  frequency: string;
+  cancellationHours: number;
+  initialSessionsCount: number;
+
+  // Pagamento em centavos
+  sessionPriceCents: number;
+  evaluationPriceCents?: number | null;
+  paymentDueDay: number;
+  lateFeePercent: number;
+  lateInterestPercent: number;
   paymentMethod: string;
-  cancellationPolicy: string;
-  customClauses?: string;
-  status: "draft" | "generated" | "signed";
+
+  // Vigencia
+  rescissionNoticeDays: number;
+
+  // Foro
+  foroCidade: string;
+
+  // Testemunhas
+  hasWitnesses: boolean;
+  witness1Name?: string | null;
+  witness1Cpf?: string | null;
+  witness2Name?: string | null;
+  witness2Cpf?: string | null;
+
+  // Clausulas extras
+  customClauses?: string | null;
+
+  // Arquivo assinado
+  signedFileKey?: string | null;
+  signedFileHash?: string | null;
+  signedFileSizeBytes?: number | null;
+  signedFileUploadedAt?: string | null;
+  signedVersion: number;
+
+  // Decisao
+  decisionAt?: string | null;
+  refusalReason?: string | null;
+
   createdAt: string;
   updatedAt: string;
+
+  // Historico de transicoes (apenas no GET /[id])
+  events?: ContractEvent[];
 }
 
 export interface AdminUser {

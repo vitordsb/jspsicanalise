@@ -2,35 +2,44 @@
 
 import React, { useState, useEffect } from "react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { useRouter } from "next/navigation";
 import {
   Settings,
   Save,
   User,
   Mail,
   CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 
 export default function AdminConfiguracoesPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
   const [profile, setProfile] = useState({
-    name: "Dra. Joane Silva",
+    name: "Dra. Joane Souza Oliveira de Andrade",
     title: "Psicóloga & Psicanalista Clínica",
-    crp: "CRP 06/123456 • Reg. Psicanálise",
-    phone: "(11) 98765-4321",
-    email: "joane@psicanalise.com.br",
-    notificationEmail: "joane@psicanalise.com.br",
-    clinicName: "JS Psicanálise & Acolhimento Humano",
-    address: "Atendimento Clínico Online e Presencial - São Paulo/SP",
+    crp: "",
+    phone: "",
+    email: "",
+    notificationEmail: "",
+    clinicName: "",
+    address: "",
   });
+
+  const crpPendente = !profile.crp || profile.crp.trim() === "";
 
   useEffect(() => {
     async function loadProfile() {
       try {
         setLoading(true);
         const res = await fetch("/api/admin/profile");
+        if (res.status === 401) {
+          router.push("/admin/login");
+          return;
+        }
         if (res.ok) {
           const data = await res.json();
           setProfile(data);
@@ -42,7 +51,7 @@ export default function AdminConfiguracoesPage() {
       }
     }
     loadProfile();
-  }, []);
+  }, [router]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +65,11 @@ export default function AdminConfiguracoesPage() {
         body: JSON.stringify(profile),
       });
 
+      if (res.status === 401) {
+        router.push("/admin/login");
+        return;
+      }
+
       if (res.ok) {
         setSuccessMsg("Configurações atualizadas com sucesso!");
         setTimeout(() => setSuccessMsg(""), 4000);
@@ -66,6 +80,17 @@ export default function AdminConfiguracoesPage() {
       setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-[#fff6f4]">
+        <AdminHeader />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-10 h-10 border-4 border-[#f0ded8] border-t-[#5d0c1d] rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fff6f4]">
@@ -78,12 +103,29 @@ export default function AdminConfiguracoesPage() {
             <span>Perfil & Configurações da Clínica</span>
           </div>
           <h1 className="font-serif text-2xl sm:text-4xl font-bold text-[#5d0c1d]">
-            Configurações da Joane
+            Configurações do Perfil Clínico
           </h1>
           <p className="text-xs sm:text-sm text-[#6f5f62] mt-1">
             Seus dados profissionais são usados na emissão dos contratos e no envio de notificações de novas anamneses.
           </p>
         </div>
+
+        {/* AVISO DE CRP PENDENTE */}
+        {crpPendente && (
+          <div className="bg-[#fffbeb] border border-[#fde68a] rounded-3xl p-5 mb-6 flex items-start gap-4">
+            <div className="p-2.5 rounded-full bg-[#fef3c7] text-[#92400e] shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <h4 className="font-serif font-bold text-sm text-[#92400e]">
+                Registro Profissional pendente de preenchimento
+              </h4>
+              <p className="text-xs text-[#78350f] leading-relaxed">
+                O campo de Registro Profissional (CRP / documento de psicanálise) está vazio. Esse dado é obrigatório para a emissão de contratos válidos. Preencha com o seu número de registro real antes de gerar qualquer contrato.
+              </p>
+            </div>
+          </div>
+        )}
 
         {successMsg && (
           <div className="bg-[#e7f4ec] border border-[#c7e6d2] text-[#245f3c] p-4 rounded-3xl mb-6 text-xs sm:text-sm flex items-center gap-2 shadow-xs font-semibold">
@@ -105,12 +147,12 @@ export default function AdminConfiguracoesPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+              <label htmlFor="cfg-name" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
                 Nome Profissional Completo
               </label>
               <input
+                id="cfg-name"
                 type="text"
-                required
                 value={profile.name}
                 onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                 className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
@@ -118,38 +160,51 @@ export default function AdminConfiguracoesPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+              <label htmlFor="cfg-title" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
                 Título / Especialidade
               </label>
               <input
+                id="cfg-title"
                 type="text"
-                required
                 value={profile.title}
                 onChange={(e) => setProfile({ ...profile, title: e.target.value })}
                 className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-[#241a1c] mb-1.5">
-                Registro Profissional (CRP / CBO / Psicanálise)
+            <div className="sm:col-span-2">
+              <label htmlFor="cfg-crp" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+                Registro Profissional
+                {crpPendente && (
+                  <span className="ml-2 text-[11px] font-bold text-[#92400e] bg-[#fef3c7] px-2 py-0.5 rounded-full border border-[#fde68a]">
+                    Pendente
+                  </span>
+                )}
               </label>
               <input
+                id="cfg-crp"
                 type="text"
-                required
+                placeholder="Informe seu registro profissional real (CRP, CBO ou documento de psicanálise)"
                 value={profile.crp}
                 onChange={(e) => setProfile({ ...profile, crp: e.target.value })}
-                className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
+                className={`w-full h-11 px-4 rounded-full border text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:outline-none transition ${
+                  crpPendente
+                    ? "border-[#fde68a] bg-[#fffbeb] focus:border-[#f59e0b]"
+                    : "border-[#eae2d7] bg-[#f7efe5] focus:border-[#5d0c1d]"
+                }`}
               />
+              <p className="text-[11px] text-[#9c8b8e] mt-1 pl-1">
+                Preencha com o número de registro fornecido pelo seu conselho / entidade profissional. Não invente nem use placeholders.
+              </p>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+              <label htmlFor="cfg-phone" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
                 Telefone / WhatsApp Profissional
               </label>
               <input
+                id="cfg-phone"
                 type="text"
-                required
                 value={profile.phone}
                 onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                 className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
@@ -157,10 +212,11 @@ export default function AdminConfiguracoesPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+              <label htmlFor="cfg-clinic" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
                 Nome da Clínica / Consultório
               </label>
               <input
+                id="cfg-clinic"
                 type="text"
                 value={profile.clinicName}
                 onChange={(e) => setProfile({ ...profile, clinicName: e.target.value })}
@@ -169,10 +225,11 @@ export default function AdminConfiguracoesPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+              <label htmlFor="cfg-address" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
                 Endereço / Modalidade de Atendimentos
               </label>
               <input
+                id="cfg-address"
                 type="text"
                 value={profile.address}
                 onChange={(e) => setProfile({ ...profile, address: e.target.value })}
@@ -187,16 +244,16 @@ export default function AdminConfiguracoesPage() {
               <span>Notificações por E-mail</span>
             </h3>
             <p className="text-xs text-[#6f5f62]">
-              Informe o e-mail onde você deseja receber o aviso instantâneo assim que um paciente enviar a anamnese.
+              Informe o e-mail onde você deseja receber o aviso assim que um paciente enviar a anamnese.
             </p>
 
             <div className="max-w-md">
-              <label className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+              <label htmlFor="cfg-notify" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
                 E-mail para Receber Novas Anamneses
               </label>
               <input
+                id="cfg-notify"
                 type="email"
-                required
                 value={profile.notificationEmail}
                 onChange={(e) => setProfile({ ...profile, notificationEmail: e.target.value })}
                 className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"

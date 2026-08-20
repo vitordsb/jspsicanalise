@@ -18,6 +18,7 @@ import {
   MessageCircle,
   Sparkles,
   ShieldAlert,
+  ShieldCheck,
 } from "lucide-react";
 
 export default function PreencherAnamnesePage() {
@@ -30,7 +31,7 @@ export default function PreencherAnamnesePage() {
     sections: FormSection[];
   } | null>(null);
 
-  // Stepper: 1: Dados Pessoais, 2+: Seções da Anamnese, Last: Revisão
+  // Stepper: 1: Dados Pessoais, 2+: Secoes da Anamnese, Last: Revisao
   const [currentStep, setCurrentStep] = useState(1);
 
   // Dados Pessoais
@@ -46,12 +47,14 @@ export default function PreencherAnamnesePage() {
   });
 
   // Respostas da Anamnese
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [answers, setAnswers] = useState<Record<string, unknown>>({});
 
-  // Estados de Envio & Validação
+  // Consentimento LGPD - obrigatorio antes do envio
+  const [lgpdConsent, setLgpdConsent] = useState(false);
+
+  // Estados de Envio & Validacao
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alreadySubmittedInfo, setAlreadySubmittedInfo] = useState<{
-    patientName: string;
     createdAt?: string;
     status?: string;
   } | null>(null);
@@ -69,11 +72,11 @@ export default function PreencherAnamnesePage() {
           const data = await res.json();
           setTemplate(data);
         } else {
-          setErrorMessage("Não foi possível carregar o formulário de anamnese no momento.");
+          setErrorMessage("Nao foi possivel carregar o formulario de anamnese no momento.");
         }
       } catch (err) {
         console.error("Erro ao carregar template:", err);
-        setErrorMessage("Falha de conexão ao carregar formulário.");
+        setErrorMessage("Falha de conexao ao carregar formulario.");
       } finally {
         setLoadingTemplate(false);
       }
@@ -94,8 +97,8 @@ export default function PreencherAnamnesePage() {
         });
         const data = await res.json();
         if (data.exists) {
+          // Nota: o backend nao retorna mais patientName por reducao de exposicao de PII
           setAlreadySubmittedInfo({
-            patientName: data.patientName,
             createdAt: data.createdAt,
             status: data.status,
           });
@@ -108,9 +111,9 @@ export default function PreencherAnamnesePage() {
     }
   };
 
-  // Seções da Anamnese
+  // Secoes da Anamnese
   const sections = template?.sections || [];
-  const totalSteps = 1 + sections.length + 1; // 1 (Dados) + N (Seções) + 1 (Revisão)
+  const totalSteps = 1 + sections.length + 1; // 1 (Dados) + N (Secoes) + 1 (Revisao)
 
   const handlePersonalInfoChange = (field: string, value: string) => {
     let formatted = value;
@@ -123,22 +126,30 @@ export default function PreencherAnamnesePage() {
     if (alreadySubmittedInfo && field === "cpf") setAlreadySubmittedInfo(null);
   };
 
-  const handleAnswerChange = (questionId: string, value: any) => {
+  const handleAnswerChange = (questionId: string, value: unknown) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
     if (errorMessage) setErrorMessage("");
   };
 
-  // Validação da Etapa 1
+  // Detecta sinalizacao de risco nas respostas atuais
+  const riskIdeacao =
+    !!answers["q_ideacao"] &&
+    answers["q_ideacao"] !== "Não" &&
+    answers["q_ideacao"] !== "Prefiro não responder aqui";
+  const riskAutolesao = answers["q_autolesao"] === "Sim, recentemente";
+  const showRiskAlert = riskIdeacao || riskAutolesao;
+
+  // Validacao da Etapa 1
   const validateStep1 = () => {
     if (!personalInfo.fullName.trim()) return "Por favor, preencha seu nome completo.";
-    if (!personalInfo.cpf.trim() || personalInfo.cpf.replace(/\D/g, "").length !== 11) return "Por favor, informe um CPF válido com 11 dígitos.";
-    if (!personalInfo.birthDate || !isValidDateBRL(personalInfo.birthDate)) return "Por favor, informe uma data de nascimento válida no formato DD/MM/AAAA.";
-    if (!personalInfo.email.trim() || !personalInfo.email.includes("@")) return "Por favor, informe um e-mail válido.";
+    if (!personalInfo.cpf.trim() || personalInfo.cpf.replace(/\D/g, "").length !== 11) return "Por favor, informe um CPF valido com 11 digitos.";
+    if (!personalInfo.birthDate || !isValidDateBRL(personalInfo.birthDate)) return "Por favor, informe uma data de nascimento valida no formato DD/MM/AAAA.";
+    if (!personalInfo.email.trim() || !personalInfo.email.includes("@")) return "Por favor, informe um e-mail valido.";
     if (!personalInfo.phone.trim() || personalInfo.phone.replace(/\D/g, "").length < 10) return "Por favor, informe seu telefone/WhatsApp completo com DDD.";
     return null;
   };
 
-  // Validação da Seção Atual
+  // Validacao da Secao Atual
   const validateCurrentSection = (sectionIndex: number) => {
     const currentSection = sections[sectionIndex];
     if (!currentSection) return null;
@@ -147,7 +158,7 @@ export default function PreencherAnamnesePage() {
       if (q.required) {
         const val = answers[q.id];
         if (val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0)) {
-          return `Por favor, responda o campo obrigatório: "${q.label}"`;
+          return `Por favor, responda o campo obrigatorio: "${q.label}"`;
         }
       }
     }
@@ -164,7 +175,7 @@ export default function PreencherAnamnesePage() {
         return;
       }
       if (alreadySubmittedInfo) {
-        setErrorMessage("Sua anamnese já foi enviada anteriormente e está em análise pela Dra. Joane.");
+        setErrorMessage("Sua anamnese ja foi enviada anteriormente e esta em analise pela Dra. Joane Souza Oliveira de Andrade.");
         return;
       }
       setCurrentStep(2);
@@ -194,6 +205,12 @@ export default function PreencherAnamnesePage() {
 
   const handleSubmit = async () => {
     if (!template) return;
+
+    if (!lgpdConsent) {
+      setErrorMessage("Voce precisa marcar o consentimento LGPD para enviar a anamnese.");
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage("");
 
@@ -205,16 +222,15 @@ export default function PreencherAnamnesePage() {
           personalInfo,
           answers,
           templateId: template.id,
+          lgpdConsent: true,
         }),
       });
 
       const data = await res.json();
 
       if (res.status === 409 || data.alreadySubmitted) {
-        setAlreadySubmittedInfo({
-          patientName: data.patientName || personalInfo.fullName,
-        });
-        setErrorMessage(data.error || "Sua anamnese já foi enviada anteriormente e está em análise pela Dra. Joane Silva.");
+        setAlreadySubmittedInfo({});
+        setErrorMessage(data.error || "Sua anamnese ja foi enviada anteriormente e esta em analise pela Dra. Joane Souza Oliveira de Andrade.");
         return;
       }
 
@@ -237,7 +253,7 @@ export default function PreencherAnamnesePage() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       console.error("Erro ao submeter anamnese:", err);
-      setErrorMessage("Erro de comunicação com o servidor. Por favor, tente novamente.");
+      setErrorMessage("Erro de comunicacao com o servidor. Por favor, tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -249,7 +265,7 @@ export default function PreencherAnamnesePage() {
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="text-center space-y-4">
             <div className="w-12 h-12 border-4 border-[#e5e0da] border-t-[#5d0c1d] rounded-full animate-spin mx-auto" />
-            <p className="font-serif text-sm font-medium text-[#5f5456]">Carregando formulário de acolhimento...</p>
+            <p className="font-serif text-sm font-medium text-[#5f5456]">Carregando formulario de acolhimento...</p>
           </div>
         </div>
       </div>
@@ -275,50 +291,50 @@ export default function PreencherAnamnesePage() {
                   Obrigada, {personalInfo.fullName.split(" ")[0]}!
                 </h1>
                 <p className="text-[#5f5456] text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
-                  Sua ficha de anamnese foi enviada para a <strong>Dra. Joane Silva</strong>. 
-                  Seus dados estão protegidos com total sigilo profissional e ética.
+                  Sua ficha de anamnese foi enviada para a <strong>Dra. Joane Souza Oliveira de Andrade</strong>.
+                  Seus dados estao protegidos com total sigilo profissional e etica.
                 </p>
               </div>
 
               <div className="bg-[#fbf9f7] border border-[#e5e0da] rounded-2xl p-6 text-left max-w-md mx-auto space-y-3 text-xs sm:text-sm text-[#5f5456]">
                 <div className="flex items-center gap-2 text-[#5d0c1d] font-bold">
                   <Clock className="w-4 h-4 text-[#5d0c1d]" />
-                  <span className="font-serif text-sm">Próximos Passos:</span>
+                  <span className="font-serif text-sm">Proximos Passos:</span>
                 </div>
-                <p>1. A Dra. Joane fará a leitura detalhada das suas respostas.</p>
-                <p>2. Ela entrará em contato pelo seu WhatsApp (<strong>{personalInfo.phone}</strong>) para alinhar o primeiro encontro.</p>
+                <p>1. A Dra. Joane fara a leitura detalhada das suas respostas.</p>
+                <p>2. Ela entrara em contato pelo seu WhatsApp (<strong>{personalInfo.phone}</strong>) para alinhar o primeiro encontro.</p>
               </div>
 
               <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <a
                   href={`https://wa.me/55${personalInfo.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-                    `Olá Dra. Joane, acabei de preencher minha ficha de anamnese no site (${personalInfo.fullName}).`
+                    `Ola Dra. Joane, acabei de preencher minha ficha de anamnese no site (${personalInfo.fullName}).`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-[#5d0c1d] hover:bg-[#8b1c31] text-white text-sm font-semibold shadow-md transition"
                 >
                   <MessageCircle className="w-4 h-4" />
-                  <span>Avisar Joane pelo WhatsApp</span>
+                  <span>Avisar pelo WhatsApp</span>
                 </a>
 
                 <Link
                   href="/"
                   className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-full bg-white border border-[#d8d0c8] text-[#5d0c1d] text-sm font-semibold hover:bg-[#fbf9f7] transition"
                 >
-                  Voltar ao Início
+                  Voltar ao Inicio
                 </Link>
               </div>
             </div>
           ) : (
             <div className="space-y-6">
-              {/* CABEÇALHO DO FORMULÁRIO COM BARRA DE PROGRESSO */}
+              {/* CABECALHO DO FORMULARIO COM BARRA DE PROGRESSO */}
               <div className="bg-white rounded-3xl border border-[#e5e0da] p-6 sm:p-8 shadow-xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#eee9e4] pb-6">
                   <div>
                     <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[1px] text-[#5d0c1d] bg-[#fbf5f2] border border-[#f0ded8] px-3.5 py-1 rounded-full mb-2">
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>Ficha de Anamnese Clínica</span>
+                      <span>Ficha de Anamnese Clinica</span>
                     </div>
                     <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#5d0c1d]">
                       {template?.title || "Ficha de Anamnese"}
@@ -329,7 +345,7 @@ export default function PreencherAnamnesePage() {
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-[#5d0c1d] font-semibold bg-[#fbf9f7] px-3.5 py-2 rounded-full border border-[#e5e0da] shrink-0">
                     <Lock className="w-4 h-4 text-[#5d0c1d]" />
-                    <span>Sigilo Ético & LGPD</span>
+                    <span>Sigilo Etico & LGPD</span>
                   </div>
                 </div>
 
@@ -343,7 +359,7 @@ export default function PreencherAnamnesePage() {
                       {currentStep === 1
                         ? "1. Dados Pessoais"
                         : currentStep === totalSteps
-                        ? "Revisão e Envio"
+                        ? "Revisao e Envio"
                         : `${currentStep - 1}. ${sections[currentStep - 2]?.title || "Perguntas"}`}
                     </span>
                   </div>
@@ -356,19 +372,19 @@ export default function PreencherAnamnesePage() {
                 </div>
               </div>
 
-              {/* ALERTA DE JÁ SUBMETIDO / DUPLICIDADE */}
+              {/* ALERTA DE JA SUBMETIDO / DUPLICIDADE */}
               {alreadySubmittedInfo && (
                 <div className="bg-[#fffbeb] border border-[#fde68a] rounded-3xl p-6 shadow-xs flex items-start gap-4">
                   <div className="p-3 rounded-full bg-[#fef3c7] text-[#92400e] shrink-0">
                     <ShieldAlert className="w-6 h-6" />
                   </div>
                   <div className="space-y-1 text-sm text-[#78350f]">
-                    <h4 className="font-serif font-bold text-base text-[#92400e]">Anamnese já enviada anteriormente!</h4>
+                    <h4 className="font-serif font-bold text-base text-[#92400e]">Anamnese ja enviada anteriormente!</h4>
                     <p className="text-xs sm:text-sm leading-relaxed">
-                      Olá <strong>{alreadySubmittedInfo.patientName}</strong>, identificamos que você já possui uma ficha de anamnese preenchida e ela <strong>está em análise</strong> pela Dra. Joane Silva.
+                      Identificamos que este CPF ja possui uma ficha de anamnese preenchida e ela <strong>esta em analise</strong> pela Dra. Joane Souza Oliveira de Andrade.
                     </p>
                     <p className="text-xs font-bold pt-1">
-                      Caso precise atualizar alguma informação importante ou agendar uma sessão, entre em contato direto pelo WhatsApp.
+                      Caso precise atualizar alguma informacao importante ou agendar uma sessao, entre em contato direto pelo WhatsApp.
                     </p>
                   </div>
                 </div>
@@ -382,7 +398,7 @@ export default function PreencherAnamnesePage() {
                 </div>
               )}
 
-              {/* CONTEÚDO DA ETAPA ATUAL */}
+              {/* CONTEUDO DA ETAPA ATUAL */}
               <div className="bg-white rounded-3xl border border-[#e5e0da] p-6 sm:p-8 shadow-xs">
                 {/* ETAPA 1: DADOS PESSOAIS */}
                 {currentStep === 1 && (
@@ -393,17 +409,18 @@ export default function PreencherAnamnesePage() {
                         <span>1. Dados Pessoais do Paciente</span>
                       </h2>
                       <p className="text-xs text-[#5f5456] mt-1">
-                        Suas informações de contato e identificação básica para prontuário clínico.
+                        Suas informacoes de contato e identificacao basica para prontuario clinico.
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* NOME COMPLETO */}
                       <div className="sm:col-span-2">
-                        <label className="block text-xs font-semibold text-[#221a1b] mb-1.5">
-                          Nome Completo <span className="text-[#5d0c1d]">*</span>
+                        <label htmlFor="fullName" className="block text-xs font-semibold text-[#221a1b] mb-1.5">
+                          Nome Completo <span className="text-[#5d0c1d]" aria-hidden="true">*</span>
                         </label>
                         <input
+                          id="fullName"
                           type="text"
                           required
                           placeholder="Ex: Mariana Albuquerque Santos"
@@ -415,10 +432,11 @@ export default function PreencherAnamnesePage() {
 
                       {/* CPF */}
                       <div>
-                        <label className="block text-xs font-semibold text-[#221a1b] mb-1.5">
-                          CPF <span className="text-[#5d0c1d]">*</span>
+                        <label htmlFor="cpf" className="block text-xs font-semibold text-[#221a1b] mb-1.5">
+                          CPF <span className="text-[#5d0c1d]" aria-hidden="true">*</span>
                         </label>
                         <input
+                          id="cpf"
                           type="text"
                           required
                           placeholder="000.000.000-00"
@@ -428,32 +446,33 @@ export default function PreencherAnamnesePage() {
                           onBlur={handleCpfBlur}
                           className="w-full h-12 px-4 rounded-xl border border-[#d8d0c8] bg-white text-[#221a1b] placeholder-[#9c9092] text-sm focus:outline-none focus:border-[#5d0c1d] focus:ring-2 focus:ring-[#5d0c1d]/10 transition shadow-2xs"
                         />
-                        <span className="text-[11px] text-[#8e8284] pl-1">Identificação única do paciente.</span>
+                        <span className="text-[11px] text-[#8e8284] pl-1">Identificacao unica do paciente.</span>
                       </div>
 
-                      {/* DATA DE NASCIMENTO (FORMATO BRL DD/MM/AAAA) */}
+                      {/* DATA DE NASCIMENTO */}
                       <div>
-                        <label className="block text-xs font-semibold text-[#221a1b] mb-1.5">
-                          Data de Nascimento <span className="text-[#5d0c1d]">*</span>
+                        <label htmlFor="birthDate" className="block text-xs font-semibold text-[#221a1b] mb-1.5">
+                          Data de Nascimento <span className="text-[#5d0c1d]" aria-hidden="true">*</span>
                         </label>
                         <input
+                          id="birthDate"
                           type="text"
-                          required
                           placeholder="DD/MM/AAAA"
                           maxLength={10}
                           value={personalInfo.birthDate}
                           onChange={(e) => handlePersonalInfoChange("birthDate", e.target.value)}
                           className="w-full h-12 px-4 rounded-xl border border-[#d8d0c8] bg-white text-[#221a1b] placeholder-[#9c9092] text-sm focus:outline-none focus:border-[#5d0c1d] focus:ring-2 focus:ring-[#5d0c1d]/10 transition shadow-2xs"
                         />
-                        <span className="text-[11px] text-[#8e8284] pl-1">Padrão brasileiro (ex: 18/05/1994).</span>
+                        <span className="text-[11px] text-[#8e8284] pl-1">Padrao brasileiro (ex: 18/05/1994).</span>
                       </div>
 
                       {/* E-MAIL */}
                       <div>
-                        <label className="block text-xs font-semibold text-[#221a1b] mb-1.5">
-                          E-mail <span className="text-[#5d0c1d]">*</span>
+                        <label htmlFor="email" className="block text-xs font-semibold text-[#221a1b] mb-1.5">
+                          E-mail <span className="text-[#5d0c1d]" aria-hidden="true">*</span>
                         </label>
                         <input
+                          id="email"
                           type="email"
                           required
                           placeholder="seuemail@exemplo.com"
@@ -465,10 +484,11 @@ export default function PreencherAnamnesePage() {
 
                       {/* TELEFONE / WHATSAPP */}
                       <div>
-                        <label className="block text-xs font-semibold text-[#221a1b] mb-1.5">
-                          Telefone / WhatsApp <span className="text-[#5d0c1d]">*</span>
+                        <label htmlFor="phone" className="block text-xs font-semibold text-[#221a1b] mb-1.5">
+                          Telefone / WhatsApp <span className="text-[#5d0c1d]" aria-hidden="true">*</span>
                         </label>
                         <input
+                          id="phone"
                           type="tel"
                           required
                           placeholder="(11) 99999-9999"
@@ -479,33 +499,35 @@ export default function PreencherAnamnesePage() {
                         />
                       </div>
 
-                      {/* GÊNERO (SELECT DROPDOWN) */}
+                      {/* GENERO */}
                       <div>
-                        <label className="block text-xs font-semibold text-[#221a1b] mb-1.5">
-                          Gênero
+                        <label htmlFor="gender" className="block text-xs font-semibold text-[#221a1b] mb-1.5">
+                          Genero
                         </label>
                         <select
+                          id="gender"
                           value={personalInfo.gender}
                           onChange={(e) => handlePersonalInfoChange("gender", e.target.value)}
                           className="w-full h-12 px-4 rounded-xl border border-[#d8d0c8] bg-white text-[#221a1b] text-sm focus:outline-none focus:border-[#5d0c1d] focus:ring-2 focus:ring-[#5d0c1d]/10 transition shadow-2xs"
                         >
-                          <option value="">Selecione seu gênero...</option>
+                          <option value="">Selecione seu genero...</option>
                           <option value="Feminino">Feminino</option>
                           <option value="Masculino">Masculino</option>
-                          <option value="Não-binário">Não-binário</option>
+                          <option value="Nao-binario">Nao-binario</option>
                           <option value="Travesti / Mulher Trans">Travesti / Mulher Trans</option>
                           <option value="Homem Trans">Homem Trans</option>
                           <option value="Outro">Outro</option>
-                          <option value="Prefiro não informar">Prefiro não informar</option>
+                          <option value="Prefiro nao informar">Prefiro nao informar</option>
                         </select>
                       </div>
 
-                      {/* PROFISSÃO */}
+                      {/* PROFISSAO */}
                       <div>
-                        <label className="block text-xs font-semibold text-[#221a1b] mb-1.5">
-                          Profissão / Ocupação
+                        <label htmlFor="occupation" className="block text-xs font-semibold text-[#221a1b] mb-1.5">
+                          Profissao / Ocupacao
                         </label>
                         <input
+                          id="occupation"
                           type="text"
                           placeholder="Ex: Arquiteta, Designer, Estudante, etc."
                           value={personalInfo.occupation}
@@ -517,7 +539,7 @@ export default function PreencherAnamnesePage() {
                   </div>
                 )}
 
-                {/* ETAPAS 2+: SEÇÕES DA ANAMNESE */}
+                {/* ETAPAS 2+: SECOES DA ANAMNESE */}
                 {currentStep > 1 && currentStep <= sections.length + 1 && (
                   <div className="space-y-6">
                     {(() => {
@@ -548,29 +570,73 @@ export default function PreencherAnamnesePage() {
                               />
                             ))}
                           </div>
+
+                          {/* Bloco de acolhimento - aparece quando ha sinalizacao de risco
+                              Nao bloqueia o formulario, apenas acolhe e informa */}
+                          {showRiskAlert && (
+                            <div className="mt-6 rounded-3xl border border-[#f0ded8] bg-[#fbf5f2] p-6 space-y-4">
+                              <div className="flex items-start gap-3">
+                                <span className="text-2xl" aria-hidden="true">&#x1F90D;</span>
+                                <div>
+                                  <p className="font-serif font-bold text-[#5d0c1d] text-base">
+                                    Voce nao esta sozinha.
+                                  </p>
+                                  <p className="text-sm text-[#5f5456] mt-1 leading-relaxed">
+                                    Agradeco a sua honestidade em compartilhar isso. Esse tipo de resposta
+                                    aumenta a prioridade do meu retorno para que possamos conversar logo.
+                                    Enquanto isso, caso precise de apoio agora, estes canais estao disponiveis
+                                    24 horas, de forma gratuita e sigilosa:
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div className="bg-white rounded-2xl border border-[#e5e0da] p-4 text-center">
+                                  <p className="font-bold text-[#5d0c1d] text-lg">188</p>
+                                  <p className="font-serif font-semibold text-sm text-[#5d0c1d]">CVV</p>
+                                  <p className="text-xs text-[#5f5456] mt-1">Centro de Valorizacao da Vida - ligacao gratuita, 24 horas</p>
+                                </div>
+                                <div className="bg-white rounded-2xl border border-[#e5e0da] p-4 text-center">
+                                  <p className="font-bold text-[#5d0c1d] text-lg">192</p>
+                                  <p className="font-serif font-semibold text-sm text-[#5d0c1d]">SAMU</p>
+                                  <p className="text-xs text-[#5f5456] mt-1">Servico de Atendimento Movel de Urgencia</p>
+                                </div>
+                                <div className="bg-white rounded-2xl border border-[#e5e0da] p-4 text-center">
+                                  <p className="font-bold text-[#5d0c1d] text-lg">CAPS</p>
+                                  <p className="font-serif font-semibold text-sm text-[#5d0c1d]">Centro de Atencao Psicossocial</p>
+                                  <p className="text-xs text-[#5f5456] mt-1">Busque o CAPS mais proximo da sua cidade</p>
+                                </div>
+                              </div>
+
+                              <p className="text-xs text-[#5f5456] italic">
+                                Voce pode continuar preenchendo o formulario normalmente.
+                                Sua honestidade ja e um passo importante.
+                              </p>
+                            </div>
+                          )}
                         </>
                       );
                     })()}
                   </div>
                 )}
 
-                {/* ETAPA FINAL: REVISÃO E ENVIO */}
+                {/* ETAPA FINAL: REVISAO E ENVIO */}
                 {currentStep === totalSteps && (
                   <div className="space-y-6">
                     <div className="border-b border-[#eee9e4] pb-4">
                       <h2 className="font-serif text-xl font-bold text-[#5d0c1d] flex items-center gap-2">
                         <CheckCircle className="w-5 h-5 text-[#5d0c1d]" />
-                        <span>Revisão dos Dados & Envio</span>
+                        <span>Revisao dos Dados & Envio</span>
                       </h2>
                       <p className="text-xs text-[#5f5456] mt-1">
-                        Por favor, confira seus dados antes de enviar para a avaliação da Dra. Joane.
+                        Por favor, confira seus dados antes de enviar para a avaliacao da Dra. Joane Souza Oliveira de Andrade.
                       </p>
                     </div>
 
                     {/* Resumo Dados Pessoais */}
                     <div className="bg-[#fbf9f7] border border-[#e5e0da] rounded-2xl p-6 space-y-3">
                       <h3 className="font-serif font-bold text-base text-[#5d0c1d] border-b border-[#eee9e4] pb-2">
-                        Identificação do Paciente
+                        Identificacao do Paciente
                       </h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs sm:text-sm">
                         <p><strong className="text-[#5d0c1d]">Nome:</strong> {personalInfo.fullName}</p>
@@ -578,8 +644,8 @@ export default function PreencherAnamnesePage() {
                         <p><strong className="text-[#5d0c1d]">E-mail:</strong> {personalInfo.email}</p>
                         <p><strong className="text-[#5d0c1d]">WhatsApp:</strong> {personalInfo.phone}</p>
                         <p><strong className="text-[#5d0c1d]">Nascimento:</strong> {personalInfo.birthDate}</p>
-                        {personalInfo.gender && <p><strong className="text-[#5d0c1d]">Gênero:</strong> {personalInfo.gender}</p>}
-                        {personalInfo.occupation && <p><strong className="text-[#5d0c1d]">Profissão:</strong> {personalInfo.occupation}</p>}
+                        {personalInfo.gender && <p><strong className="text-[#5d0c1d]">Genero:</strong> {personalInfo.gender}</p>}
+                        {personalInfo.occupation && <p><strong className="text-[#5d0c1d]">Profissao:</strong> {personalInfo.occupation}</p>}
                       </div>
                     </div>
 
@@ -611,20 +677,58 @@ export default function PreencherAnamnesePage() {
                       </div>
                     </div>
 
-                    {/* Termo de Consentimento */}
-                    <div className="p-5 rounded-2xl bg-[#fbf5f2] border border-[#f0ded8] text-xs text-[#5f5456] flex items-start gap-3.5">
-                      <Lock className="w-5 h-5 text-[#5d0c1d] shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-serif font-bold text-sm text-[#5d0c1d]">Consentimento & Sigilo Ético</p>
-                        <p className="mt-0.5 leading-relaxed">
-                          Ao clicar em <strong>"Enviar Análise"</strong>, você autoriza o envio seguro e confidencial das suas respostas para avaliação clínica da Dra. Joane Silva.
+                    {/* Lembrete de risco na revisao */}
+                    {showRiskAlert && (
+                      <div className="rounded-2xl border border-[#f0ded8] bg-[#fbf5f2] p-4 flex items-start gap-3 text-sm text-[#5d0c1d]">
+                        <span className="text-xl shrink-0" aria-hidden="true">&#x1F90D;</span>
+                        <p>
+                          Voce compartilhou algo importante sobre seu momento emocional.
+                          Irei priorizar o retorno para voce. Se precisar antes disso: <strong>CVV 188</strong> (gratuito, 24h) ou <strong>SAMU 192</strong>.
                         </p>
                       </div>
+                    )}
+
+                    {/* CONSENTIMENTO LGPD - OBRIGATORIO */}
+                    <div className="rounded-2xl border-2 border-[#5d0c1d]/20 bg-[#fbf5f2] p-5 space-y-4">
+                      <div className="flex items-start gap-3">
+                        <ShieldCheck className="w-5 h-5 text-[#5d0c1d] shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-serif font-bold text-sm text-[#5d0c1d]">
+                            Consentimento LGPD - Protecao de Dados Pessoais e de Saude
+                          </p>
+                          <p className="text-xs text-[#5f5456] mt-1 leading-relaxed">
+                            Ao enviar este formulario, voce autoriza o armazenamento e tratamento dos seus dados pessoais e de saude pela <strong>Dra. Joane Souza Oliveira de Andrade</strong>, exclusivamente para fins de atendimento clinico e psicanalitico, em conformidade com a Lei Geral de Protecao de Dados (LGPD - Lei 13.709/2018). Seus dados serao acessados somente pela profissional responsavel e nao serao compartilhados com terceiros sem seu consentimento expresso.
+                          </p>
+                        </div>
+                      </div>
+
+                      <label className="flex items-start gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          checked={lgpdConsent}
+                          onChange={(e) => {
+                            setLgpdConsent(e.target.checked);
+                            if (errorMessage) setErrorMessage("");
+                          }}
+                          className="mt-0.5 w-5 h-5 rounded border-2 border-[#d8d0c8] text-[#5d0c1d] focus:ring-2 focus:ring-[#5d0c1d]/20 focus:outline-none shrink-0 accent-[#5d0c1d] cursor-pointer"
+                          aria-required="true"
+                        />
+                        <span className="text-xs font-semibold text-[#5d0c1d] leading-relaxed group-hover:text-[#8b1c31] transition select-none">
+                          Li e concordo com o tratamento dos meus dados pessoais e de saude pela Dra. Joane Souza Oliveira de Andrade nos termos descritos acima, conforme a LGPD.
+                          <span className="text-[#5d0c1d] ml-1">*</span>
+                        </span>
+                      </label>
+
+                      {!lgpdConsent && (
+                        <p className="text-[11px] text-[#aa2d47] font-medium pl-8">
+                          O consentimento e obrigatorio para o envio da anamnese.
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
 
-                {/* BOTÕES DE NAVEGAÇÃO */}
+                {/* BOTOES DE NAVEGACAO */}
                 <div className="mt-8 pt-6 border-t border-[#eee9e4] flex items-center justify-between gap-4">
                   {currentStep > 1 ? (
                     <button
@@ -647,25 +751,26 @@ export default function PreencherAnamnesePage() {
                       disabled={Boolean(alreadySubmittedInfo)}
                       className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#5d0c1d] hover:bg-[#8b1c31] disabled:opacity-50 text-white text-sm font-semibold shadow-md shadow-[#5d0c1d]/20 transition"
                     >
-                      <span>Avançar</span>
+                      <span>Avancar</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   ) : (
                     <button
                       type="button"
                       onClick={handleSubmit}
-                      disabled={isSubmitting || Boolean(alreadySubmittedInfo)}
-                      className="inline-flex items-center gap-2 px-9 py-4 rounded-full bg-[#5d0c1d] hover:bg-[#8b1c31] disabled:opacity-50 text-white text-sm font-bold shadow-lg shadow-[#5d0c1d]/25 transition active:scale-98"
+                      disabled={isSubmitting || Boolean(alreadySubmittedInfo) || !lgpdConsent}
+                      className="inline-flex items-center gap-2 px-9 py-4 rounded-full bg-[#5d0c1d] hover:bg-[#8b1c31] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold shadow-lg shadow-[#5d0c1d]/25 transition active:scale-98"
+                      title={!lgpdConsent ? "Marque o consentimento LGPD para continuar" : undefined}
                     >
                       {isSubmitting ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          <span>Enviando Análise...</span>
+                          <span>Enviando Analise...</span>
                         </>
                       ) : (
                         <>
                           <Send className="w-4 h-4" />
-                          <span>Enviar Análise</span>
+                          <span>Enviar Analise</span>
                         </>
                       )}
                     </button>

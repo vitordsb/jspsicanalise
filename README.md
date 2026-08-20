@@ -1,6 +1,6 @@
-# JS Psicanálise & Acolhimento Clínico 🌸
+# Plataforma de Anamnese Clínica - Joane Souza Oliveira de Andrade
 
-Plataforma monolítica moderna e acolhedora em Next.js para acolhimento, preenchimento virtual de anamneses psicológicas/psicanalíticas, gestão de pacientes com interface inspirada no **WhatsApp Web**, controle de versões de anamnese e geração automática de contratos de prestação de serviços para a **Dra. Joane Silva**.
+Plataforma monolítica moderna e acolhedora em Next.js para acolhimento, preenchimento virtual de anamneses psicológicas/psicanalíticas, gestão de pacientes com interface inspirada no **WhatsApp Web**, controle de versões de anamnese e geração automática de contratos de prestação de serviços para a **Dra. Joane Souza Oliveira de Andrade**.
 
 ---
 

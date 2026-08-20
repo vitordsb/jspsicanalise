@@ -54,31 +54,190 @@
   background: #beb3aa;
 }
 
-/* Print styles for Clean A4 Contract & Anamnesis Ficha */
+/* Print styles - Documento juridico A4 formal */
 @media print {
+  /* Corpo da pagina */
   body {
     background: white !important;
-    color: black !important;
+    color: #000 !important;
+    font-family: "Lora", Georgia, "Times New Roman", serif !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  .no-print {
+  /* Esconde toda a UI que nao e o documento */
+  .no-print,
+  header,
+  nav,
+  aside,
+  footer,
+  button,
+  [role="dialog"] > *:not(.contract-print-document) {
     display: none !important;
   }
 
+  /* Elementos vistos apenas em impressao */
   .print-only {
     display: block !important;
   }
 
-  .print-page {
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-    border: none !important;
+  /* Pagina A4 com margens de documento formal brasileiro:
+     ABNT: 3cm esquerda, 2cm direita, 2,5cm superior e inferior */
+  @page {
+    size: A4 portrait;
+    margin: 25mm 20mm 25mm 30mm;
   }
 
+  /* Numeracao de paginas no rodape */
   @page {
-    size: A4;
-    margin: 15mm;
+    @bottom-center {
+      content: "Pagina " counter(page) " de " counter(pages);
+      font-family: "Lora", Georgia, serif;
+      font-size: 9pt;
+      color: #444;
+    }
+  }
+
+  /* O documento em si - sem fundo, sem borda, sem sombra */
+  .contract-print-document {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Tipografia do documento */
+  .contract-print-document p,
+  .contract-print-document li {
+    font-family: "Lora", Georgia, "Times New Roman", serif !important;
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+    text-align: justify !important;
+    hyphens: auto !important;
+    -webkit-hyphens: auto !important;
+    color: #000 !important;
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Titulos de clausulas */
+  .contract-print-document .clausula-titulo {
+    font-family: "Lora", Georgia, "Times New Roman", serif !important;
+    font-size: 11pt !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.03em !important;
+    color: #000 !important;
+    margin-top: 1.4em !important;
+    margin-bottom: 0.3em !important;
+  }
+
+  /* Cabecalho do contrato */
+  .contract-print-document .contrato-titulo {
+    font-family: "Lora", Georgia, "Times New Roman", serif !important;
+    font-size: 14pt !important;
+    font-weight: bold !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: #000 !important;
+    margin-bottom: 0.5em !important;
+  }
+
+  .contract-print-document .contrato-subtitulo {
+    font-family: "Lora", Georgia, "Times New Roman", serif !important;
+    font-size: 10pt !important;
+    text-align: center !important;
+    color: #333 !important;
+    margin-bottom: 1.5em !important;
+  }
+
+  /* Blocos de identificacao - sem fundo colorido */
+  .contract-print-document .bloco-parte {
+    background: none !important;
+    border: none !important;
+    border-left: 2px solid #000 !important;
+    padding: 0.4em 0 0.4em 0.8em !important;
+    margin: 0.6em 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .contract-print-document .bloco-parte p {
+    margin: 0.1em 0 !important;
+    font-size: 10.5pt !important;
+  }
+
+  /* Separador de secoes */
+  .contract-print-document .separador {
+    border: none !important;
+    border-top: 1px solid #000 !important;
+    margin: 1.2em 0 !important;
+  }
+
+  /* Bloco de assinaturas - nunca quebra no meio */
+  .contract-print-document .bloco-assinaturas {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin-top: 3em !important;
+  }
+
+  .contract-print-document .linha-assinatura {
+    border-top: 1px solid #000 !important;
+    margin-top: 2.5em !important;
+    padding-top: 0.3em !important;
+  }
+
+  .contract-print-document .linha-assinatura p {
+    text-align: center !important;
+    font-size: 10pt !important;
+    margin: 0 !important;
+  }
+
+  /* Rodape do documento */
+  .contract-print-document .rodape-documento {
+    margin-top: 2em !important;
+    padding-top: 0.8em !important;
+    border-top: 1px solid #888 !important;
+    font-size: 8.5pt !important;
+    color: #444 !important;
+    text-align: center !important;
+  }
+
+  /* Clausulas - sem quebra no meio */
+  .contract-print-document .clausula-bloco {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin-bottom: 0.8em !important;
+  }
+
+  /* Remove cores de fundo e bordas arredondadas do resto da pagina */
+  * {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    text-shadow: none !important;
+  }
+
+  /* Excecao: as bordas do bloco-parte precisam aparecer */
+  .contract-print-document .bloco-parte {
+    border-left: 2px solid #000 !important;
+  }
+  .contract-print-document .separador {
+    border-top: 1px solid #000 !important;
+  }
+  .contract-print-document .linha-assinatura {
+    border-top: 1px solid #000 !important;
+  }
+  .contract-print-document .rodape-documento {
+    border-top: 1px solid #888 !important;
   }
 }

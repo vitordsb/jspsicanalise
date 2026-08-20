@@ -11,7 +11,7 @@ export const PublicFooter = () => {
               Atendimento Psicológico & Psicanalítico
             </span>
             <h3 className="font-serif text-xl font-bold text-[#5d0c1d] mb-2">
-              Dra. Joane Silva
+              Dra. Joane Souza Oliveira de Andrade
             </h3>
             <p className="text-[#6f5f62] leading-relaxed text-xs sm:text-sm">
               Espaço ético, confidencial e acolhedor dedicado à escuta clínica, elaboração de conflitos subjetivos e desenvolvimento pessoal.
@@ -46,7 +46,7 @@ export const PublicFooter = () => {
         </div>
 
         <div className="border-t border-[#ebd6ce] pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#9c8b8e] gap-4">
-          <p>© {new Date().getFullYear()} Dra. Joane Silva • Psicologia & Psicanálise. Todos os direitos reservados.</p>
+          <p>© {new Date().getFullYear()} Dra. Joane Souza Oliveira de Andrade • Psicologia & Psicanálise. Todos os direitos reservados.</p>
           <div className="flex items-center gap-1">
             <span>Desenvolvido com carinho</span>
             <Heart className="w-3.5 h-3.5 text-[#5d0c1d] fill-current inline" />

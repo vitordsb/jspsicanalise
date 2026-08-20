@@ -28,7 +28,7 @@ export const AdminHeader = () => {
       icon: FileText,
     },
     {
-      label: "Gerar Contratos",
+      label: "Contratos",
       href: "/admin/contratos",
       icon: FileSignature,
     },
@@ -55,14 +55,15 @@ export const AdminHeader = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* LOGO & TITLE */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#5d0c1d] to-[#aa2d47] flex items-center justify-center text-white shadow-xs">
               <HeartHandshake className="w-5 h-5" />
             </div>
-            <div>
+            {/* Nome completo so visivel em telas largas (lg+) pois o header tem muitos itens em md */}
+            <div className="hidden lg:block">
               <div className="flex items-center gap-2">
-                <span className="font-serif text-lg font-bold text-[#5d0c1d] leading-none">
-                  Joane Silva
+                <span className="font-serif text-base font-bold text-[#5d0c1d] leading-none">
+                  Joane Souza Oliveira de Andrade
                 </span>
                 <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#f8dad2] text-[#5d0c1d] uppercase tracking-wide">
                   Painel Clínico
@@ -70,6 +71,10 @@ export const AdminHeader = () => {
               </div>
               <span className="text-xs text-[#6f5f62]">Psicologia & Psicanálise</span>
             </div>
+            {/* Em md mostra so o badge compacto */}
+            <span className="lg:hidden text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#f8dad2] text-[#5d0c1d] uppercase tracking-wide">
+              Painel Clínico
+            </span>
           </div>
 
           {/* NAV LINKS */}
