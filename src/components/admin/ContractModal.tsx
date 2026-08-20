@@ -63,7 +63,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
     professionalDocType: "nenhum",
     professionalDocNumber: "",
     sessionPriceCents: 18000,
-    frequency: "Semanal (1 sessao por semana)",
+    frequency: "Semanal (1 sessão por semana)",
     durationMinutes: 50,
     cancellationHours: 24,
     paymentMethod: "PIX",
@@ -106,9 +106,19 @@ export const ContractModal: React.FC<ContractModalProps> = ({
         .then((r) => r.json())
         .then((data) => {
           if (data && data.name) {
+            // Monta o nome completo: titulo do perfil + nome, ou "Dra." como prefixo padrao
+            const title = (data.title || "").trim();
+            const name = (data.name || "").trim();
+            const fullName = title
+              ? `${title} ${name}`
+              : name.startsWith("Dr")
+                ? name
+                : name
+                  ? `Dra. ${name}`
+                  : "";
             setForm((prev) => ({
               ...prev,
-              therapistName: data.name || prev.therapistName,
+              therapistName: fullName || prev.therapistName,
               therapistAddress: data.address || prev.therapistAddress,
               therapistPhone: data.phone || prev.therapistPhone,
               professionalDocNumber: data.crp || prev.professionalDocNumber,
@@ -158,7 +168,178 @@ export const ContractModal: React.FC<ContractModalProps> = ({
   };
 
   const handlePrint = () => {
-    window.print();
+    // Abre uma janela limpa com apenas o contrato para impressao.
+    // Isola completamente o documento do layout do painel (modal/flex/overflow).
+    const contractEl = document.querySelector(".contract-print-document");
+    if (!contractEl) { window.print(); return; }
+
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    // innerHTML ja inclui a marca dagua e todo o conteudo do documento
+    const contractHTML = (contractEl as HTMLElement).innerHTML;
+
+    const printWindow = window.open("", "_blank", "width=900,height=1100,scrollbars=yes");
+    if (!printWindow) { window.print(); return; }
+
+    const css = `
+    @page { size: A4 portrait; margin: 20mm 20mm 20mm 25mm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 11pt;
+      line-height: 1.65;
+      color: #000;
+      background: white;
+    }
+    p {
+      text-align: justify;
+      hyphens: auto;
+      -webkit-hyphens: auto;
+      orphans: 3;
+      widows: 3;
+      margin-bottom: 0.5em;
+    }
+    strong { font-weight: bold; }
+
+    /* Marca dagua: position:fixed repete em cada pagina no print */
+    .contract-watermark {
+      display: block !important;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 55%;
+      max-width: 14cm;
+      height: auto;
+      opacity: 0.07;
+      pointer-events: none;
+      z-index: -1;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    /* Cabecalho do documento */
+    .contrato-titulo {
+      font-size: 14pt;
+      font-weight: bold;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.3em;
+      display: block;
+      color: #000;
+    }
+    .contrato-subtitulo {
+      font-size: 10pt;
+      text-align: center;
+      color: #444;
+      display: block;
+    }
+    /* O primeiro div filho (cabecalho) ganha borda inferior */
+    .contract-print-document > div:first-of-type {
+      border-bottom: 1.5px solid #000;
+      padding-bottom: 0.7em;
+      margin-bottom: 1em;
+      text-align: center;
+    }
+
+    /* Blocos de identificacao das partes */
+    .bloco-parte {
+      border-left: 2px solid #000;
+      padding: 0.3em 0 0.3em 0.7em;
+      margin: 0.5em 0;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .bloco-parte p {
+      font-size: 10.5pt;
+      text-align: left;
+      margin-bottom: 0.1em;
+    }
+
+    /* Separador horizontal */
+    hr, .separador {
+      border: none;
+      border-top: 1px solid #000;
+      margin: 0.8em 0;
+    }
+
+    /* Titulos de clausulas */
+    .clausula-titulo {
+      font-size: 11pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-top: 1.1em;
+      margin-bottom: 0.2em;
+      display: block;
+    }
+    .clausula-bloco {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin-bottom: 0.2em;
+    }
+
+    /* Assinaturas */
+    .bloco-assinaturas {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin-top: 1.8em;
+    }
+    /* A div de grid de assinaturas (filha direta de bloco-assinaturas) */
+    .bloco-assinaturas > div {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2cm;
+    }
+    .linha-assinatura {
+      border-top: 1px solid #000;
+      margin-top: 2em;
+      padding-top: 0.3em;
+      text-align: center;
+    }
+    .linha-assinatura p {
+      text-align: center;
+      font-size: 10pt;
+      margin: 0.1em 0;
+    }
+
+    /* Rodape */
+    .rodape-documento {
+      margin-top: 1.2em;
+      padding-top: 0.5em;
+      border-top: 1px solid #888;
+      font-size: 8pt;
+      color: #555;
+      text-align: center;
+    }
+
+    /* Utilitarios minimos que podem estar no HTML */
+    .text-center { text-align: center; }
+    .underline { text-decoration: underline; }
+    .decoration-dotted { text-decoration-style: dotted; }
+    `;
+
+    printWindow.document.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <base href="${origin}/" />
+  <title>Contrato de Prestacao de Servicos</title>
+  <style>${css}</style>
+</head>
+<body>
+  <div class="contract-print-document">
+    ${contractHTML}
+  </div>
+</body>
+</html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    // Aguarda imagem carregar antes de imprimir
+    setTimeout(() => {
+      printWindow.print();
+      setTimeout(() => printWindow.close(), 800);
+    }, 700);
   };
 
   // Converte centavos para reais para exibicao
@@ -169,8 +350,8 @@ export const ContractModal: React.FC<ContractModalProps> = ({
   const cancelText = `Desmarcacoes ou reagendamentos devem ser comunicados com no minimo ${form.cancellationHours} horas de antecedencia. Faltas sem aviso previo serao cobradas integralmente.`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-3xl border border-[#f0ded8] w-full max-w-4xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden my-auto">
+    <div className="contract-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-xs overflow-y-auto">
+      <div className="contract-modal-card bg-white rounded-3xl border border-[#f0ded8] w-full max-w-4xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden my-auto">
 
         {/* CABECALHO DO MODAL - oculto na impressao */}
         <div className="p-4 sm:p-5 border-b border-[#f3e4e0] flex items-center justify-between bg-[#fbf3ef] no-print shrink-0">
@@ -215,7 +396,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
         </div>
 
         {/* CORPO DO MODAL */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="contract-modal-body flex-1 overflow-y-auto p-6 space-y-6">
 
           {/* Mensagens - ocultas na impressao */}
           {successMsg && (
@@ -252,14 +433,14 @@ export const ContractModal: React.FC<ContractModalProps> = ({
           {/* FORMULARIO DE EDICAO - oculto na impressao */}
           <div className="bg-[#fbf3ef] border border-[#f0ded8] rounded-3xl p-6 space-y-5 no-print">
             <h3 className="font-serif text-sm font-bold text-[#5d0c1d] uppercase tracking-wider">
-              Clausulas e Valores
+              Clausulas e Valores (Pre-visualizacao)
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Valor da sessao */}
               <div>
                 <label className="block text-xs font-semibold text-[#241a1c] mb-1">
-                  Valor da Sessao (R$)
+                  Valor da Sessão (R$)
                 </label>
                 <input
                   type="number"
@@ -287,7 +468,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               {/* Duracao */}
               <div>
                 <label className="block text-xs font-semibold text-[#241a1c] mb-1">
-                  Duracao da Sessao (minutos)
+                  Duração da Sessão (minutos)
                 </label>
                 <input
                   type="number"
@@ -302,7 +483,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               {/* Antecedencia de cancelamento */}
               <div>
                 <label className="block text-xs font-semibold text-[#241a1c] mb-1">
-                  Antecedencia minima para cancelar (horas)
+                  Antecedência mínima para cancelar (horas)
                 </label>
                 <input
                   type="number"
@@ -345,7 +526,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               {/* Aviso rescisao */}
               <div>
                 <label className="block text-xs font-semibold text-[#241a1c] mb-1">
-                  Aviso previo para rescisao (dias)
+                  Aviso prévio para rescisão (dias)
                 </label>
                 <input
                   type="number"
@@ -366,7 +547,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                   type="text"
                   value={form.foroCidade}
                   onChange={(e) => set("foroCidade", e.target.value)}
-                  placeholder="Ex: Sao Paulo/SP"
+                  placeholder="Ex: São Paulo/SP"
                   className="w-full h-11 px-3.5 rounded-full border border-[#eae2d7] bg-white text-xs text-[#241a1c] focus:outline-none focus:border-[#5d0c1d]"
                 />
               </div>
@@ -388,13 +569,13 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               {/* Clausulas extras */}
               <div className="sm:col-span-2">
                 <label className="block text-xs font-semibold text-[#241a1c] mb-1">
-                  Clausulas adicionais (opcional)
+                  Cláusulas adicionais (opcional)
                 </label>
                 <textarea
                   rows={3}
                   value={form.customClauses}
                   onChange={(e) => set("customClauses", e.target.value)}
-                  placeholder="Disposicoes especificas que nao constam nas clausulas padrao..."
+                  placeholder="Disposições específicas que não constam nas cláusulas padrão..."
                   className="w-full p-3 rounded-2xl border border-[#eae2d7] bg-white text-xs text-[#241a1c] focus:outline-none focus:border-[#5d0c1d] resize-y"
                 />
               </div>
@@ -407,13 +588,22 @@ export const ContractModal: React.FC<ContractModalProps> = ({
           ================================================================ */}
           <div className="contract-print-document bg-white p-8 sm:p-12 border border-[#f0ded8] rounded-3xl shadow-xs text-[#241a1c]">
 
+            {/* MARCA D'AGUA - visivel apenas na impressao, repetida em cada pagina via position:fixed */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logotipo-marca-dagua.png"
+              alt=""
+              aria-hidden="true"
+              className="contract-watermark"
+            />
+
             {/* CABECALHO DO DOCUMENTO */}
             <div className="text-center mb-8 pb-6 border-b border-[#ddd]">
               <p className="contrato-titulo font-serif text-xl sm:text-2xl font-bold uppercase tracking-wide text-[#5d0c1d]">
-                Contrato de Prestacao de Servicos
+                Contrato de Prestação de Serviços
               </p>
               <p className="contrato-subtitulo text-sm text-[#6f5f62] mt-1">
-                Atendimento Psicanalitico e Psicoterapeutico Individual
+                Atendimento Psicanalítico e Psicoterapeútico Individual
               </p>
             </div>
 
@@ -434,9 +624,9 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                   <p><strong>REGISTRO PROFISSIONAL:</strong> <span className="underline decoration-dotted">______________________________</span></p>
                 )}
                 {form.therapistAddress ? (
-                  <p><strong>ENDERECO PROFISSIONAL:</strong> {form.therapistAddress}</p>
+                  <p><strong>ENDEREÇO PROFISSIONAL:</strong> {form.therapistAddress}</p>
                 ) : (
-                  <p><strong>ENDERECO PROFISSIONAL:</strong> <span className="underline decoration-dotted">______________________________</span></p>
+                  <p><strong>ENDEREÇO PROFISSIONAL:</strong> <span className="underline decoration-dotted">______________________________</span></p>
                 )}
                 {form.therapistPhone && (
                   <p><strong>TELEFONE:</strong> {form.therapistPhone}</p>
@@ -461,7 +651,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               </div>
 
               <p>
-                Acordam, mutuamente, as seguintes clausulas e condicoes:
+                Acordam, mutuamente, as seguintes cláusulas e condições:
               </p>
 
               <hr className="separador border-t border-[#ccc] my-4" />
@@ -469,36 +659,36 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               {/* CLAUSULA 1 */}
               <div className="clausula-bloco">
                 <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
-                  CLAUSULA PRIMEIRA - DO OBJETO
+                  CLÁUSULA PRIMEIRA - DO OBJETO
                 </p>
                 <p>
-                  O presente instrumento tem por objeto a prestacao de servicos de atendimento
-                  psicanalitico e psicoterapeutico individual, com encontros na periodicidade
-                  de <strong>{form.frequency}</strong>, com duracao media de{" "}
+                  O presente instrumento tem por objeto a prestação de serviços de atendimento
+                  psicanalítico e psicoterapeútico individual, com encontros na periodicidade
+                  de <strong>{form.frequency}</strong>, com duração média de{" "}
                   <strong>{form.durationMinutes} (
                   {form.durationMinutes === 50 ? "cinquenta" :
                    form.durationMinutes === 60 ? "sessenta" :
-                   String(form.durationMinutes)}) minutos</strong> por sessao.
-                  A modalidade de atendimento sera definida de comum acordo entre as partes.
+                   String(form.durationMinutes)}) minutos</strong> por sessão.
+                  A modalidade de atendimento será definida de comum acordo entre as partes.
                 </p>
               </div>
 
               {/* CLAUSULA 2 */}
               <div className="clausula-bloco">
                 <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
-                  CLAUSULA SEGUNDA - DOS HONORARIOS E PAGAMENTO
+                  CLÁUSULA SEGUNDA - DOS HONORÁRIOS E PAGAMENTO
                 </p>
                 <p>
-                  Pelos servicos prestados, o CONTRATANTE pagara a CONTRATADA o valor de{" "}
-                  <strong>{formatCurrency(sessionPriceBRL)}</strong> por sessao. O pagamento
-                  sera realizado por meio de <strong>{form.paymentMethod}</strong>, com
-                  vencimento ate o dia <strong>{form.paymentDueDay}</strong> de cada mes.
+                  Pelos serviços prestados, o CONTRATANTE pagará à CONTRATADA o valor de{" "}
+                  <strong>{formatCurrency(sessionPriceBRL)}</strong> por sessão. O pagamento
+                  será realizado por meio de <strong>{form.paymentMethod}</strong>, com
+                  vencimento até o dia <strong>{form.paymentDueDay}</strong> de cada mês.
                 </p>
                 {(form.lateFeePercent > 0 || form.lateInterestPercent > 0) && (
                   <p className="mt-2">
-                    Em caso de atraso no pagamento, incidira multa de{" "}
+                    Em caso de atraso no pagamento, incidirá multa de{" "}
                     <strong>{form.lateFeePercent}%</strong> sobre o valor devido, acrescida
-                    de juros moratorious de <strong>{form.lateInterestPercent}% ao mes</strong>.
+                    de juros moratórios de <strong>{form.lateInterestPercent}% ao mês</strong>.
                   </p>
                 )}
               </div>
@@ -506,16 +696,16 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               {/* CLAUSULA 3 */}
               <div className="clausula-bloco">
                 <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
-                  CLAUSULA TERCEIRA - DAS DESMARCACOES E FALTAS
+                  CLÁUSULA TERCEIRA - DAS DESMARCAÇÕES E FALTAS
                 </p>
                 <p>
-                  Desmarcacoes ou reagendamentos devem ser comunicados com no minimo{" "}
+                  Desmarcações ou reagendamentos devem ser comunicados com no mínimo{" "}
                   <strong>{form.cancellationHours} ({
                     form.cancellationHours === 24 ? "vinte e quatro" :
                     form.cancellationHours === 48 ? "quarenta e oito" :
                     String(form.cancellationHours)
-                  }) horas</strong> de antecedencia. Faltas sem aviso previo no prazo
-                  estabelecido serao cobradas integralmente, salvo situacoes de forca maior
+                  }) horas</strong> de antecedência. Faltas sem aviso prévio no prazo
+                  estabelecido serão cobradas integralmente, salvo situações de força maior
                   devidamente comunicadas.
                 </p>
               </div>
@@ -523,13 +713,13 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               {/* CLAUSULA 4 */}
               <div className="clausula-bloco">
                 <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
-                  CLAUSULA QUARTA - DO SIGILO PROFISSIONAL
+                  CLÁUSULA QUARTA - DO SIGILO PROFISSIONAL
                 </p>
                 <p>
-                  Todo o conteudo das sessoes esta resguardado pelo sigilo etico profissional,
-                  em conformidade com o codigo de etica da categoria, nao podendo ser revelado
-                  a terceiros salvo nas excecoes previstas em lei. As informacoes pessoais e
-                  de saude serao tratadas em conformidade com a Lei Geral de Protecao de Dados
+                  Todo o conteúdo das sessões está resguardado pelo sigilo ético profissional,
+                  em conformidade com o código de ética da categoria, não podendo ser revelado
+                  a terceiros salvo nas exceções previstas em lei. As informações pessoais e
+                  de saúde serão tratadas em conformidade com a Lei Geral de Proteção de Dados
                   (LGPD - Lei 13.709/2018).
                 </p>
               </div>
@@ -537,18 +727,18 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               {/* CLAUSULA 5 */}
               <div className="clausula-bloco">
                 <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
-                  CLAUSULA QUINTA - DA VIGENCIA E RESCISAO
+                  CLÁUSULA QUINTA - DA VIGÊNCIA E RESCISÃO
                 </p>
                 <p>
-                  O presente contrato vigorara por prazo indeterminado, podendo ser rescindido
-                  por qualquer das partes mediante aviso previo de{" "}
+                  O presente contrato vigorará por prazo indeterminado, podendo ser rescindido
+                  por qualquer das partes mediante aviso prévio de{" "}
                   <strong>{form.rescissionNoticeDays} ({
                     form.rescissionNoticeDays === 30 ? "trinta" :
                     form.rescissionNoticeDays === 15 ? "quinze" :
                     form.rescissionNoticeDays === 60 ? "sessenta" :
                     String(form.rescissionNoticeDays)
-                  }) dias</strong>, por escrito. A rescisao sem aviso previo implica
-                  o pagamento das sessoes correspondentes ao periodo de aviso.
+                  }) dias</strong>, por escrito. A rescisão sem aviso prévio implica
+                  o pagamento das sessões correspondentes ao período de aviso.
                 </p>
               </div>
 
@@ -556,7 +746,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               {form.customClauses && form.customClauses.trim() && (
                 <div className="clausula-bloco">
                   <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
-                    CLAUSULA SEXTA - DISPOSICOES GERAIS
+                    CLÁUSULA SEXTA - DISPOSIÇÕES GERAIS
                   </p>
                   <p>{form.customClauses}</p>
                 </div>
@@ -566,8 +756,8 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               <div className="clausula-bloco">
                 <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
                   {form.customClauses && form.customClauses.trim()
-                    ? "CLAUSULA SETIMA"
-                    : "CLAUSULA SEXTA"} - DO FORO
+                    ? "CLÁUSULA SÉTIMA"
+                    : "CLÁUSULA SEXTA"} - DO FORO
                 </p>
                 <p>
                   As partes elegem o foro da comarca de{" "}
@@ -576,7 +766,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                   ) : (
                     <span className="underline decoration-dotted">______________________________</span>
                   )}{" "}
-                  para dirimir quaisquer controversias oriundas do presente contrato,
+                  para dirimir quaisquer controvérsias oriundas do presente contrato,
                   com renúncia expressa a qualquer outro, por mais privilegiado que seja.
                 </p>
               </div>
@@ -584,7 +774,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               {/* Encerramento */}
               <p className="mt-4">
                 E, por estarem justos e contratados, firmam o presente instrumento em duas
-                vias de igual teor e forma.
+                vias de igual teor e forma, para que produza seus jurídicos e legais efeitos.
               </p>
 
               {/* Local e data */}
@@ -621,13 +811,13 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-16 text-center mt-10">
                     <div>
                       <div className="linha-assinatura border-t border-[#555] pt-2 mt-12">
-                        <p className="font-bold text-sm">1a Testemunha</p>
+                        <p className="font-bold text-sm">1ª Testemunha</p>
                         <p className="text-xs text-[#555]">CPF: ___________________</p>
                       </div>
                     </div>
                     <div>
                       <div className="linha-assinatura border-t border-[#555] pt-2 mt-12">
-                        <p className="font-bold text-sm">2a Testemunha</p>
+                        <p className="font-bold text-sm">2ª Testemunha</p>
                         <p className="text-xs text-[#555]">CPF: ___________________</p>
                       </div>
                     </div>
@@ -638,7 +828,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               {/* RODAPE DO DOCUMENTO */}
               <div className="rodape-documento mt-8 pt-4 border-t border-[#ccc] text-center">
                 <p className="text-[11px] text-[#888]">
-                  Documento gerado eletronicamente em {formatDateTime(new Date())} via plataforma clinica.
+                  Documento gerado eletronicamente em {formatDateTime(new Date())} via plataforma clínica.
                 </p>
               </div>
 

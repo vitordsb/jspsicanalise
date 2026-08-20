@@ -54,91 +54,141 @@
   background: #beb3aa;
 }
 
+/* Marca d'agua do contrato - invisivel na tela, visivel apenas no impresso */
+.contract-watermark {
+  display: none;
+}
+
 /* Print styles - Documento juridico A4 formal */
 @media print {
-  /* Corpo da pagina */
-  body {
-    background: white !important;
-    color: #000 !important;
-    font-family: "Lora", Georgia, "Times New Roman", serif !important;
-    font-size: 11pt !important;
-    line-height: 1.5 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* Esconde toda a UI que nao e o documento */
-  .no-print,
-  header,
-  nav,
-  aside,
-  footer,
-  button,
-  [role="dialog"] > *:not(.contract-print-document) {
-    display: none !important;
-  }
-
-  /* Elementos vistos apenas em impressao */
-  .print-only {
-    display: block !important;
-  }
-
-  /* Pagina A4 com margens de documento formal brasileiro:
-     ABNT: 3cm esquerda, 2cm direita, 2,5cm superior e inferior */
+  /* Pagina A4 com margens ABNT:
+     3cm esquerda, 2cm direita, 2,5cm superior e inferior */
   @page {
     size: A4 portrait;
-    margin: 25mm 20mm 25mm 30mm;
+    margin: 20mm 20mm 20mm 25mm;
   }
 
-  /* Numeracao de paginas no rodape */
-  @page {
-    @bottom-center {
-      content: "Pagina " counter(page) " de " counter(pages);
-      font-family: "Lora", Georgia, serif;
-      font-size: 9pt;
-      color: #444;
-    }
-  }
-
-  /* O documento em si - sem fundo, sem borda, sem sombra */
-  .contract-print-document {
+  /* Marca d'agua: position:fixed repete o elemento em cada pagina no print.
+     print-color-adjust:exact obriga o navegador a imprimir a imagem (sem isso ela some).
+     Opacidade baixa (8%) para nao atrapalhar a leitura do texto juridico. */
+  .contract-watermark {
     display: block !important;
-    position: static !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    visibility: visible !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 55% !important;
+    max-width: 14cm !important;
+    height: auto !important;
+    opacity: 0.08 !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    z-index: 0 !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  /* Reset de html e body: sem overflow nem altura fixa */
+  html, body {
+    overflow: visible !important;
+    height: auto !important;
+    background: white !important;
     margin: 0 !important;
     padding: 0 !important;
+  }
+
+  /* Overlay do modal (position:fixed) volta para estatico no print
+     para nao bloquear paginacao e nao criar containing block errado */
+  .contract-modal-overlay {
+    position: static !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Card do modal: remove max-height e overflow:hidden que cortam o documento */
+  .contract-modal-card {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+
+  /* Corpo do modal: remove o scroll que impede o conteudo abaixo do dobro */
+  .contract-modal-body {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    flex: none !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  /* TECNICA DE ISOLAMENTO: visibility:hidden oculta tudo sem remover do fluxo.
+     Entao visibility:visible no documento o exibe sobre o fundo em branco.
+     Isso evita que qualquer UI (botoes, header, sidebar) apareca no impresso. */
+  body * {
+    visibility: hidden;
+  }
+
+  .contract-print-document,
+  .contract-print-document * {
+    visibility: visible !important;
+  }
+
+  /* Documento posicionado no canto superior esquerdo da pagina */
+  .contract-print-document {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
     background: white !important;
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
-    overflow: visible !important;
   }
 
-  /* Tipografia do documento */
+  /* Remove backgrounds coloridos e bordas arredondadas de TUDO no documento */
+  .contract-print-document * {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    text-shadow: none !important;
+    color: #000 !important;
+  }
+
+  /* Tipografia: serif, 11pt, justificado, com controle de orfaos/viuvas */
   .contract-print-document p,
   .contract-print-document li {
     font-family: "Lora", Georgia, "Times New Roman", serif !important;
     font-size: 11pt !important;
-    line-height: 1.6 !important;
+    line-height: 1.65 !important;
     text-align: justify !important;
     hyphens: auto !important;
     -webkit-hyphens: auto !important;
     color: #000 !important;
     orphans: 3;
     widows: 3;
-  }
-
-  /* Titulos de clausulas */
-  .contract-print-document .clausula-titulo {
-    font-family: "Lora", Georgia, "Times New Roman", serif !important;
-    font-size: 11pt !important;
-    font-weight: bold !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.03em !important;
-    color: #000 !important;
-    margin-top: 1.4em !important;
-    margin-bottom: 0.3em !important;
+    margin-bottom: 0.5em !important;
   }
 
   /* Cabecalho do contrato */
@@ -148,9 +198,10 @@
     font-weight: bold !important;
     text-align: center !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.06em !important;
     color: #000 !important;
-    margin-bottom: 0.5em !important;
+    margin-bottom: 0.4em !important;
+    display: block !important;
   }
 
   .contract-print-document .contrato-subtitulo {
@@ -158,76 +209,97 @@
     font-size: 10pt !important;
     text-align: center !important;
     color: #333 !important;
-    margin-bottom: 1.5em !important;
+    margin-bottom: 0.8em !important;
+    display: block !important;
   }
 
-  /* Blocos de identificacao - sem fundo colorido */
+  /* Linha separadora no cabecalho: preta, nao colorida */
+  .contract-print-document > div:first-child {
+    border-bottom: 1.5px solid #000 !important;
+    padding-bottom: 0.8em !important;
+    margin-bottom: 1.2em !important;
+  }
+
+  /* Titulos de clausulas: negrito, uppercase, espaco antes */
+  .contract-print-document .clausula-titulo {
+    font-family: "Lora", Georgia, "Times New Roman", serif !important;
+    font-size: 11pt !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.03em !important;
+    color: #000 !important;
+    margin-top: 1.4em !important;
+    margin-bottom: 0.3em !important;
+    display: block !important;
+  }
+
+  /* Blocos de identificacao das partes: borda esquerda preta */
   .contract-print-document .bloco-parte {
-    background: none !important;
-    border: none !important;
     border-left: 2px solid #000 !important;
     padding: 0.4em 0 0.4em 0.8em !important;
     margin: 0.6em 0 !important;
-    border-radius: 0 !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
   .contract-print-document .bloco-parte p {
-    margin: 0.1em 0 !important;
+    margin: 0.15em 0 !important;
     font-size: 10.5pt !important;
+    text-align: left !important;
   }
 
   /* Separador de secoes */
   .contract-print-document .separador {
-    border: none !important;
     border-top: 1px solid #000 !important;
-    margin: 1.2em 0 !important;
+    margin: 1em 0 !important;
   }
 
-  /* Bloco de assinaturas - nunca quebra no meio */
+  /* Clausulas: nunca cortadas no meio de uma pagina */
+  .contract-print-document .clausula-bloco {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin-bottom: 0.5em !important;
+  }
+
+  /* Bloco de assinaturas: nunca quebra, sempre na mesma pagina */
   .contract-print-document .bloco-assinaturas {
     break-inside: avoid !important;
     page-break-inside: avoid !important;
-    margin-top: 3em !important;
+    break-before: auto !important;
+    margin-top: 2.5em !important;
+  }
+
+  /* Grade de assinaturas: forcada em 2 colunas independente do breakpoint */
+  .contract-print-document .bloco-assinaturas [class*="grid"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 3cm !important;
   }
 
   .contract-print-document .linha-assinatura {
     border-top: 1px solid #000 !important;
     margin-top: 2.5em !important;
     padding-top: 0.3em !important;
+    text-align: center !important;
   }
 
   .contract-print-document .linha-assinatura p {
     text-align: center !important;
     font-size: 10pt !important;
-    margin: 0 !important;
+    margin: 0.1em 0 !important;
   }
 
   /* Rodape do documento */
   .contract-print-document .rodape-documento {
     margin-top: 2em !important;
-    padding-top: 0.8em !important;
+    padding-top: 0.6em !important;
     border-top: 1px solid #888 !important;
-    font-size: 8.5pt !important;
-    color: #444 !important;
+    font-size: 8pt !important;
+    color: #555 !important;
     text-align: center !important;
   }
 
-  /* Clausulas - sem quebra no meio */
-  .contract-print-document .clausula-bloco {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    margin-bottom: 0.8em !important;
-  }
-
-  /* Remove cores de fundo e bordas arredondadas do resto da pagina */
-  * {
-    background-color: transparent !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    text-shadow: none !important;
-  }
-
-  /* Excecao: as bordas do bloco-parte precisam aparecer */
+  /* Garantias de borda que precisam sobreviver ao reset global */
   .contract-print-document .bloco-parte {
     border-left: 2px solid #000 !important;
   }
@@ -239,5 +311,6 @@
   }
   .contract-print-document .rodape-documento {
     border-top: 1px solid #888 !important;
+    color: #555 !important;
   }
 }

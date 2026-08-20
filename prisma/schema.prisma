@@ -21,6 +21,15 @@ model User {
   notificationEmail String   @default("enaoj22@gmail.com")
   clinicName        String   @default("")
   address           String   @default("")
+  // --- Dados de pagamento (editaveis pelo painel; nascem vazios) ---
+  // pixKeyType: "" | "cpf" | "cnpj" | "email" | "telefone" | "aleatoria"
+  pixKey            String   @default("")
+  pixKeyType        String   @default("")
+  // pixHolderName: nome do titular da conta PIX (pode diferir do name profissional)
+  pixHolderName     String   @default("")
+  bankName          String   @default("")
+  bankAgency        String   @default("")
+  bankAccount       String   @default("")
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
@@ -139,6 +148,15 @@ model Contract {
 
   // --- Foro ---
   foroCidade String @default("")
+
+  // --- PIX snapshot (copiado do perfil no momento da emissao do contrato) ---
+  // Documento juridico: o snapshot preserva os dados vigentes na assinatura.
+  paymentPixKey        String @default("")
+  paymentPixKeyType    String @default("")
+  paymentBankName      String @default("")
+  paymentBankAgency    String @default("")
+  paymentBankAccount   String @default("")
+  paymentPixHolderName String @default("")
 
   // --- Testemunhas (opcionais) ---
   hasWitnesses Boolean @default(false)

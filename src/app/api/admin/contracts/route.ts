@@ -137,6 +137,15 @@ export async function POST(req: NextRequest) {
         lateInterestPercent:  parsed.lateInterestPercent  ?? 0,
         paymentMethod:        parsed.paymentMethod        ?? "PIX",
 
+        // PIX snapshot - copiado do perfil no momento da emissao
+        // Documento juridico: preserva os dados vigentes na assinatura.
+        paymentPixKey:        admin?.pixKey        ?? "",
+        paymentPixKeyType:    admin?.pixKeyType    ?? "",
+        paymentBankName:      admin?.bankName      ?? "",
+        paymentBankAgency:    admin?.bankAgency    ?? "",
+        paymentBankAccount:   admin?.bankAccount   ?? "",
+        paymentPixHolderName: admin?.pixHolderName ?? "",
+
         // Vigencia
         rescissionNoticeDays: parsed.rescissionNoticeDays ?? 30,
 

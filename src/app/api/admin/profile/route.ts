@@ -77,6 +77,13 @@ export async function PUT(req: NextRequest) {
             parsed.notificationEmail || "enaoj22@gmail.com",
           clinicName: parsed.clinicName || "",
           address: parsed.address || "",
+          // Campos de pagamento PIX nascem vazios
+          pixKey:        parsed.pixKey        || "",
+          pixKeyType:    parsed.pixKeyType    || "",
+          pixHolderName: parsed.pixHolderName || "",
+          bankName:      parsed.bankName      || "",
+          bankAgency:    parsed.bankAgency    || "",
+          bankAccount:   parsed.bankAccount   || "",
         },
       });
     } else {
@@ -96,6 +103,13 @@ export async function PUT(req: NextRequest) {
             clinicName: parsed.clinicName,
           }),
           ...(parsed.address !== undefined && { address: parsed.address }),
+          // Campos de pagamento PIX
+          ...(parsed.pixKey !== undefined && { pixKey: parsed.pixKey }),
+          ...(parsed.pixKeyType !== undefined && { pixKeyType: parsed.pixKeyType }),
+          ...(parsed.pixHolderName !== undefined && { pixHolderName: parsed.pixHolderName }),
+          ...(parsed.bankName !== undefined && { bankName: parsed.bankName }),
+          ...(parsed.bankAgency !== undefined && { bankAgency: parsed.bankAgency }),
+          ...(parsed.bankAccount !== undefined && { bankAccount: parsed.bankAccount }),
         },
       });
     }

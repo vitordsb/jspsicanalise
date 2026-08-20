@@ -257,6 +257,19 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
         <ContractStatusBadge status={contract.status} />
       </div>
 
+      {/* Abre a pagina dedicada de impressao. Rota propria, sem modal nem
+          layout do painel, porque ancestral com overflow ou altura fixa
+          quebra a paginacao do navegador. */}
+      <a
+        href={`/admin/contratos/${contract.id}/imprimir`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-semibold transition self-start"
+      >
+        <Printer className="w-4 h-4" />
+        <span>Abrir contrato para impressão</span>
+      </a>
+
       {/* Dados do contrato */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
         <div className="bg-[#fbf3ef] rounded-2xl p-3 border border-[#f0ded8]">

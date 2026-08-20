@@ -5,10 +5,10 @@
  */
 
 import { z } from "zod";
-import { normalizeCpf, isValidCpf } from "./cpf";
+import { normalizeCpf, isValidCpf, normalizeCnpj, isValidCnpj } from "./cpf";
 
 // Re-exporta para conveniencia de importacoes externas
-export { normalizeCpf, isValidCpf } from "./cpf";
+export { normalizeCpf, isValidCpf, normalizeCnpj, isValidCnpj } from "./cpf";
 
 // --- Schemas ---
 
@@ -145,17 +145,78 @@ export const createContractSchema = z.object({
   customClauses: z.string().max(10_000).optional().nullable(),
 });
 
-export const updateProfileSchema = z.object({
-  name:              z.string().min(2).max(200).optional(),
-  email:             z.string().email().max(254).optional(),
-  title:             z.string().max(200).optional(),
-  crp:               z.string().max(100).optional(),
-  cpfCnpj:           z.string().max(18).optional(),
-  phone:             z.string().max(30).optional(),
-  notificationEmail: z.string().email().max(254).optional(),
-  clinicName:        z.string().max(300).optional(),
-  address:           z.string().max(500).optional(),
-});
+// Regex permissivo para agencia e conta bancaria:
+// aceita digitos, letras, espacos, hifen, barra e ponto.
+// Bancos variam demais para uma regra rigida.
+const bankFieldRegex = /^[\w\s\-/.]*$/;
+
+export const updateProfileSchema = z
+  .object({
+    name:              z.string().min(2).max(200).optional(),
+    email:             z.string().email().max(254).optional(),
+    title:             z.string().max(200).optional(),
+    crp:               z.string().max(100).optional(),
+    cpfCnpj:           z.string().max(18).optional(),
+    phone:             z.string().max(30).optional(),
+    notificationEmail: z.string().email().max(254).optional(),
+    clinicName:        z.string().max(300).optional(),
+    address:           z.string().max(500).optional(),
+    // Campos de pagamento PIX (todos opcionais; campo vazio e sempre valido)
+    pixKey:        z.string().max(200).optional(),
+    // pixKeyType aceita string vazia (estado "nao configurado")
+    pixKeyType:    z
+      .enum(["", "cpf", "cnpj", "email", "telefone", "aleatoria"])
+      .optional(),
+    pixHolderName: z.string().max(200).optional(),
+    bankName:      z.string().max(200).optional(),
+    bankAgency:    z
+      .string()
+      .max(20, "Agencia: maximo 20 caracteres.")
+      .regex(bankFieldRegex, "Agencia: caracteres invalidos.")
+      .optional(),
+    bankAccount:   z
+      .string()
+      .max(30, "Conta: maximo 30 caracteres.")
+      .regex(bankFieldRegex, "Conta: caracteres invalidos.")
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    const keyType = data.pixKeyType ?? "";
+    const key = data.pixKey?.trim() ?? "";
+
+    // Campo vazio sempre passa - e estado legitimo
+    if (!keyType || !key) return;
+
+    if (keyType === "cpf") {
+      const normalized = normalizeCpf(key);
+      if (!isValidCpf(normalized)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Chave PIX (CPF) invalida.",
+          path: ["pixKey"],
+        });
+      }
+    } else if (keyType === "cnpj") {
+      const normalized = normalizeCnpj(key);
+      if (!isValidCnpj(normalized)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Chave PIX (CNPJ) invalida.",
+          path: ["pixKey"],
+        });
+      }
+    } else if (keyType === "email") {
+      const emailResult = z.string().email().safeParse(key);
+      if (!emailResult.success) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Chave PIX (e-mail) invalida.",
+          path: ["pixKey"],
+        });
+      }
+    }
+    // "telefone" e "aleatoria": sem validacao especifica de formato
+  });
 
 export const createTemplateSchema = z.object({
   title: z.string().min(1, "Titulo e obrigatorio.").max(300),
