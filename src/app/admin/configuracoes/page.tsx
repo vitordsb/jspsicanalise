@@ -10,6 +10,7 @@ import {
   Mail,
   CheckCircle2,
   AlertTriangle,
+  Wallet,
 } from "lucide-react";
 
 export default function AdminConfiguracoesPage() {
@@ -27,6 +28,15 @@ export default function AdminConfiguracoesPage() {
     notificationEmail: "",
     clinicName: "",
     address: "",
+    // Dados de pagamento. Ficam vazios ate a Joane preencher: sao copiados
+    // para o contrato no momento da emissao, entao contrato ja assinado nao
+    // muda se ela trocar de conta depois.
+    pixKey: "",
+    pixKeyType: "",
+    pixHolderName: "",
+    bankName: "",
+    bankAgency: "",
+    bankAccount: "",
   });
 
   const crpPendente = !profile.crp || profile.crp.trim() === "";
@@ -258,6 +268,110 @@ export default function AdminConfiguracoesPage() {
                 onChange={(e) => setProfile({ ...profile, notificationEmail: e.target.value })}
                 className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
               />
+            </div>
+          </div>
+
+          {/* DADOS DE PAGAMENTO
+              Nenhum campo e obrigatorio. O que ficar em branco simplesmente
+              nao aparece no contrato, em vez de virar linha pontilhada. */}
+          <div className="border-t border-[#f3e4e0] pt-6 space-y-4">
+            <h3 className="font-serif text-xl font-bold text-[#5d0c1d] flex items-center gap-2">
+              <Wallet className="w-5 h-5 text-[#5d0c1d]" />
+              <span>Dados de Pagamento</span>
+            </h3>
+            <p className="text-xs text-[#6f5f62]">
+              Aparecem na cláusula de honorários do contrato. São copiados para o contrato
+              no momento da emissão, então um contrato já assinado continua mostrando a conta
+              que valia naquela data. Deixe em branco o que não quiser incluir.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label htmlFor="cfg-pix-tipo" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+                  Tipo da Chave PIX
+                </label>
+                <select
+                  id="cfg-pix-tipo"
+                  value={profile.pixKeyType}
+                  onChange={(e) => setProfile({ ...profile, pixKeyType: e.target.value })}
+                  className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
+                >
+                  <option value="">Não informado</option>
+                  <option value="cpf">CPF</option>
+                  <option value="cnpj">CNPJ</option>
+                  <option value="email">E-mail</option>
+                  <option value="telefone">Telefone</option>
+                  <option value="aleatoria">Chave aleatória</option>
+                </select>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label htmlFor="cfg-pix-chave" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+                  Chave PIX
+                </label>
+                <input
+                  id="cfg-pix-chave"
+                  type="text"
+                  value={profile.pixKey}
+                  onChange={(e) => setProfile({ ...profile, pixKey: e.target.value })}
+                  className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
+                />
+              </div>
+
+              <div className="sm:col-span-3">
+                <label htmlFor="cfg-pix-titular" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+                  Titular da Conta
+                </label>
+                <input
+                  id="cfg-pix-titular"
+                  type="text"
+                  value={profile.pixHolderName}
+                  onChange={(e) => setProfile({ ...profile, pixHolderName: e.target.value })}
+                  className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
+                />
+                <p className="text-[11px] text-[#9c8b8e] mt-1.5">
+                  Preencha se o nome cadastrado no banco for diferente do nome profissional.
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="cfg-banco" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+                  Banco
+                </label>
+                <input
+                  id="cfg-banco"
+                  type="text"
+                  value={profile.bankName}
+                  onChange={(e) => setProfile({ ...profile, bankName: e.target.value })}
+                  className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="cfg-agencia" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+                  Agência
+                </label>
+                <input
+                  id="cfg-agencia"
+                  type="text"
+                  value={profile.bankAgency}
+                  onChange={(e) => setProfile({ ...profile, bankAgency: e.target.value })}
+                  className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="cfg-conta" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+                  Conta
+                </label>
+                <input
+                  id="cfg-conta"
+                  type="text"
+                  value={profile.bankAccount}
+                  onChange={(e) => setProfile({ ...profile, bankAccount: e.target.value })}
+                  className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
+                />
+              </div>
             </div>
           </div>
 
