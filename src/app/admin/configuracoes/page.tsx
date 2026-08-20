@@ -29,6 +29,7 @@ export default function AdminConfiguracoesPage() {
     notificationEmail: "",
     clinicName: "",
     address: "",
+    foroCidade: "",
     // Dados de pagamento. Ficam vazios ate a Joane preencher: sao copiados
     // para o contrato no momento da emissao, entao contrato ja assinado nao
     // muda se ela trocar de conta depois.
@@ -245,6 +246,23 @@ export default function AdminConfiguracoesPage() {
                 className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
               />
             </div>
+          </div>
+
+          <div className="max-w-md">
+            <label htmlFor="cfg-foro" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+              Comarca do Foro
+            </label>
+            <input
+              id="cfg-foro"
+              type="text"
+              value={profile.foroCidade}
+              onChange={(e) => setProfile({ ...profile, foroCidade: e.target.value })}
+              className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
+            />
+            <p className="text-[11px] text-[#9c8b8e] mt-1.5">
+              Comarca usada na cláusula de foro dos contratos. É a sua comarca, não a
+              do paciente. Se ficar em branco, a cláusula de foro não entra no contrato.
+            </p>
           </div>
 
           <div className="border-t border-[#f3e4e0] pt-6 space-y-4">

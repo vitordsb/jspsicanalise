@@ -30,6 +30,9 @@ model User {
   bankName          String   @default("")
   bankAgency        String   @default("")
   bankAccount       String   @default("")
+  // Comarca do foro dos contratos. E a comarca da profissional, nao a do
+  // paciente: quem presta o servico define o foro de eleicao.
+  foroCidade        String   @default("Cotia")
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }

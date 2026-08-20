@@ -99,6 +99,7 @@ export async function PUT(req: NextRequest) {
           ...(parsed.notificationEmail !== undefined && {
             notificationEmail: parsed.notificationEmail,
           }),
+          ...(parsed.foroCidade !== undefined && { foroCidade: parsed.foroCidade }),
           ...(parsed.clinicName !== undefined && {
             clinicName: parsed.clinicName,
           }),

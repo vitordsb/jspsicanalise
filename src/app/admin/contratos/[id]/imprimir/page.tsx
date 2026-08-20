@@ -10,6 +10,7 @@
 import React, { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { formatCurrency, formatCPF, formatDate, formatDateTime } from "@/lib/formatters";
+import { sessoesPorMes } from "@/lib/money";
 import { ESTILOS_IMPRESSAO } from "./estilos";
 import { TelaCarregando } from "@/components/ui/Carregando";
 
@@ -56,6 +57,7 @@ interface ContratoImpressao {
 /** Número por extenso para os valores que aparecem no contrato. */
 const EXTENSO: Record<number, string> = {
   1: "uma", 2: "duas", 3: "três", 4: "quatro", 5: "cinco", 6: "seis",
+  7: "sete", 8: "oito", 9: "nove", 10: "dez", 11: "onze",
   12: "doze", 15: "quinze", 24: "vinte e quatro", 30: "trinta", 45: "quarenta e cinco",
   48: "quarenta e oito", 50: "cinquenta", 60: "sessenta", 90: "noventa",
 };
@@ -137,6 +139,14 @@ export default function ImprimirContratoPage({
   const cpfPaciente = c.patientCpf || c.patient?.cpf || "";
   const valorSessao = formatCurrency(c.sessionPriceCents / 100);
   const dataHoje = formatDate(new Date());
+
+  // Total mensal derivado da periodicidade. Quando nao da para afirmar quantas
+  // sessoes o mes tem, nao imprime numero nenhum em vez de chutar.
+  const sessoesMes = sessoesPorMes(c.frequency);
+  const totalMensal =
+    sessoesMes !== null && c.sessionPriceCents > 0
+      ? formatCurrency((c.sessionPriceCents * sessoesMes) / 100)
+      : null;
 
   // Campos que a Joane ainda nao preencheu no painel. Aparecem como aviso na
   // tela, nunca dentro do documento que vai para o paciente.
@@ -282,6 +292,20 @@ export default function ImprimirContratoPage({
             <strong>{c.paymentMethod}</strong>, com vencimento até o dia{" "}
             <strong>{c.paymentDueDay}</strong> de cada mês.
           </p>
+          {/* Total mensal apresentado como estimativa, e nao como valor fixo:
+              na periodicidade semanal o mes pode ter quatro ou cinco sessoes.
+              Afirmar um valor fechado abriria margem para disputa sobre o mes
+              em que o numero de encontros nao bate. */}
+          {sessoesMes !== null && totalMensal && (
+            <p>
+              Considerando a periodicidade contratada, estima-se{" "}
+              <strong>{porExtenso(sessoesMes)} sessões</strong> por mês, o que
+              corresponde a aproximadamente <strong>{totalMensal}</strong> mensais.
+              O valor efetivamente devido em cada mês será apurado pelo número de
+              sessões realizadas, observado o disposto na cláusula terceira quanto
+              a faltas sem aviso prévio.
+            </p>
+          )}
           {temPagamento && (
             <p>
               Os pagamentos serão realizados por meio dos seguintes dados:{" "}

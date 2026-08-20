@@ -51,19 +51,26 @@ export async function GET(
     const semDadosDePagamento =
       !contract.paymentPixKey?.trim() && !contract.paymentBankName?.trim();
 
-    if (aindaNaoAssinado && semDadosDePagamento) {
+    // O foro de eleicao acompanha a profissional, nao o domicilio do paciente.
+    // Enquanto o contrato nao foi assinado ele reflete a comarca configurada.
+    const semForo = !contract.foroCidade?.trim();
+
+    if (aindaNaoAssinado && (semDadosDePagamento || semForo)) {
       const perfil = await prisma.user.findFirst();
       if (perfil) {
         return NextResponse.json({
           ...contract,
-          paymentPixKey: perfil.pixKey ?? "",
-          paymentPixKeyType: perfil.pixKeyType ?? "",
-          paymentPixHolderName: perfil.pixHolderName ?? "",
-          paymentBankName: perfil.bankName ?? "",
-          paymentBankAgency: perfil.bankAgency ?? "",
-          paymentBankAccount: perfil.bankAccount ?? "",
-          // Sinaliza para a UI que veio das Configuracoes, nao do snapshot.
-          pagamentoVindoDoPerfil: true,
+          ...(semDadosDePagamento && {
+            paymentPixKey: perfil.pixKey ?? "",
+            paymentPixKeyType: perfil.pixKeyType ?? "",
+            paymentPixHolderName: perfil.pixHolderName ?? "",
+            paymentBankName: perfil.bankName ?? "",
+            paymentBankAgency: perfil.bankAgency ?? "",
+            paymentBankAccount: perfil.bankAccount ?? "",
+            // Sinaliza para a UI que veio das Configuracoes, nao do snapshot.
+            pagamentoVindoDoPerfil: true,
+          }),
+          ...(semForo && { foroCidade: perfil.foroCidade ?? "" }),
         });
       }
     }

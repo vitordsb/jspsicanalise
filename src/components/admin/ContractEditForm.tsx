@@ -13,6 +13,7 @@
 import React, { useState } from "react";
 import { Save, X } from "lucide-react";
 import { BotaoConteudo } from "@/components/ui/Carregando";
+import { PERIODICIDADES, sessoesPorMes } from "@/lib/money";
 
 interface Props {
   contract: Record<string, unknown>;
@@ -66,7 +67,6 @@ export function ContractEditForm({ contract, onCancel, onSaved }: Props) {
     // Prazos e foro
     cancellationHours: n(contract.cancellationHours, 24),
     rescissionNoticeDays: n(contract.rescissionNoticeDays, 30),
-    foroCidade: s(contract.foroCidade),
     hasWitnesses: contract.hasWitnesses === true,
     customClauses: s(contract.customClauses),
   });
@@ -107,6 +107,14 @@ export function ContractEditForm({ contract, onCancel, onSaved }: Props) {
       setSalvando(false);
     }
   };
+
+  // Previa do total mensal, para a Joane conferir antes de imprimir.
+  const sessoesMes = sessoesPorMes(f.frequency);
+  const centavos = textoParaCentavos(f.valorSessao);
+  const previaMensal =
+    sessoesMes !== null && centavos
+      ? `${sessoesMes} sessões por mês, aproximadamente ${((centavos * sessoesMes) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} mensais.`
+      : null;
 
   const campo =
     "w-full h-10 px-3.5 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none";
@@ -175,8 +183,15 @@ export function ContractEditForm({ contract, onCancel, onSaved }: Props) {
           </div>
           <div>
             <label className={rotulo} htmlFor="ed-freq">Periodicidade</label>
-            <input id="ed-freq" className={campo} value={f.frequency}
-              onChange={(e) => set("frequency", e.target.value)} />
+            <select id="ed-freq" className={campo} value={f.frequency}
+              onChange={(e) => set("frequency", e.target.value)}>
+              {!PERIODICIDADES.some((p) => p.valor === f.frequency) && (
+                <option value={f.frequency}>{f.frequency || "Não definida"}</option>
+              )}
+              {PERIODICIDADES.map((p) => (
+                <option key={p.valor} value={p.valor}>{p.valor}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className={rotulo} htmlFor="ed-dur">Duração da sessão (minutos)</label>
@@ -201,6 +216,9 @@ export function ContractEditForm({ contract, onCancel, onSaved }: Props) {
             <input id="ed-valor" inputMode="decimal" placeholder="200,00" className={campo}
               value={f.valorSessao}
               onChange={(e) => set("valorSessao", e.target.value)} />
+            {previaMensal && (
+              <p className="text-[11px] text-[#6f5f62] mt-1.5">{previaMensal}</p>
+            )}
           </div>
           <div>
             <label className={rotulo} htmlFor="ed-venc">Dia do vencimento</label>
@@ -243,11 +261,9 @@ export function ContractEditForm({ contract, onCancel, onSaved }: Props) {
               value={f.rescissionNoticeDays}
               onChange={(e) => set("rescissionNoticeDays", Number(e.target.value))} />
           </div>
-          <div className="sm:col-span-2">
-            <label className={rotulo} htmlFor="ed-foro">Comarca do foro</label>
-            <input id="ed-foro" className={campo} value={f.foroCidade}
-              placeholder="Sem preenchimento, a cláusula de foro não entra no contrato"
-              onChange={(e) => set("foroCidade", e.target.value)} />
+          <div className="sm:col-span-2 text-[11px] text-[#9c8b8e] bg-[#fbf3ef] border border-[#f0ded8] rounded-2xl p-3">
+            A comarca do foro vem das Configurações e é a mesma para todos os
+            contratos, por ser a comarca da profissional e não a do paciente.
           </div>
           <div className="sm:col-span-2 flex items-center gap-2">
             <input id="ed-test" type="checkbox" checked={f.hasWitnesses}

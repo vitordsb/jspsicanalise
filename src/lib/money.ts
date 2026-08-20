@@ -58,3 +58,49 @@ export function parseCents(input: unknown): number | null {
 export function isValidCents(cents: number): boolean {
   return Number.isInteger(cents) && cents > 0 && cents <= 9_999_999;
 }
+
+/**
+ * Periodicidades oferecidas no contrato e quantas sessoes cada uma representa
+ * por mes. A convencao comercial e de 4 semanas por mes, por isso o total
+ * mensal e sempre apresentado como estimativa: mes com 5 semanas rende uma
+ * sessao a mais, e o contrato precisa dizer isso para nao virar disputa.
+ */
+export const PERIODICIDADES = [
+  { valor: "Semanal (1 sessão por semana)",      sessoesPorMes: 4 },
+  { valor: "Duas vezes por semana",              sessoesPorMes: 8 },
+  { valor: "Três vezes por semana",              sessoesPorMes: 12 },
+  { valor: "Quinzenal (2 sessões por mês)",      sessoesPorMes: 2 },
+  { valor: "Mensal (1 sessão por mês)",          sessoesPorMes: 1 },
+] as const;
+
+/**
+ * Descobre quantas sessoes por mes uma periodicidade representa.
+ *
+ * Aceita tanto os valores da lista acima quanto texto livre digitado antes de
+ * a periodicidade virar uma selecao, por isso o reconhecimento por palavra.
+ * Retorna null quando nao da para afirmar: nesse caso o contrato nao imprime
+ * total mensal, em vez de imprimir um numero inventado.
+ */
+export function sessoesPorMes(frequencia: string): number | null {
+  const f = (frequencia || "").toLowerCase().trim();
+  if (!f) return null;
+
+  const exata = PERIODICIDADES.find((p) => p.valor.toLowerCase() === f);
+  if (exata) return exata.sessoesPorMes;
+
+  // "3x por semana", "2 vezes por semana"
+  const porSemana = f.match(/(\d+)\s*(x|vezes?)\s*(por|na)?\s*semana/);
+  if (porSemana) return Number(porSemana[1]) * 4;
+
+  // "2x por mes", "3 vezes ao mes"
+  const porMes = f.match(/(\d+)\s*(x|vezes?)\s*(por|ao|no)?\s*m[eê]s/);
+  if (porMes) return Number(porMes[1]);
+
+  if (/duas\s+vezes.*semana/.test(f)) return 8;
+  if (/tr[eê]s\s+vezes.*semana/.test(f)) return 12;
+  if (/quinzenal/.test(f)) return 2;
+  if (/semanal/.test(f)) return 4;
+  if (/mensal/.test(f)) return 1;
+
+  return null;
+}
