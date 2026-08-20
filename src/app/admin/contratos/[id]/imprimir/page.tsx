@@ -7,7 +7,7 @@
  * o navegador pagine corretamente. Protegida pelo proxy.ts, que ja cobre /admin.
  */
 
-import { useEffect, useState, use } from "react";
+import React, { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { formatCurrency, formatCPF, formatDate, formatDateTime } from "@/lib/formatters";
 import { ESTILOS_IMPRESSAO } from "./estilos";
@@ -149,6 +149,38 @@ export default function ImprimirContratoPage({
   }
 
   const temPagamento = Boolean(c.paymentPixKey?.trim() || c.paymentBankName?.trim());
+
+  // Monta os trechos da frase de pagamento e junta com ponto e virgula.
+  // Assim nao sobra pontuacao solta quando a Joane preenche so o PIX, so a
+  // conta bancaria, ou deixa agencia e conta em branco.
+  const blocosDePagamento: React.ReactNode[] = [];
+  if (c.paymentPixKey?.trim()) {
+    const rotuloTipo =
+      c.paymentPixKeyType && ROTULO_CHAVE_PIX[c.paymentPixKeyType]
+        ? ` (${ROTULO_CHAVE_PIX[c.paymentPixKeyType]})`
+        : "";
+    blocosDePagamento.push(
+      <>
+        chave PIX{rotuloTipo} <strong>{c.paymentPixKey.trim()}</strong>
+        {c.paymentPixHolderName?.trim() && (
+          <>, em nome de <strong>{c.paymentPixHolderName.trim()}</strong></>
+        )}
+      </>
+    );
+  }
+  if (c.paymentBankName?.trim()) {
+    blocosDePagamento.push(
+      <>
+        banco <strong>{c.paymentBankName.trim()}</strong>
+        {c.paymentBankAgency?.trim() && (
+          <>, agência <strong>{c.paymentBankAgency.trim()}</strong></>
+        )}
+        {c.paymentBankAccount?.trim() && (
+          <>, conta <strong>{c.paymentBankAccount.trim()}</strong></>
+        )}
+      </>
+    );
+  }
   const temClausulasExtras = Boolean(c.customClauses?.trim());
   const numeroForo = temClausulasExtras ? "SÉTIMA" : "SEXTA";
 
@@ -252,25 +284,14 @@ export default function ImprimirContratoPage({
           </p>
           {temPagamento && (
             <p>
-              Dados para pagamento:{" "}
-              {c.paymentPixKey?.trim() && (
-                <>
-                  chave PIX{" "}
-                  {c.paymentPixKeyType && ROTULO_CHAVE_PIX[c.paymentPixKeyType]
-                    ? `(${ROTULO_CHAVE_PIX[c.paymentPixKeyType]}) `
-                    : ""}
-                  <strong>{c.paymentPixKey}</strong>
-                  {c.paymentPixHolderName?.trim() && <>, titular <strong>{c.paymentPixHolderName}</strong></>}
-                  {c.paymentBankName?.trim() ? "; " : "."}
-                </>
-              )}
-              {c.paymentBankName?.trim() && (
-                <>
-                  banco <strong>{c.paymentBankName}</strong>
-                  {c.paymentBankAgency?.trim() && <>, agência <strong>{c.paymentBankAgency}</strong></>}
-                  {c.paymentBankAccount?.trim() && <>, conta <strong>{c.paymentBankAccount}</strong></>}.
-                </>
-              )}
+              Os pagamentos serão realizados por meio dos seguintes dados:{" "}
+              {blocosDePagamento.map((bloco, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && "; "}
+                  {bloco}
+                </React.Fragment>
+              ))}
+              .
             </p>
           )}
           {(c.lateFeePercent > 0 || c.lateInterestPercent > 0) && (

@@ -38,6 +38,36 @@ export async function GET(
       );
     }
 
+    // Dados de pagamento: o contrato guarda um snapshot para que documento ja
+    // assinado nao mude se a Joane trocar de conta depois. Enquanto ele ainda
+    // nao foi assinado, porem, o certo e refletir o que esta nas Configuracoes:
+    // caso contrario um contrato criado antes de ela cadastrar o PIX sairia
+    // impresso sem dado de pagamento nenhum.
+    const aindaNaoAssinado =
+      contract.status === "rascunho" ||
+      contract.status === "gerado" ||
+      contract.status === "aguardando_assinatura";
+
+    const semDadosDePagamento =
+      !contract.paymentPixKey?.trim() && !contract.paymentBankName?.trim();
+
+    if (aindaNaoAssinado && semDadosDePagamento) {
+      const perfil = await prisma.user.findFirst();
+      if (perfil) {
+        return NextResponse.json({
+          ...contract,
+          paymentPixKey: perfil.pixKey ?? "",
+          paymentPixKeyType: perfil.pixKeyType ?? "",
+          paymentPixHolderName: perfil.pixHolderName ?? "",
+          paymentBankName: perfil.bankName ?? "",
+          paymentBankAgency: perfil.bankAgency ?? "",
+          paymentBankAccount: perfil.bankAccount ?? "",
+          // Sinaliza para a UI que veio das Configuracoes, nao do snapshot.
+          pagamentoVindoDoPerfil: true,
+        });
+      }
+    }
+
     return NextResponse.json(contract);
   } catch (error) {
     console.error("Erro ao buscar contrato:", error);

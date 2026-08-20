@@ -140,6 +140,24 @@ export async function POST(
 
   // Atualiza contrato e registra evento em transacao
   try {
+    // Congela os dados de pagamento no momento em que o contrato assinado
+    // chega. Ate aqui o documento lia o PIX das Configuracoes; a partir de
+    // agora o que vale e o que estava impresso no papel que a pessoa assinou.
+    const contratoAtual = await prisma.contract.findUnique({ where: { id } });
+    const pagamentoVazio =
+      !contratoAtual?.paymentPixKey?.trim() && !contratoAtual?.paymentBankName?.trim();
+    const perfil = pagamentoVazio ? await prisma.user.findFirst() : null;
+    const snapshotPagamento = perfil
+      ? {
+          paymentPixKey:        perfil.pixKey ?? "",
+          paymentPixKeyType:    perfil.pixKeyType ?? "",
+          paymentPixHolderName: perfil.pixHolderName ?? "",
+          paymentBankName:      perfil.bankName ?? "",
+          paymentBankAgency:    perfil.bankAgency ?? "",
+          paymentBankAccount:   perfil.bankAccount ?? "",
+        }
+      : {};
+
     const updated = await prisma.$transaction(async (tx) => {
       // Evento de transicao
       await tx.contractEvent.create({
@@ -164,6 +182,7 @@ export async function POST(
           // Limpa decisao anterior (recusa) ao receber novo arquivo
           decisionAt:    null,
           refusalReason: null,
+          ...snapshotPagamento,
         },
         include: {
           events: { orderBy: { createdAt: "asc" } },
