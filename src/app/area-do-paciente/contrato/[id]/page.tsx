@@ -1,23 +1,21 @@
 "use client";
 
 /**
- * Página dedicada de impressão do contrato (painel da Joane).
- *
- * Renderiza o documento sozinho, sem modal e sem o layout do painel, para que
- * o navegador pagine corretamente. Protegida pelo proxy.ts, que ja cobre /admin.
+ * Contrato visto pelo paciente, no mesmo layout de impressao usado no painel.
+ * Reaproveita o componente do documento para que o que a pessoa le seja
+ * exatamente o que sai no papel.
  */
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { ESTILOS_IMPRESSAO } from "./estilos";
+import { ESTILOS_IMPRESSAO } from "@/app/admin/contratos/[id]/imprimir/estilos";
 import { TelaCarregando } from "@/components/ui/Carregando";
 import {
   DocumentoContrato,
-  pendenciasDoContrato,
   type ContratoImpressao,
 } from "@/components/contrato/DocumentoContrato";
 
-export default function ImprimirContratoPage({
+export default function ContratoDoPacientePage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -32,9 +30,9 @@ export default function ImprimirContratoPage({
     let ativo = true;
     (async () => {
       try {
-        const res = await fetch(`/api/admin/contracts/${id}`);
+        const res = await fetch(`/api/paciente/contratos/${id}`);
         if (res.status === 401) {
-          router.push("/admin/login");
+          router.push("/area-do-paciente/entrar");
           return;
         }
         if (!res.ok) {
@@ -52,14 +50,10 @@ export default function ImprimirContratoPage({
     return () => { ativo = false; };
   }, [id, router]);
 
-  if (carregando) {
-    return <TelaCarregando mensagem="Preparando o contrato para impressão..." />;
-  }
+  if (carregando) return <TelaCarregando mensagem="Abrindo seu contrato..." />;
   if (erro || !contrato) {
     return <p style={{ padding: 32, fontFamily: "system-ui" }}>{erro || "Contrato não encontrado."}</p>;
   }
-
-  const pendencias = pendenciasDoContrato(contrato);
 
   return (
     <>
@@ -67,7 +61,7 @@ export default function ImprimirContratoPage({
 
       <div className="barra-acoes nao-imprimir">
         <button
-          onClick={() => router.back()}
+          onClick={() => router.push("/area-do-paciente")}
           style={{
             padding: "9px 16px", borderRadius: 999, border: "1px solid #d8cfcb",
             background: "#fff", cursor: "pointer", fontSize: 13, color: "#5d0c1d",
@@ -75,11 +69,9 @@ export default function ImprimirContratoPage({
         >
           Voltar
         </button>
-        {pendencias.length > 0 && (
-          <span style={{ fontSize: 12, color: "#8a6d3b", flex: 1, textAlign: "center" }}>
-            Não preenchido no painel, então fica de fora do documento: {pendencias.join(", ")}.
-          </span>
-        )}
+        <span style={{ fontSize: 12, color: "#6f5f62", flex: 1, textAlign: "center" }}>
+          Imprima, assine e envie de volta pela sua área.
+        </span>
         <button
           onClick={() => window.print()}
           style={{

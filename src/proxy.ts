@@ -7,6 +7,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyToken, ADMIN_COOKIE_NAME } from "@/lib/auth";
+import { verificarSessaoPaciente, PACIENTE_COOKIE_NAME } from "@/lib/paciente-auth";
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -27,9 +28,21 @@ export function proxy(request: NextRequest) {
     }
   }
 
+  // Area do paciente: sessao propria, cookie proprio. Um token de admin nao
+  // abre esta area, e um token de paciente nao abre o painel.
+  if (pathname.startsWith("/area-do-paciente")) {
+    if (pathname === "/area-do-paciente/entrar") {
+      return NextResponse.next();
+    }
+    const sessao = request.cookies.get(PACIENTE_COOKIE_NAME);
+    if (!sessao?.value || !verificarSessaoPaciente(sessao.value)) {
+      return NextResponse.redirect(new URL("/area-do-paciente/entrar", request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/area-do-paciente/:path*"],
 };

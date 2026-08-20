@@ -63,6 +63,11 @@ model Patient {
   rg            String?               @default("")
   address       String?               @default("")
   notes         String?               @default("")
+  // Acesso do paciente a propria area. Guardamos apenas o hash: token e
+  // numerico, logo mais fraco que senha, e um vazamento do banco nao pode
+  // entregar acesso. Reemissao e feita pela Joane no painel.
+  accessTokenHash String              @default("")
+  accessTokenAt   DateTime?
   createdAt     DateTime              @default(now())
   updatedAt     DateTime              @updatedAt
   submissions   AnamnesisSubmission[]

@@ -54,6 +54,8 @@ export default function PreencherAnamnesePage() {
 
   // Estados de Envio & Validacao
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Codigo de acesso a area do paciente. So existe em claro neste momento.
+  const [tokenAcesso, setTokenAcesso] = useState("");
   const [alreadySubmittedInfo, setAlreadySubmittedInfo] = useState<{
     createdAt?: string;
     status?: string;
@@ -242,6 +244,7 @@ export default function PreencherAnamnesePage() {
       // Sucesso!
       setIsSuccess(true);
       setSubmittedId(data.submissionId);
+      setTokenAcesso(data.tokenAcesso || "");
 
       confetti({
         particleCount: 80,
@@ -295,6 +298,29 @@ export default function PreencherAnamnesePage() {
                   Seus dados estao protegidos com total sigilo profissional e etica.
                 </p>
               </div>
+
+              {tokenAcesso && (
+                <div className="bg-[#fffbeb] border-2 border-[#fde68a] rounded-2xl p-6 max-w-md mx-auto space-y-3">
+                  <p className="font-serif text-sm font-bold text-[#92400e]">
+                    Guarde este código
+                  </p>
+                  <p className="text-3xl sm:text-4xl font-bold tracking-[0.2em] text-[#5d0c1d] select-all py-1">
+                    {tokenAcesso.slice(0, 4)} {tokenAcesso.slice(4)}
+                  </p>
+                  <p className="text-xs text-[#78350f] leading-relaxed text-left">
+                    Com ele e o seu CPF você acompanha o andamento da sua ficha e
+                    recebe o contrato pela sua área. Anote agora: por segurança,
+                    ele não aparece de novo. Se perder, a Dra. Joane emite um novo
+                    para você.
+                  </p>
+                  <a
+                    href="/area-do-paciente/entrar"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#5d0c1d] hover:bg-[#8b1c31] text-white text-xs font-semibold transition"
+                  >
+                    <span>Acessar minha área</span>
+                  </a>
+                </div>
+              )}
 
               <div className="bg-[#fbf9f7] border border-[#e5e0da] rounded-2xl p-6 text-left max-w-md mx-auto space-y-3 text-xs sm:text-sm text-[#5f5456]">
                 <div className="flex items-center gap-2 text-[#5d0c1d] font-bold">

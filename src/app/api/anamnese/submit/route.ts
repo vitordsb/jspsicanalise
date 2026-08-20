@@ -5,6 +5,7 @@ import { sendAnamnesisNotificationEmail } from "@/lib/mail";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { submitAnamnesisSchema } from "@/lib/validate";
 import { ZodError } from "zod";
+import { gerarTokenAcesso, hashToken } from "@/lib/paciente-auth";
 
 /** Nome tecnico do campo -> como o paciente o ve no formulario. */
 const NOMES_DE_CAMPO: Record<string, string> = {
@@ -112,6 +113,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Token de acesso a area do paciente. Numerico para poder ser ditado e
+    // anotado. Guardamos so o hash; o valor em claro e devolvido uma unica vez
+    // nesta resposta, para a tela mostrar e a pessoa anotar.
+    const tokenAcesso = gerarTokenAcesso();
+
     // Cria ou atualiza o paciente com CPF sempre normalizado (so digitos)
     let patient = existingPatient;
     if (!patient) {
@@ -125,6 +131,8 @@ export async function POST(req: NextRequest) {
           gender: personalInfo.gender || "",
           occupation: personalInfo.occupation || "",
           maritalStatus: personalInfo.maritalStatus || "",
+          accessTokenHash: hashToken(tokenAcesso),
+          accessTokenAt: new Date(),
         },
         include: { submissions: true },
       });
@@ -139,6 +147,8 @@ export async function POST(req: NextRequest) {
           gender: personalInfo.gender || patient.gender,
           occupation: personalInfo.occupation || patient.occupation,
           maritalStatus: personalInfo.maritalStatus || patient.maritalStatus,
+          accessTokenHash: hashToken(tokenAcesso),
+          accessTokenAt: new Date(),
         },
         include: { submissions: true },
       });
@@ -190,6 +200,9 @@ export async function POST(req: NextRequest) {
       message: "Anamnese enviada com sucesso.",
       submissionId: submission.id,
       patientId: patient.id,
+      // Unico momento em que o token aparece em claro. Depois daqui so existe
+      // o hash, e uma nova via precisa ser emitida pela Joane no painel.
+      tokenAcesso,
     });
   } catch (error) {
     console.error("Erro ao processar envio de anamnese:", error);

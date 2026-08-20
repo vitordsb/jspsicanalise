@@ -8,6 +8,7 @@ import {
   User,
   FileSignature,
   Printer,
+  KeyRound,
   MessageCircle,
   Sparkles,
   Save,
@@ -34,6 +35,9 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
   const [activeTab, setActiveTab] = useState<"anamnese" | "anotacoes" | "contratos">("anamnese");
   const [clinicalNotes, setClinicalNotes] = useState(submission.clinicalNotes || "");
   const [savingNotes, setSavingNotes] = useState(false);
+  // Codigo de acesso do paciente: so existe em claro no instante da emissao.
+  const [reemitindo, setReemitindo] = useState(false);
+  const [codigoNovo, setCodigoNovo] = useState("");
   const [notesSavedSuccess, setNotesSavedSuccess] = useState(false);
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
 
@@ -56,6 +60,22 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
   };
 
   const cleanPhone = patient.phone.replace(/\D/g, "");
+  const reemitirCodigo = async () => {
+    if (!confirm("Emitir um novo código de acesso? O código anterior deixa de funcionar imediatamente.")) return;
+    setReemitindo(true);
+    setCodigoNovo("");
+    try {
+      const res = await fetch(`/api/admin/pacientes/${patient.id}/reemitir-codigo`, { method: "POST" });
+      const dados = await res.json().catch(() => ({}));
+      if (res.ok) setCodigoNovo(dados.codigoFormatado || dados.codigo || "");
+      else alert(dados.error || "Nao foi possivel emitir o codigo.");
+    } catch {
+      alert("Falha de conexao ao emitir o codigo.");
+    } finally {
+      setReemitindo(false);
+    }
+  };
+
   const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(
     `Olá ${patient.fullName.split(" ")[0]}, tudo bem? Sou a Dra. Joane Souza Oliveira de Andrade, psicóloga/psicanalista. Recebi sua ficha de anamnese e gostaria de conversar com você!`
   )}`;
@@ -118,6 +138,16 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
             <span className="hidden sm:inline">Gerar Contrato</span>
           </button>
 
+          {/* CODIGO DE ACESSO DO PACIENTE */}
+          <button
+            onClick={reemitirCodigo}
+            disabled={reemitindo}
+            title="Emitir novo código de acesso à área do paciente"
+            className="p-2 rounded-full bg-white border border-[#f0ded8] text-[#5d0c1d] hover:bg-[#fbf3ef] disabled:opacity-60 transition"
+          >
+            <KeyRound className="w-4 h-4" />
+          </button>
+
           {/* IMPRIMIR */}
           <button
             onClick={() => window.print()}
@@ -140,6 +170,33 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
           </select>
         </div>
       </div>
+
+      {/* CODIGO DE ACESSO RECEM EMITIDO
+          Aparece uma unica vez, logo apos a emissao. Guardamos so o hash,
+          entao nao ha como exibir de novo depois que a Joane fechar a tela. */}
+      {codigoNovo && (
+        <div className="bg-[#fffbeb] border-b-2 border-[#fde68a] px-4 sm:px-6 py-3 flex items-start gap-3 shrink-0 no-print">
+          <KeyRound className="w-5 h-5 text-[#92400e] shrink-0 mt-0.5" aria-hidden="true" />
+          <div className="text-xs text-[#78350f] space-y-1 flex-1">
+            <p className="font-bold">
+              Novo código de acesso:{" "}
+              <span className="text-base tracking-[0.18em] text-[#5d0c1d] select-all">
+                {codigoNovo}
+              </span>
+            </p>
+            <p>
+              Passe para o paciente agora. Ele não aparece de novo, e o código
+              anterior deixou de funcionar.
+            </p>
+          </div>
+          <button
+            onClick={() => setCodigoNovo("")}
+            className="text-[#92400e] text-xs font-semibold hover:underline shrink-0"
+          >
+            Fechar
+          </button>
+        </div>
+      )}
 
       {/* BANNER DE RISCO - aparece logo abaixo da barra de topo */}
       {riskFlag && (
