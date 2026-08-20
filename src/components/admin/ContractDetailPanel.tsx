@@ -12,9 +12,11 @@ import {
   Clock,
   ArrowRight,
   Printer,
+  Pencil,
   FileText,
   Loader2,
 } from "lucide-react";
+import { ContractEditForm } from "./ContractEditForm";
 
 // Mapa de labels pt-BR para os status
 const STATUS_LABELS: Record<ContractStatus, string> = {
@@ -57,6 +59,7 @@ export function ContractStatusBadge({ status }: { status: string }) {
 }
 
 export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanelProps) {
+  const [editando, setEditando] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [uploadState, setUploadState] = useState<"idle" | "uploading" | "success" | "error">("idle");
@@ -243,6 +246,26 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
       ? legacyPrice
       : 0;
 
+  // Contrato ja aprovado nao deve ser editado: foi assinado com o teor que
+  // esta ali. Para mudar, emite-se um novo.
+  const podeEditar = contract.status !== "aprovado";
+
+  if (editando) {
+    return (
+      <div className="space-y-4">
+        <h3 className="font-serif text-lg font-bold text-[#5d0c1d]">Editar contrato</h3>
+        <ContractEditForm
+          contract={contract as unknown as Record<string, unknown>}
+          onCancel={() => setEditando(false)}
+          onSaved={() => {
+            setEditando(false);
+            onRefresh();
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Cabecalho do contrato */}
@@ -257,18 +280,30 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
         <ContractStatusBadge status={contract.status} />
       </div>
 
-      {/* Abre a pagina dedicada de impressao. Rota propria, sem modal nem
-          layout do painel, porque ancestral com overflow ou altura fixa
-          quebra a paginacao do navegador. */}
-      <a
-        href={`/admin/contratos/${contract.id}/imprimir`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-semibold transition self-start"
-      >
-        <Printer className="w-4 h-4" />
-        <span>Abrir contrato para impressão</span>
-      </a>
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Abre a pagina dedicada de impressao. Rota propria, sem modal nem
+            layout do painel, porque ancestral com overflow ou altura fixa
+            quebra a paginacao do navegador. */}
+        <a
+          href={`/admin/contratos/${contract.id}/imprimir`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-semibold transition"
+        >
+          <Printer className="w-4 h-4" />
+          <span>Abrir contrato para impressão</span>
+        </a>
+
+        {podeEditar && (
+          <button
+            onClick={() => setEditando(true)}
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-[#eae2d7] text-[#5d0c1d] text-xs font-semibold hover:bg-[#fbf3ef] transition"
+          >
+            <Pencil className="w-4 h-4" />
+            <span>Editar dados</span>
+          </button>
+        )}
+      </div>
 
       {/* Dados do contrato */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
