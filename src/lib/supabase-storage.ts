@@ -43,6 +43,19 @@ export function getStorageBucket(): string {
  * @param buffer  - conteudo do arquivo em ArrayBuffer
  * @returns void - lanca excecao em caso de falha
  */
+/**
+ * Cabecalhos de autenticacao do Storage.
+ *
+ * As chaves novas do Supabase (formato sb_secret_...) nao sao JWT. Mandar
+ * apenas Authorization: Bearer faz a API tentar decodificar como JWT e
+ * responder "Invalid Compact JWS". O header apikey e o que ela aceita.
+ * Os dois vao juntos para funcionar tambem com as chaves legadas (eyJ...).
+ */
+function cabecalhosAuth(): Record<string, string> {
+  const key = getServiceKey();
+  return { apikey: key, Authorization: `Bearer ${key}` };
+}
+
 export async function uploadSignedPdf(
   fileKey: string,
   buffer: ArrayBuffer
@@ -55,10 +68,9 @@ export async function uploadSignedPdf(
   const res = await fetch(`${base}/object/${bucket}/${fileKey}`, {
     method: "PUT",
     headers: {
-      Authorization:   `Bearer ${key}`,
-      "Content-Type":  "application/pdf",
-      // Forca download no navegador (nao renderiza inline)
-      "x-upsert":      "true",
+      ...cabecalhosAuth(),
+      "Content-Type": "application/pdf",
+      "x-upsert":     "true",
     },
     body: buffer,
   });
@@ -91,7 +103,7 @@ export async function createSignedUrl(
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${key}`,
+        ...cabecalhosAuth(),
         "Content-Type": "application/json",
       },
       // download: true forca Content-Disposition: attachment na URL assinada,
@@ -112,9 +124,19 @@ export async function createSignedUrl(
     throw new Error("Supabase nao retornou signedURL.");
   }
 
-  // Retorna a URL completa com o host do Supabase
-  const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
-  return `${url.origin}${data.signedURL}`;
+  // O Supabase devolve signedURL relativo a /storage/v1 (ex:
+  // "/object/sign/files/..."). Concatenar so com a origem gera 404, porque o
+  // prefixo /storage/v1 fica de fora. Montamos a partir de getStorageBase(),
+  // que ja inclui o prefixo, removendo barra duplicada.
+  const relativo = data.signedURL.startsWith("/") ? data.signedURL.slice(1) : data.signedURL;
+
+  // download na query e o que de fato faz o Supabase responder com
+  // Content-Disposition: attachment. Passar no corpo do POST nao surte efeito.
+  // Importa porque PDF pode conter JavaScript: baixar em vez de renderizar
+  // no navegador fecha essa porta.
+  const url = new URL(`${base}/${relativo}`);
+  url.searchParams.set("download", "");
+  return url.toString();
 }
 
 /**
@@ -124,11 +146,10 @@ export async function createSignedUrl(
 export async function deleteFile(fileKey: string): Promise<void> {
   const base   = getStorageBase();
   const bucket = getStorageBucket();
-  const key    = getServiceKey();
 
   await fetch(`${base}/object/${bucket}/${fileKey}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${key}` },
+    headers: cabecalhosAuth(),
   });
   // Silencia erros de "nao encontrado" - idempotente por design
 }
