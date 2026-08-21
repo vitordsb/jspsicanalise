@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-session";
+import { varreduraOportunista } from "@/lib/limpeza-anamneses";
 
 const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 100;
@@ -9,6 +10,9 @@ const MAX_PAGE_SIZE = 100;
 export async function GET(req: NextRequest) {
   const authError = await requireAuth();
   if (authError) return authError;
+
+  // Complementa o cron diario para o prazo de 24 horas valer de fato.
+  varreduraOportunista();
 
   try {
     const { searchParams } = new URL(req.url);
