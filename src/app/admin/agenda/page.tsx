@@ -18,8 +18,9 @@ export default function AdminAgendaPage() {
           </div>
           <h1 className="font-serif text-2xl sm:text-4xl font-bold text-[#5d0c1d]">Agenda</h1>
           <p className="text-xs sm:text-sm text-[#6f5f62] mt-1">
-            Toque numa consulta para remanejar, marcar como realizada ou registrar falta.
-            Horários de Brasília, formato 24 horas.
+            Toque num horário livre para agendar um cliente, ou numa consulta para
+            remanejar, marcar como realizada e registrar falta. Horários de Brasília,
+            formato 24 horas.
           </p>
         </div>
 

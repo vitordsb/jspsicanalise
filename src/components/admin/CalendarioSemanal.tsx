@@ -16,7 +16,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ChevronLeft, ChevronRight, CalendarDays, X, Check,
-  MessageSquareText, AlertTriangle, Trash2, CircleSlash, MoveRight,
+  MessageSquareText, AlertTriangle, Trash2, CircleSlash, MoveRight, Plus,
 } from "lucide-react";
 import {
   faixaDeHoras, dentroDaJanela, chaveDia, chaveHora, montarInstante,
@@ -25,6 +25,7 @@ import {
 import { formatCPF } from "@/lib/formatters";
 import { TelaCarregando, BotaoConteudo, BarraProgresso } from "@/components/ui/Carregando";
 import { ProximosAgendamentos } from "./ProximosAgendamentos";
+import { EscolherPaciente } from "./EscolherPaciente";
 
 interface Agendamento {
   id: string;
@@ -76,6 +77,8 @@ export function CalendarioSemanal() {
   const [aviso, setAviso] = useState("");
   const [erro, setErro] = useState("");
   const [mostrarVazias, setMostrarVazias] = useState(false);
+  // Horario escolhido para agendar alguem que ja e cliente.
+  const [vagaParaAgendar, setVagaParaAgendar] = useState<string | null>(null);
 
   const carregar = useCallback(
     async (alvo?: string | null, silencioso = false) => {
@@ -126,6 +129,35 @@ export function CalendarioSemanal() {
       const j = await res.json().catch(() => ({}));
       if (!res.ok) {
         setErro(j.error || "Nao foi possivel atualizar.");
+        return false;
+      }
+      if (j.foraDaJanela) {
+        setAviso("Consulta marcada fora do seu horario de atendimento. Ela vale, mas o paciente nao conseguiria escolher esse horario sozinho.");
+      }
+      await carregar(semana, true);
+      return true;
+    } catch {
+      setErro("Falha de conexao.");
+      return false;
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const agendarCliente = async (patientId: string) => {
+    if (!vagaParaAgendar) return false;
+    setSalvando(true);
+    setErro("");
+    setAviso("");
+    try {
+      const res = await fetch("/api/admin/agenda", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ patientId, inicioIso: vagaParaAgendar }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErro(j.error || "Nao foi possivel agendar.");
         return false;
       }
       if (j.foraDaJanela) {
@@ -299,19 +331,29 @@ export function CalendarioSemanal() {
                   return (
                     <button
                       key={chave}
-                      onClick={() => movendo && moverPara(d.data, hora)}
-                      disabled={!movendo || salvando}
-                      title={trabalha ? "Horário de atendimento livre" : "Fora do seu horário de atendimento"}
-                      className={`min-h-[52px] rounded-xl transition ${
+                      onClick={() =>
+                        movendo
+                          ? moverPara(d.data, hora)
+                          : setVagaParaAgendar(montarInstante(d.data, hora))
+                      }
+                      disabled={salvando}
+                      title={
+                        movendo
+                          ? "Mover a consulta para este horário"
+                          : trabalha
+                          ? "Livre. Toque para agendar um cliente"
+                          : "Fora do seu horário de atendimento. Toque para agendar mesmo assim"
+                      }
+                      className={`group min-h-[52px] rounded-xl transition flex items-center justify-center ${
                         trabalha
                           ? "bg-[#fbf3ef] border border-[#f0ded8]"
                           : "bg-[#f7f5f4] border border-dashed border-[#eae2d7]"
-                      } ${
-                        movendo
-                          ? "hover:bg-[#f8dad2] hover:border-[#5d0c1d] cursor-pointer"
-                          : "cursor-default"
-                      }`}
-                    />
+                      } hover:bg-[#f8dad2] hover:border-[#5d0c1d] cursor-pointer`}
+                    >
+                      {!movendo && (
+                        <Plus className="w-3.5 h-3.5 text-[#5d0c1d] opacity-0 group-hover:opacity-60 transition" />
+                      )}
+                    </button>
                   );
                 })}
               </div>
@@ -374,6 +416,14 @@ export function CalendarioSemanal() {
     // Calendario e fila lado a lado no desktop, empilhados no celular.
     <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-5 items-start">
       {grade}
+      {vagaParaAgendar && (
+        <EscolherPaciente
+          inicioIso={vagaParaAgendar}
+          aoFechar={() => setVagaParaAgendar(null)}
+          aoAgendar={agendarCliente}
+        />
+      )}
+
       <ProximosAgendamentos
         itens={dados.proximas}
         selecionadoId={selecionado?.id}
