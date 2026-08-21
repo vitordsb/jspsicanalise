@@ -20,7 +20,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (semNavegacao) return <>{children}</>;
 
   return (
-    <div className="flex min-h-screen bg-[#fff6f4]">
+    // Coluna no celular (barra do menu em cima, conteudo embaixo) e linha a
+    // partir do desktop (trilho a esquerda). Sem o flex-col, a barra do menu
+    // virava uma coluna estreita na lateral e espremia o conteudo.
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#fff6f4]">
       <AdminSidebar />
       <div className="flex-1 min-w-0 flex flex-col">{children}</div>
     </div>

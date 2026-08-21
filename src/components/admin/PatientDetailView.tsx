@@ -83,8 +83,8 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
   return (
     <div className="flex-1 flex flex-col h-[calc(100vh-56px)] md:h-screen bg-[#fbf5f2] overflow-hidden">
       {/* WHATSAPP WEB TOP BAR */}
-      <div className="p-3.5 bg-[#fbf3ef] border-b border-[#f0ded8] flex items-center justify-between gap-4 shrink-0 no-print">
-        <div className="flex items-center gap-3 min-w-0">
+      <div className="p-3.5 bg-[#fbf3ef] border-b border-[#f0ded8] flex flex-wrap items-center justify-between gap-y-2.5 gap-x-4 shrink-0 no-print">
+        <div className="flex items-center gap-3 min-w-0 flex-1 basis-full sm:basis-auto">
           <div className="w-11 h-11 rounded-full bg-[#5d0c1d] text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
             {patient.fullName.charAt(0)}
           </div>
@@ -116,7 +116,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
         )}
 
         {/* TOP ACTION BUTTONS */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2">
           {/* WHATSAPP DIRECT */}
           <a
             href={whatsappUrl}
