@@ -38,13 +38,16 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  // Proximas consultas fora da semana exibida, para a Joane nao perder de
-  // vista o que vem depois.
+  // Fila do que vem pela frente, da consulta mais proxima ate a mais distante.
+  // Independe da semana exibida: e a lista que a Joane usa para saber quem ela
+  // atende em seguida, mesmo navegando para tras no calendario.
   const proximas = await prisma.agendamento.findMany({
-    where: { status: "agendado", inicioEm: { gte: domingoFim } },
+    where: { status: "agendado", inicioEm: { gte: agora } },
     orderBy: { inicioEm: "asc" },
-    take: 5,
-    include: { patient: { select: { id: true, fullName: true } } },
+    take: 30,
+    include: {
+      patient: { select: { id: true, fullName: true, phone: true, cpf: true } },
+    },
   });
 
   return NextResponse.json({
@@ -52,6 +55,6 @@ export async function GET(req: NextRequest) {
     dias: diasDaSemana(segunda, agora),
     janelas,
     agendamentos: daSemana,
-    proximasForaDaSemana: proximas,
+    proximas,
   });
 }

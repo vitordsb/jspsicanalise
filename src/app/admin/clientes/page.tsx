@@ -132,7 +132,13 @@ function ClientesContent() {
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    // Altura presa a viewport: e o que faz a lista e a ficha rolarem cada uma
+    // no seu proprio espaco, em vez de a pagina inteira rolar junto.
+    //
+    // Sem flex-1 de proposito: em container de coluna, o crescimento do flex
+    // define a altura e sobrepoe o h-screen, e a coluna voltava a esticar do
+    // tamanho do conteudo.
+    <div className="flex flex-col h-[calc(100vh-56px)] md:h-screen overflow-hidden">
 
       <div className="flex-1 flex overflow-hidden">
         {/* SIDEBAR (WHATSAPP LIST) */}

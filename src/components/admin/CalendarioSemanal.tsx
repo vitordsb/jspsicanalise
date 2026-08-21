@@ -24,6 +24,7 @@ import {
 } from "@/lib/agenda";
 import { formatCPF } from "@/lib/formatters";
 import { TelaCarregando, BotaoConteudo, BarraProgresso } from "@/components/ui/Carregando";
+import { ProximosAgendamentos } from "./ProximosAgendamentos";
 
 interface Agendamento {
   id: string;
@@ -39,7 +40,7 @@ interface Dados {
   dias: DiaDaSemana[];
   janelas: JanelaAtendimento[];
   agendamentos: Agendamento[];
-  proximasForaDaSemana: { id: string; inicioEm: string; patient: { fullName: string } }[];
+  proximas: Agendamento[];
 }
 
 const COR_STATUS: Record<string, string> = {
@@ -176,7 +177,7 @@ export function CalendarioSemanal() {
   const primeiroDia = dados.dias[0];
   const ultimoDia = dados.dias[6];
 
-  return (
+  const grade = (
     <div className="space-y-4">
       {/* NAVEGACAO DE SEMANA */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -366,22 +367,25 @@ export function CalendarioSemanal() {
         />
       )}
 
-      {/* PROXIMAS FORA DA SEMANA */}
-      {dados.proximasForaDaSemana.length > 0 && (
-        <div className="border-t border-[#f3e4e0] pt-4">
-          <p className="text-xs font-semibold text-[#6f5f62] mb-2 flex items-center gap-1.5">
-            <CalendarDays className="w-3.5 h-3.5" />
-            Próximas depois desta semana
-          </p>
-          <ul className="space-y-1">
-            {dados.proximasForaDaSemana.map((p) => (
-              <li key={p.id} className="text-xs text-[#6f5f62] capitalize">
-                {formatarDataHora(p.inicioEm)} - {p.patient.fullName}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+    </div>
+  );
+
+  return (
+    // Calendario e fila lado a lado no desktop, empilhados no celular.
+    <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-5 items-start">
+      {grade}
+      <ProximosAgendamentos
+        itens={dados.proximas}
+        selecionadoId={selecionado?.id}
+        aoSelecionar={(id) => {
+          const alvo = dados.proximas.find((a) => a.id === id);
+          if (!alvo) return;
+          setSelecionado(alvo);
+          setMovendo(false);
+          // Leva o calendario para a semana da consulta escolhida.
+          setSemana(alvo.inicioEm.slice(0, 10));
+        }}
+      />
     </div>
   );
 }

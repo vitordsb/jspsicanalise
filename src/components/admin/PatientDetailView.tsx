@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { SubmissionData, FormSection } from "@/lib/types";
 import { formatDate, formatDateTime, calculateAge, formatCPF } from "@/lib/formatters";
 import { ContractModal } from "./ContractModal";
@@ -9,6 +9,8 @@ import {
   FileSignature,
   Printer,
   KeyRound,
+  ArrowDown,
+  ArrowUp,
   MessageCircle,
   Sparkles,
   Save,
@@ -38,6 +40,10 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
   // Codigo de acesso do paciente: so existe em claro no instante da emissao.
   const [reemitindo, setReemitindo] = useState(false);
   const [codigoNovo, setCodigoNovo] = useState("");
+  // Atalho de rolagem da ficha: com 36 perguntas, chegar ao fim na mao cansa.
+  const areaFicha = useRef<HTMLDivElement>(null);
+  const [perto, setPerto] = useState<"topo" | "meio" | "fim">("topo");
+  const [temRolagem, setTemRolagem] = useState(false);
   const [notesSavedSuccess, setNotesSavedSuccess] = useState(false);
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
 
@@ -60,6 +66,33 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
   };
 
   const cleanPhone = patient.phone.replace(/\D/g, "");
+  // Acompanha a posicao para o botao oferecer a acao util: descer quando esta
+  // em cima, voltar quando ja chegou ao fim.
+  const aoRolar = () => {
+    const el = areaFicha.current;
+    if (!el) return;
+    const sobra = el.scrollHeight - el.clientHeight;
+    setTemRolagem(sobra > 240);
+    if (sobra <= 0) return;
+    const pos = el.scrollTop / sobra;
+    setPerto(pos < 0.05 ? "topo" : pos > 0.95 ? "fim" : "meio");
+  };
+
+  // Recalcula ao trocar de paciente ou de aba: o conteudo muda de tamanho.
+  useEffect(() => {
+    const el = areaFicha.current;
+    if (!el) return;
+    el.scrollTop = 0;
+    const t = setTimeout(aoRolar, 120);
+    return () => clearTimeout(t);
+  }, [submission.id, activeTab]);
+
+  const rolarPara = (destino: "topo" | "fim") => {
+    const el = areaFicha.current;
+    if (!el) return;
+    el.scrollTo({ top: destino === "fim" ? el.scrollHeight : 0, behavior: "smooth" });
+  };
+
   const reemitirCodigo = async () => {
     if (!confirm("Emitir um novo código de acesso? O código anterior deixa de funcionar imediatamente.")) return;
     setReemitindo(true);
@@ -260,7 +293,32 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
       </div>
 
       {/* CHAT / CONTENT AREA WITH DOODLE BACKGROUND */}
-      <div className="flex-1 overflow-y-auto whatsapp-bg p-4 sm:p-6">
+      <div
+        ref={areaFicha}
+        onScroll={aoRolar}
+        className="flex-1 overflow-y-auto whatsapp-bg p-4 sm:p-6 relative"
+      >
+        {/* Atalho de rolagem. So aparece quando ha conteudo suficiente para
+            justificar, e troca de acao conforme a posicao. */}
+        {temRolagem && (
+          <button
+            onClick={() => rolarPara(perto === "fim" ? "topo" : "fim")}
+            className="no-print sticky top-0 float-right z-20 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-semibold shadow-lg shadow-[#5d0c1d]/20 transition"
+          >
+            {perto === "fim" ? (
+              <>
+                <ArrowUp className="w-3.5 h-3.5" />
+                <span>Voltar ao topo</span>
+              </>
+            ) : (
+              <>
+                <ArrowDown className="w-3.5 h-3.5" />
+                <span>Ir até o final</span>
+              </>
+            )}
+          </button>
+        )}
+
         <div className="max-w-4xl mx-auto space-y-6">
           {/* TAB 1: FICHA DE ANAMNESE COMPLETA */}
           {activeTab === "anamnese" && (
