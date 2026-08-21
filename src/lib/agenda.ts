@@ -185,3 +185,107 @@ export function vagaEhValida(
     return (minutos - ini) % 60 === 0;
   });
 }
+
+/** Chave "YYYY-MM-DD" de um instante, no fuso da clinica. */
+export function chaveDia(d: Date | string): string {
+  const data = typeof d === "string" ? new Date(d) : d;
+  const p = partesEmBrasilia(data);
+  return `${p.ano}-${String(p.mes).padStart(2, "0")}-${String(p.dia).padStart(2, "0")}`;
+}
+
+/** Hora "HH:MM" de um instante, no fuso da clinica. */
+export function chaveHora(d: Date | string): string {
+  const data = typeof d === "string" ? new Date(d) : d;
+  const p = partesEmBrasilia(data);
+  return `${String(p.hora).padStart(2, "0")}:${String(p.minuto).padStart(2, "0")}`;
+}
+
+/**
+ * Segunda-feira da semana de uma data, as 00:00 de Brasilia.
+ * Serve de ancora para navegar entre semanas no calendario.
+ */
+export function inicioDaSemana(referencia: Date): Date {
+  const p = partesEmBrasilia(referencia);
+  const diaSemana = new Date(Date.UTC(p.ano, p.mes - 1, p.dia)).getUTCDay();
+  // Domingo (0) pertence a semana que comecou na segunda anterior.
+  const recuo = diaSemana === 0 ? 6 : diaSemana - 1;
+  return dataLocalParaUtc(p.ano, p.mes - 1, p.dia - recuo, 0);
+}
+
+export interface DiaDaSemana {
+  /** "2026-08-24" */
+  data: string;
+  diaSemana: number;
+  nomeDia: string;
+  /** "24/08" */
+  rotulo: string;
+  ehHoje: boolean;
+}
+
+/** Os sete dias da semana que comeca em `segunda`. */
+export function diasDaSemana(segunda: Date, agora: Date): DiaDaSemana[] {
+  const hoje = chaveDia(agora);
+  const dias: DiaDaSemana[] = [];
+  const p0 = partesEmBrasilia(segunda);
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(Date.UTC(p0.ano, p0.mes - 1, p0.dia + i, 12));
+    const p = partesEmBrasilia(d);
+    const data = `${p.ano}-${String(p.mes).padStart(2, "0")}-${String(p.dia).padStart(2, "0")}`;
+    const diaSemana = new Date(Date.UTC(p.ano, p.mes - 1, p.dia)).getUTCDay();
+    dias.push({
+      data,
+      diaSemana,
+      nomeDia: NOMES_DIA[diaSemana],
+      rotulo: `${String(p.dia).padStart(2, "0")}/${String(p.mes).padStart(2, "0")}`,
+      ehHoje: data === hoje,
+    });
+  }
+  return dias;
+}
+
+/**
+ * Faixa de horas que o calendario precisa desenhar.
+ * Vai da hora mais cedo ate a mais tarde entre todas as janelas, com uma folga
+ * quando alguma consulta foi marcada fora delas pela Joane.
+ */
+export function faixaDeHoras(
+  janelas: JanelaAtendimento[],
+  horasExtras: string[] = []
+): string[] {
+  const todas = [
+    ...janelas.flatMap((j) => [j.inicio, j.fim]),
+    ...horasExtras,
+  ].filter(Boolean);
+
+  if (todas.length === 0) return [];
+
+  const emMinutos = todas.map(paraMinutos);
+  const inicio = Math.floor(Math.min(...emMinutos) / 60) * 60;
+  const fim = Math.ceil(Math.max(...emMinutos) / 60) * 60;
+
+  const horas: string[] = [];
+  for (let m = inicio; m < fim; m += 60) {
+    horas.push(`${String(Math.floor(m / 60)).padStart(2, "0")}:00`);
+  }
+  return horas;
+}
+
+/** Uma hora esta dentro de alguma janela daquele dia da semana? */
+export function dentroDaJanela(
+  diaSemana: number,
+  hora: string,
+  janelas: JanelaAtendimento[],
+  duracaoMinutos: number
+): boolean {
+  const m = paraMinutos(hora);
+  return janelas.some(
+    (j) => j.dia === diaSemana && m >= paraMinutos(j.inicio) && m + duracaoMinutos <= paraMinutos(j.fim)
+  );
+}
+
+/** Monta o instante UTC de um dia "YYYY-MM-DD" com hora "HH:MM" de Brasilia. */
+export function montarInstante(data: string, hora: string): string {
+  const [ano, mes, dia] = data.split("-").map(Number);
+  return dataLocalParaUtc(ano, mes - 1, dia, paraMinutos(hora)).toISOString();
+}

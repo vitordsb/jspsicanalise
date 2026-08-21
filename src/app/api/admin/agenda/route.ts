@@ -1,33 +1,57 @@
 /**
- * Agenda vista pela Joane: consultas marcadas pelos pacientes.
+ * Agenda da Joane.
+ *
+ * Devolve os agendamentos de uma semana mais as janelas de atendimento, para
+ * o calendario desenhar a grade e saber quais celulas sao horario de trabalho.
+ *
+ * A semana vem por parametro (?semana=YYYY-MM-DD, qualquer dia dentro dela).
+ * Sem parametro, usa a semana corrente.
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-session";
+import { lerJanelas, inicioDaSemana, diasDaSemana } from "@/lib/agenda";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const authError = await requireAuth();
   if (authError) return authError;
 
-  const agora = new Date();
+  const { searchParams } = new URL(req.url);
+  const semanaParam = searchParams.get("semana");
 
-  const proximos = await prisma.agendamento.findMany({
-    where: { status: "agendado", inicioEm: { gte: agora } },
+  const agora = new Date();
+  const referencia = semanaParam ? new Date(`${semanaParam}T12:00:00.000Z`) : agora;
+  const base = isNaN(referencia.getTime()) ? agora : referencia;
+
+  const segunda = inicioDaSemana(base);
+  const domingoFim = new Date(segunda.getTime() + 7 * 24 * 3600_000);
+
+  const perfil = await prisma.user.findFirst({ select: { horariosAtendimento: true } });
+  const janelas = lerJanelas(perfil?.horariosAtendimento);
+
+  const daSemana = await prisma.agendamento.findMany({
+    where: { inicioEm: { gte: segunda, lt: domingoFim } },
     orderBy: { inicioEm: "asc" },
     include: {
       patient: { select: { id: true, fullName: true, phone: true, cpf: true } },
     },
   });
 
-  const passados = await prisma.agendamento.findMany({
-    where: { inicioEm: { lt: agora } },
-    orderBy: { inicioEm: "desc" },
-    take: 20,
-    include: {
-      patient: { select: { id: true, fullName: true, phone: true, cpf: true } },
-    },
+  // Proximas consultas fora da semana exibida, para a Joane nao perder de
+  // vista o que vem depois.
+  const proximas = await prisma.agendamento.findMany({
+    where: { status: "agendado", inicioEm: { gte: domingoFim } },
+    orderBy: { inicioEm: "asc" },
+    take: 5,
+    include: { patient: { select: { id: true, fullName: true } } },
   });
 
-  return NextResponse.json({ proximos, passados });
+  return NextResponse.json({
+    semanaInicio: segunda.toISOString(),
+    dias: diasDaSemana(segunda, agora),
+    janelas,
+    agendamentos: daSemana,
+    proximasForaDaSemana: proximas,
+  });
 }
