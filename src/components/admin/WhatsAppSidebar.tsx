@@ -125,7 +125,7 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
   };
 
   return (
-    <div className="w-full md:w-96 lg:w-[410px] bg-white border-r border-[#f0ded8] flex flex-col h-[calc(100vh-64px)] shrink-0">
+    <div className="w-full md:w-96 lg:w-[410px] bg-white border-r border-[#f0ded8] flex flex-col h-[calc(100vh-56px)] md:h-screen shrink-0">
       {/* HEADER DA LISTA DE CONVERSAS */}
       <div className="p-3.5 bg-[#fbf3ef] border-b border-[#f0ded8] flex items-center justify-between">
         <div className="flex items-center gap-2.5">

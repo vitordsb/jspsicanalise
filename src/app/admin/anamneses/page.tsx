@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { AdminHeader } from "@/components/admin/AdminHeader";
 import { FormSection, QuestionItem, QuestionType } from "@/lib/types";
 import { formatDate } from "@/lib/formatters";
 import {
@@ -223,8 +222,7 @@ export default function AdminAnamnesesPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fff6f4]">
-      <AdminHeader />
+    <div className="flex-1 flex flex-col">
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
         {/* HEADER */}

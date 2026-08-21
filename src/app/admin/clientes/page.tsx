@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { AdminHeader } from "@/components/admin/AdminHeader";
 import { WhatsAppSidebar } from "@/components/admin/WhatsAppSidebar";
 import { PatientDetailView } from "@/components/admin/PatientDetailView";
 import { SubmissionData } from "@/lib/types";
@@ -133,8 +132,7 @@ function ClientesContent() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#f8f7f5] overflow-hidden">
-      <AdminHeader />
+    <div className="flex-1 flex flex-col overflow-hidden">
 
       <div className="flex-1 flex overflow-hidden">
         {/* SIDEBAR (WHATSAPP LIST) */}

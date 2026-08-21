@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { AdminHeader } from "@/components/admin/AdminHeader";
 import { useRouter } from "next/navigation";
 import {
   Settings,
@@ -98,16 +97,14 @@ export default function AdminConfiguracoesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#fff6f4]">
-        <AdminHeader />
+      <div className="flex-1 flex flex-col">
         <TelaCarregando mensagem="Carregando suas configurações..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fff6f4]">
-      <AdminHeader />
+    <div className="flex-1 flex flex-col">
 
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8">
         <div className="mb-8">

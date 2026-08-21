@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { AdminHeader } from "@/components/admin/AdminHeader";
 import { ContractModal } from "@/components/admin/ContractModal";
 import { ContractDetailPanel, ContractStatusBadge } from "@/components/admin/ContractDetailPanel";
 import { ContractData, ContractStatus, PatientData } from "@/lib/types";
@@ -154,8 +153,7 @@ export default function AdminContratosPage() {
     : contracts;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fff6f4]">
-      <AdminHeader />
+    <div className="flex-1 flex flex-col">
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
 

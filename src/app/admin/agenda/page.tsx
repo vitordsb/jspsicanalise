@@ -6,7 +6,6 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AdminHeader } from "@/components/admin/AdminHeader";
 import { CalendarDays, MessageSquareText, Clock } from "lucide-react";
 import { formatarDataHora, formatarHora, formatarDataCurta } from "@/lib/agenda";
 import { formatCPF } from "@/lib/formatters";
@@ -77,8 +76,7 @@ export default function AdminAgendaPage() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fff6f4]">
-      <AdminHeader />
+    <div className="flex-1 flex flex-col">
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
         <div>
           <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[1px] text-[#5d0c1d] bg-[#f8dad2] px-3.5 py-1 rounded-full mb-2">
