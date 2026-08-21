@@ -7,10 +7,21 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { scryptSync } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { normalizeCpf, isValidCpf } from "@/lib/cpf";
 import { verificarToken, cookieSessaoPaciente } from "@/lib/paciente-auth";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+
+/**
+ * Hash fantasma para comparacao em tempo constante quando o CPF nao existe.
+ * Sem isso, a ausencia do scrypt revela por timing que o CPF nao e paciente
+ * da clinica, o que e dado sensivel para uma clinica psicanalitica.
+ */
+const HASH_FANTASMA = (() => {
+  const salt = "00000000000000000000000000000000";
+  return `${salt}:${scryptSync("fantasma", salt, 64).toString("hex")}`;
+})();
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
@@ -56,13 +67,17 @@ export async function POST(req: NextRequest) {
 
   // Mensagem unica para CPF inexistente e token errado: nao confirmamos se
   // determinada pessoa e paciente da clinica.
+  // verificarToken roda sempre (com hash real ou fantasma) para nivelar o
+  // tempo de resposta e impedir que um atacante descubra via timing quais
+  // CPFs sao pacientes da clinica.
   const generico = NextResponse.json(
     { error: "CPF ou código de acesso inválido." },
     { status: 401 }
   );
 
-  if (!paciente || !paciente.accessTokenHash) return generico;
-  if (!verificarToken(tokenLimpo, paciente.accessTokenHash)) return generico;
+  const hashParaComparar = paciente?.accessTokenHash || HASH_FANTASMA;
+  const tokenValido = verificarToken(tokenLimpo, hashParaComparar);
+  if (!paciente || !paciente.accessTokenHash || !tokenValido) return generico;
 
   const cookie = cookieSessaoPaciente(paciente.id);
   const res = NextResponse.json({

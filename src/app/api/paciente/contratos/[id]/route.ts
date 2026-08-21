@@ -19,8 +19,11 @@ export async function GET(
   const { id } = await params;
 
   // Filtro por patientId da sessao: id da URL sozinho nao basta.
+  // signedFileKey e signedFileHash sao caminhos e hashes internos do Storage:
+  // o paciente nao precisa deles e expor o caminho e desnecessario.
   const contrato = await prisma.contract.findFirst({
     where: { id, patientId },
+    omit: { signedFileKey: true, signedFileHash: true },
   });
 
   if (!contrato) {

@@ -94,7 +94,9 @@ export async function createSignedUrl(
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ expiresIn }),
+      // download: true forca Content-Disposition: attachment na URL assinada,
+      // impedindo que um PDF com JavaScript embutido execute no navegador.
+      body: JSON.stringify({ expiresIn, download: true }),
     }
   );
 
