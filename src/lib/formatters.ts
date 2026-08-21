@@ -78,6 +78,8 @@ export function formatDateTime(dateString: string | Date | null | undefined): st
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      // 24 horas sempre, sem depender do locale do navegador
+      hourCycle: "h23",
     }).format(d);
   } catch {
     return String(dateString);

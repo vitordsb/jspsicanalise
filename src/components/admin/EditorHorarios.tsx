@@ -12,6 +12,24 @@ import React from "react";
 import { Plus, Trash2, CalendarDays } from "lucide-react";
 import { NOMES_DIA, lerJanelas, type JanelaAtendimento } from "@/lib/agenda";
 
+/**
+ * Opcoes de horario em passos de 30 minutos, sempre em 24 horas.
+ *
+ * Trocamos <input type="time"> por selecao porque o input segue o idioma do
+ * navegador: um Chrome em ingles mostra 8:00 AM, e nao ha atributo HTML que
+ * force 24 horas. O valor enviado seria o mesmo, mas a Joane veria um formato
+ * que nao e o que ela usa.
+ */
+const HORARIOS: string[] = (() => {
+  const lista: string[] = [];
+  for (let h = 0; h < 24; h++) {
+    for (const m of ["00", "30"]) {
+      lista.push(`${String(h).padStart(2, "0")}:${m}`);
+    }
+  }
+  return lista;
+})();
+
 interface Props {
   valorJson: string;
   aoMudar: (json: string) => void;
@@ -65,21 +83,29 @@ export function EditorHorarios({ valorJson, aoMudar }: Props) {
                 ))}
               </select>
 
-              <input
-                type="time"
+              <select
                 value={j.inicio}
                 onChange={(e) => editar(i, "inicio", e.target.value)}
                 className={campo}
                 aria-label="Hora de início"
-              />
+              >
+                {!HORARIOS.includes(j.inicio) && <option value={j.inicio}>{j.inicio}</option>}
+                {HORARIOS.map((h) => (
+                  <option key={h} value={h}>{h}</option>
+                ))}
+              </select>
               <span className="text-xs text-[#9c8b8e]">até</span>
-              <input
-                type="time"
+              <select
                 value={j.fim}
                 onChange={(e) => editar(i, "fim", e.target.value)}
                 className={campo}
                 aria-label="Hora de término"
-              />
+              >
+                {!HORARIOS.includes(j.fim) && <option value={j.fim}>{j.fim}</option>}
+                {HORARIOS.map((h) => (
+                  <option key={h} value={h}>{h}</option>
+                ))}
+              </select>
 
               <button
                 type="button"
@@ -112,8 +138,9 @@ export function EditorHorarios({ valorJson, aoMudar }: Props) {
       <p className="text-[11px] text-[#9c8b8e] flex items-start gap-1.5 pt-1">
         <CalendarDays className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#ccb38d]" />
         <span>
-          Cada faixa vira horários de hora em hora. Das 08:00 às 11:00, com sessão
-          de 50 minutos, o paciente vê 08:00, 09:00 e 10:00.
+          Horários em formato 24 horas. Cada faixa vira horários de hora em hora:
+          das 08:00 às 11:00, com sessão de 50 minutos, o paciente vê 08:00,
+          09:00 e 10:00.
         </span>
       </p>
     </div>

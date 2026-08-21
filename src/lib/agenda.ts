@@ -141,7 +141,9 @@ export function formatarDataHora(d: Date | string): string {
   const data = typeof d === "string" ? new Date(d) : d;
   return new Intl.DateTimeFormat("pt-BR", {
     timeZone: FUSO, weekday: "long", day: "2-digit", month: "long",
-    hour: "2-digit", minute: "2-digit",
+    // hourCycle h23 forca 24 horas. Sem isso o Intl segue a preferencia do
+    // navegador de quem acessa, e um Chrome em ingles mostraria 8:00 AM.
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23",
   }).format(data);
 }
 
@@ -157,7 +159,7 @@ export function formatarDataCurta(d: Date | string): string {
 export function formatarHora(d: Date | string): string {
   const data = typeof d === "string" ? new Date(d) : d;
   return new Intl.DateTimeFormat("pt-BR", {
-    timeZone: FUSO, hour: "2-digit", minute: "2-digit",
+    timeZone: FUSO, hour: "2-digit", minute: "2-digit", hourCycle: "h23",
   }).format(data);
 }
 

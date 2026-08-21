@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { gerarVagas, vagaEhValida, lerJanelas, type JanelaAtendimento } from "@/lib/agenda";
+import { gerarVagas, vagaEhValida, lerJanelas, formatarDataHora, formatarHora, type JanelaAtendimento } from "@/lib/agenda";
 
 const JANELAS: JanelaAtendimento[] = [
   { dia: 1, inicio: "08:00", fim: "11:00" },
@@ -111,5 +111,36 @@ describe("leitura das janelas", () => {
   });
   it("descarta entrada malformada", () => {
     expect(lerJanelas('[{"dia":9,"inicio":"08:00","fim":"11:00"},{"dia":1,"inicio":"x","fim":"y"}]')).toEqual([]);
+  });
+});
+
+describe("formato de 24 horas", () => {
+  it("nao usa AM/PM em nenhum formatador", () => {
+    const tarde = "2026-08-28T21:00:00.000Z"; // 18:00 em Brasilia
+    for (const texto of [formatarDataHora(tarde), formatarHora(tarde)]) {
+      expect(texto).not.toMatch(/AM|PM|a\.m\.|p\.m\./i);
+    }
+  });
+
+  it("hora da tarde aparece acima de 12", () => {
+    expect(formatarHora("2026-08-28T21:00:00.000Z")).toBe("18:00");
+    expect(formatarHora("2026-08-28T22:00:00.000Z")).toBe("19:00");
+  });
+
+  it("meia-noite e 00, nao 24 nem 12", () => {
+    // 00:00 de Brasilia
+    expect(formatarHora("2026-08-25T03:00:00.000Z")).toBe("00:00");
+  });
+
+  it("as vagas geradas ja saem em 24 horas", () => {
+    const v = gerarVagas({
+      janelas: [{ dia: 5, inicio: "16:00", fim: "19:00" }],
+      duracaoMinutos: 50,
+      diasAFrente: 7,
+      antecedenciaHoras: 0,
+      ocupados: [],
+      agora: SEGUNDA,
+    });
+    expect(v.map((x) => x.hora)).toEqual(["16:00", "17:00", "18:00"]);
   });
 });
