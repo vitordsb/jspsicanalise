@@ -317,7 +317,7 @@ export default function PreencherAnamnesePage() {
                     href="/area-do-paciente/entrar"
                     className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#5d0c1d] hover:bg-[#8b1c31] text-white text-xs font-semibold transition"
                   >
-                    <span>Acessar minha área</span>
+                    <span>Marcar minha consulta agora</span>
                   </a>
                 </div>
               )}
@@ -327,8 +327,12 @@ export default function PreencherAnamnesePage() {
                   <Clock className="w-4 h-4 text-[#5d0c1d]" />
                   <span className="font-serif text-sm">Proximos Passos:</span>
                 </div>
-                <p>1. A Dra. Joane fara a leitura detalhada das suas respostas.</p>
-                <p>2. Ela entrara em contato pelo seu WhatsApp (<strong>{personalInfo.phone}</strong>) para alinhar o primeiro encontro.</p>
+                <p className="text-[#92400e] font-semibold">
+                  1. Marque sua consulta em até 24 horas. Sem agendamento, sua ficha
+                  é removida e você precisa preencher de novo.
+                </p>
+                <p>2. A Dra. Joane fara a leitura detalhada das suas respostas.</p>
+                <p>3. Ela entrara em contato pelo seu WhatsApp (<strong>{personalInfo.phone}</strong>) para alinhar o primeiro encontro.</p>
               </div>
 
               <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">

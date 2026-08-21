@@ -10,6 +10,7 @@ import {
   ExternalLink,
   HeartHandshake,
   LogOut,
+  CalendarDays,
 } from "lucide-react";
 
 export const AdminHeader = () => {
@@ -26,6 +27,11 @@ export const AdminHeader = () => {
       label: "Modelos de Anamnese",
       href: "/admin/anamneses",
       icon: FileText,
+    },
+    {
+      label: "Agenda",
+      href: "/admin/agenda",
+      icon: CalendarDays,
     },
     {
       label: "Contratos",

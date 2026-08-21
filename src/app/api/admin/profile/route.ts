@@ -100,6 +100,7 @@ export async function PUT(req: NextRequest) {
             notificationEmail: parsed.notificationEmail,
           }),
           ...(parsed.foroCidade !== undefined && { foroCidade: parsed.foroCidade }),
+          ...(parsed.horariosAtendimento !== undefined && { horariosAtendimento: parsed.horariosAtendimento }),
           ...(parsed.clinicName !== undefined && {
             clinicName: parsed.clinicName,
           }),

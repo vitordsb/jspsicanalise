@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { formatDateTime, formatCurrency, formatCPF } from "@/lib/formatters";
 import { TelaCarregando, BotaoConteudo } from "@/components/ui/Carregando";
+import { Agendamento } from "@/components/paciente/Agendamento";
 
 interface Anamnese {
   id: string;
@@ -99,6 +100,19 @@ export default function AreaDoPacientePage() {
 
   const primeiroNome = dados.paciente.fullName.split(" ")[0];
 
+  // Prazo de 24 horas contado da anamnese mais recente. So aparece enquanto a
+  // ficha esta pendente e nao ha consulta marcada.
+  const pendente = dados.anamneses.find((a) => a.status === "pending");
+  const restanteMs = pendente
+    ? new Date(pendente.enviadaEm).getTime() + 24 * 3600_000 - Date.now()
+    : 0;
+  const prazoRestante =
+    pendente && restanteMs > 0
+      ? restanteMs > 3600_000
+        ? `${Math.floor(restanteMs / 3600_000)} horas`
+        : `${Math.max(1, Math.floor(restanteMs / 60_000))} minutos`
+      : null;
+
   return (
     <div className="min-h-screen flex flex-col bg-[#fff6f4]">
       <header className="bg-white border-b border-[#f0ded8]">
@@ -127,6 +141,23 @@ export default function AreaDoPacientePage() {
       </header>
 
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-7 space-y-7">
+        {/* AGENDAMENTO
+            Vem primeiro porque e a acao pendente mais urgente: sem consulta
+            marcada, a ficha e removida em 24 horas. */}
+        <section className="space-y-3">
+          <h2 className="font-serif text-lg font-bold text-[#5d0c1d]">Sua consulta</h2>
+          {prazoRestante && (
+            <div className="bg-[#fffbeb] border border-[#fde68a] rounded-3xl p-4 text-xs text-[#78350f] flex items-start gap-2">
+              <Clock className="w-4 h-4 shrink-0 mt-0.5" />
+              <p>
+                <strong>Marque sua consulta em até {prazoRestante}.</strong> Sem
+                agendamento, sua ficha é removida e você precisará preencher de novo.
+              </p>
+            </div>
+          )}
+          <Agendamento aoMudar={carregar} />
+        </section>
+
         {/* ANAMNESES */}
         <section className="space-y-3">
           <h2 className="font-serif text-lg font-bold text-[#5d0c1d]">Sua ficha</h2>

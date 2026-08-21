@@ -11,8 +11,10 @@ import {
   CheckCircle2,
   AlertTriangle,
   Wallet,
+  CalendarDays,
 } from "lucide-react";
 import { BotaoConteudo, TelaCarregando } from "@/components/ui/Carregando";
+import { EditorHorarios } from "@/components/admin/EditorHorarios";
 
 export default function AdminConfiguracoesPage() {
   const router = useRouter();
@@ -30,6 +32,7 @@ export default function AdminConfiguracoesPage() {
     clinicName: "",
     address: "",
     foroCidade: "",
+    horariosAtendimento: "[]",
     // Dados de pagamento. Ficam vazios ate a Joane preencher: sao copiados
     // para o contrato no momento da emissao, entao contrato ja assinado nao
     // muda se ela trocar de conta depois.
@@ -286,6 +289,22 @@ export default function AdminConfiguracoesPage() {
                 className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
               />
             </div>
+          </div>
+
+          {/* HORARIOS DE ATENDIMENTO */}
+          <div className="border-t border-[#f3e4e0] pt-6 space-y-4">
+            <h3 className="font-serif text-xl font-bold text-[#5d0c1d] flex items-center gap-2">
+              <CalendarDays className="w-5 h-5 text-[#5d0c1d]" />
+              <span>Horários de Atendimento</span>
+            </h3>
+            <p className="text-xs text-[#6f5f62]">
+              Faixas em que você atende. É a partir delas que o paciente escolhe o
+              horário da consulta pelo site.
+            </p>
+            <EditorHorarios
+              valorJson={profile.horariosAtendimento}
+              aoMudar={(json) => setProfile({ ...profile, horariosAtendimento: json })}
+            />
           </div>
 
           {/* DADOS DE PAGAMENTO

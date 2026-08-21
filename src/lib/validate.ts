@@ -165,6 +165,7 @@ export const updateProfileSchema = z
     clinicName:        z.string().max(300).optional(),
     address:           z.string().max(500).optional(),
     foroCidade:        z.string().max(100).optional(),
+    horariosAtendimento: z.string().max(4000).optional(),
     // Campos de pagamento PIX (todos opcionais; campo vazio e sempre valido)
     pixKey:        z.string().max(200).optional(),
     // pixKeyType aceita string vazia (estado "nao configurado")

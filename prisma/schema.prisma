@@ -33,6 +33,9 @@ model User {
   // Comarca do foro dos contratos. E a comarca da profissional, nao a do
   // paciente: quem presta o servico define o foro de eleicao.
   foroCidade        String   @default("Cotia")
+  // Janelas semanais de atendimento, em JSON. Editaveis nas Configuracoes.
+  // Formato: [{ "dia": 1, "inicio": "08:00", "fim": "11:00" }] com dia 1=segunda.
+  horariosAtendimento String @default("[]")
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
@@ -72,6 +75,7 @@ model Patient {
   updatedAt     DateTime              @updatedAt
   submissions   AnamnesisSubmission[]
   contracts     Contract[]
+  agendamentos  Agendamento[]
 }
 
 model AnamnesisSubmission {
@@ -205,4 +209,30 @@ model ContractEvent {
   toStatus   String
   note       String?
   createdAt  DateTime @default(now())
+}
+
+
+/// Agendamento de consulta feito pelo proprio paciente.
+model Agendamento {
+  id             String   @id @default(cuid())
+  patientId      String
+  patient        Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  // Anamnese que originou o agendamento. Serve para saber se a ficha ja tem
+  // consulta marcada e escapar da limpeza automatica de 24 horas.
+  submissionId   String?
+  // Instante de inicio em UTC. A exibicao converte para America/Sao_Paulo.
+  inicioEm       DateTime
+  duracaoMinutos Int      @default(50)
+  // agendado, realizado, cancelado, falta
+  status         String   @default("agendado")
+  observacao     String?  @default("")
+  canceladoEm    DateTime?
+  motivoCancelamento String? @default("")
+  criadoEm       DateTime @default(now())
+  atualizadoEm   DateTime @updatedAt
+
+  // Impede duas pessoas reservarem o mesmo horario. A checagem em codigo tem
+  // corrida entre a leitura e a escrita: a restricao no banco e o que garante.
+  @@unique([inicioEm])
+  @@index([patientId])
 }
