@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-session";
+import { deleteFile } from "@/lib/supabase-storage";
 import {
   createContractSchema,
   isValidTransition,
@@ -191,12 +192,45 @@ export async function DELETE(
 
   try {
     const { id } = await params;
+
+    const contrato = await prisma.contract.findUnique({
+      where: { id },
+      select: { id: true, status: true, signedFileKey: true },
+    });
+
+    if (!contrato) {
+      return NextResponse.json({ error: "Contrato não encontrado." }, { status: 404 });
+    }
+
+    // Contrato assinado ou aprovado nao pode ser apagado. Existe um PDF que a
+    // pessoa assinou e uma trilha de auditoria: sumir com isso apaga a prova
+    // de um acordo que foi firmado. Para encerrar, o caminho e a clausula de
+    // rescisao, nao a tecla delete.
+    if (contrato.status === "assinado_recebido" || contrato.status === "aprovado") {
+      return NextResponse.json(
+        {
+          error:
+            "Contrato assinado não pode ser excluído. Ele é a prova do acordo firmado e do que foi assinado. Se o vínculo terminou, registre a rescisão.",
+        },
+        { status: 409 }
+      );
+    }
+
+    // Remove o arquivo do Storage antes do registro, para nao deixar orfao
+    // ocupando espaco e guardando dado pessoal sem finalidade.
+    if (contrato.signedFileKey) {
+      await deleteFile(contrato.signedFileKey).catch((e) =>
+        console.error("Falha ao remover arquivo do contrato:", e)
+      );
+    }
+
+    await prisma.contractEvent.deleteMany({ where: { contractId: id } }).catch(() => {});
     await prisma.contract.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Erro ao excluir contrato:", error);
     return NextResponse.json(
-      { error: "Erro ao excluir contrato." },
+      { error: "Não foi possível excluir o contrato." },
       { status: 500 }
     );
   }

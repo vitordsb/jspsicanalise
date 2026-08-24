@@ -5,12 +5,15 @@ import { SubmissionData, FormSection } from "@/lib/types";
 import { formatDate, formatDateTime, calculateAge, formatCPF } from "@/lib/formatters";
 import { ContractModal } from "./ContractModal";
 import { useToast } from "@/components/ui/Toast";
+import { ContractEditForm } from "./ContractEditForm";
 import {
   User,
   FileSignature,
   Printer,
   KeyRound,
   ArrowDown,
+  Pencil,
+  Trash2,
   ArrowUp,
   MessageCircle,
   Sparkles,
@@ -42,6 +45,11 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
   const [reemitindo, setReemitindo] = useState(false);
   const [codigoNovo, setCodigoNovo] = useState("");
   const toast = useToast();
+  // Contrato aberto para edicao na aba de contratos. Carregado sob demanda:
+  // a listagem traz so o resumo, e o formulario precisa do registro inteiro.
+  const [contratoEditando, setContratoEditando] = useState<Record<string, unknown> | null>(null);
+  const [carregandoContrato, setCarregandoContrato] = useState("");
+  const [excluindoContrato, setExcluindoContrato] = useState("");
   // Atalho de rolagem da ficha: com 36 perguntas, chegar ao fim na mao cansa.
   const areaFicha = useRef<HTMLDivElement>(null);
   const [perto, setPerto] = useState<"topo" | "meio" | "fim">("topo");
@@ -95,6 +103,42 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
     const el = areaFicha.current;
     if (!el) return;
     el.scrollTo({ top: destino === "fim" ? el.scrollHeight : 0, behavior: "smooth" });
+  };
+
+  const abrirEdicaoContrato = async (id: string) => {
+    setCarregandoContrato(id);
+    try {
+      const res = await fetch(`/api/admin/contracts/${id}`);
+      if (!res.ok) {
+        toast.erro("Não foi possível abrir o contrato para edição.");
+        return;
+      }
+      setContratoEditando(await res.json());
+    } catch {
+      toast.erro("Falha de conexão ao abrir o contrato.");
+    } finally {
+      setCarregandoContrato("");
+    }
+  };
+
+  const excluirContrato = async (id: string) => {
+    if (!confirm("Excluir este contrato? A ação não pode ser desfeita.")) return;
+    setExcluindoContrato(id);
+    try {
+      const res = await fetch(`/api/admin/contracts/${id}`, { method: "DELETE" });
+      const dados = await res.json().catch(() => ({}));
+      if (res.ok) {
+        toast.sucesso("Contrato excluído.");
+        onRefresh?.();
+      } else {
+        // Contrato assinado e recusado pelo servidor de proposito.
+        toast.erro(dados.error || "Não foi possível excluir o contrato.");
+      }
+    } catch {
+      toast.erro("Falha de conexão ao excluir.");
+    } finally {
+      setExcluindoContrato("");
+    }
   };
 
   const reemitirCodigo = async () => {
@@ -171,13 +215,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
           </a>
 
           {/* GERAR CONTRATO */}
-          <button
-            onClick={() => setIsContractModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-semibold shadow-xs transition"
-          >
-            <FileSignature className="w-4 h-4" />
-            <span className="hidden sm:inline">Gerar Contrato</span>
-          </button>
+
 
           {/* CODIGO DE ACESSO DO PACIENTE */}
           <button
@@ -507,7 +545,24 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
           )}
 
           {/* TAB 3: CONTRATOS */}
-          {activeTab === "contratos" && (
+          {activeTab === "contratos" && contratoEditando && (
+            <div className="bg-white rounded-3xl border border-[#f0ded8] p-6 sm:p-7 shadow-xs space-y-4">
+              <h3 className="font-serif text-lg font-bold text-[#5d0c1d]">
+                Editar contrato
+              </h3>
+              <ContractEditForm
+                contract={contratoEditando}
+                onCancel={() => setContratoEditando(null)}
+                onSaved={() => {
+                  setContratoEditando(null);
+                  toast.sucesso("Contrato atualizado.");
+                  onRefresh?.();
+                }}
+              />
+            </div>
+          )}
+
+          {activeTab === "contratos" && !contratoEditando && (
             <div className="bg-white rounded-3xl border border-[#f0ded8] p-6 sm:p-7 shadow-xs space-y-6">
               <div className="flex items-center justify-between border-b border-[#f3e4e0] pb-3">
                 <div>
@@ -520,6 +575,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                   </p>
                 </div>
 
+                {submission.contracts && submission.contracts.length > 0 && (
                 <button
                   onClick={() => setIsContractModalOpen(true)}
                   className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-semibold shadow-xs transition"
@@ -527,6 +583,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                   <FileSignature className="w-4 h-4" />
                   <span>Gerar Novo Contrato</span>
                 </button>
+                )}
               </div>
 
               {(!submission.contracts || submission.contracts.length === 0) ? (
@@ -562,7 +619,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                           CRIAR: abrir contrato existente por ele rendia um
                           documento sem logotipo, marca d'agua nem dados de
                           pagamento. */}
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex flex-wrap items-center gap-2 shrink-0">
                         <a
                           href={`/admin/contratos/${contract.id}/imprimir`}
                           target="_blank"
@@ -570,8 +627,44 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                           className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white border border-[#f0ded8] text-xs font-semibold text-[#5d0c1d] hover:bg-[#f8dad2] transition"
                         >
                           <Printer className="w-3.5 h-3.5" />
-                          <span>Visualizar / Imprimir</span>
+                          <span>Imprimir</span>
                         </a>
+
+                        {/* Contrato assinado nao aparece com editar nem excluir:
+                            o servidor recusa, e oferecer o botao so geraria erro. */}
+                        {contract.status !== "assinado_recebido" && contract.status !== "aprovado" && (
+                          <>
+                            <button
+                              onClick={() => abrirEdicaoContrato(contract.id)}
+                              disabled={carregandoContrato === contract.id}
+                              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white border border-[#f0ded8] text-xs font-semibold text-[#5d0c1d] hover:bg-[#f8dad2] disabled:opacity-60 transition"
+                            >
+                              <BotaoConteudo
+                                carregando={carregandoContrato === contract.id}
+                                rotuloCarregando="Abrindo..."
+                                claro={false}
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                                <span>Editar</span>
+                              </BotaoConteudo>
+                            </button>
+
+                            <button
+                              onClick={() => excluirContrato(contract.id)}
+                              disabled={excluindoContrato === contract.id}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-[#aa2d47] hover:bg-[#fff0f3] disabled:opacity-60 transition"
+                            >
+                              <BotaoConteudo
+                                carregando={excluindoContrato === contract.id}
+                                rotuloCarregando="Excluindo..."
+                                claro={false}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Excluir</span>
+                              </BotaoConteudo>
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}
