@@ -167,32 +167,15 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Email de notificacao assincrono
     const adminUser = await prisma.user.findFirst();
     const recipientEmail =
       adminUser?.notificationEmail || "enaoj22@gmail.com";
 
-    const chiefComplaint =
-      (answers["q_motivo"] as string) ||
-      (answers["motivo"] as string) ||
-      (answers["queixa"] as string) ||
-      (Object.values(answers)[0] as string) ||
-      "";
-
-    sendAnamnesisNotificationEmail({
-      patientName: personalInfo.fullName,
-      patientEmail: personalInfo.email,
-      patientPhone: personalInfo.phone,
-      // CPF removido do email: dado sensivel nao deve trafegar por Gmail
-      templateTitle: template.title,
-      submissionId: submission.id,
-      chiefComplaint:
-        typeof chiefComplaint === "string"
-          ? chiefComplaint.slice(0, 300)
-          : "",
-      recipientEmail,
-    }).catch((err) => {
-      console.error("Falha no envio de email de notificacao:", err);
+    // Aviso sem dado do paciente: so diz que chegou ficha nova e leva ao
+    // painel. Assincrono de proposito, para uma falha de e-mail nunca
+    // derrubar o envio da anamnese, que ja foi salva.
+    sendAnamnesisNotificationEmail({ recipientEmail }).catch((err) => {
+      console.error("Falha no envio do aviso de anamnese:", err);
     });
 
     return NextResponse.json({
