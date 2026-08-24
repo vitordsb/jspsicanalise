@@ -17,6 +17,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { ContractEditForm } from "./ContractEditForm";
+import { useToast } from "@/components/ui/Toast";
 
 // Mapa de labels pt-BR para os status
 const STATUS_LABELS: Record<ContractStatus, string> = {
@@ -60,6 +61,7 @@ export function ContractStatusBadge({ status }: { status: string }) {
 
 export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanelProps) {
   const [editando, setEditando] = useState(false);
+  const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [uploadState, setUploadState] = useState<"idle" | "uploading" | "success" | "error">("idle");
@@ -158,14 +160,17 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
 
       setUploadState("success");
       setUploadMsg("PDF assinado recebido com sucesso. Aguardando revisao.");
+      toast.sucesso("Contrato assinado recebido.");
       setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       onRefresh();
     } catch (err) {
       setUploadState("error");
-      setUploadMsg(err instanceof Error ? err.message : "Erro desconhecido ao enviar.");
+      const texto = err instanceof Error ? err.message : "Erro desconhecido ao enviar.";
+      setUploadMsg(texto);
+      toast.erro(texto);
     }
-  }, [selectedFile, contract.id, onRefresh]);
+  }, [selectedFile, contract.id, onRefresh, toast]);
 
   const handleApprove = async () => {
     if (!confirm("Confirmar aprovacao do contrato assinado?")) return;
@@ -173,13 +178,14 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
     try {
       const res = await fetch(`/api/admin/contracts/${contract.id}/approve`, { method: "POST" });
       if (res.ok) {
+        toast.sucesso("Contrato aprovado.");
         onRefresh();
       } else {
         const json = await res.json().catch(() => ({}));
-        alert(json.error || "Erro ao aprovar o contrato.");
+        toast.erro(json.error || "Não foi possível aprovar o contrato.");
       }
     } catch {
-      alert("Erro de conexao ao aprovar.");
+      toast.erro("Falha de conexão ao aprovar. Verifique sua internet.");
     } finally {
       setApproving(false);
     }
@@ -201,6 +207,7 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
       if (res.ok) {
         setShowRefuseForm(false);
         setRefuseReason("");
+        toast.aviso("Contrato recusado. Avise o paciente para reenviar.");
         onRefresh();
       } else {
         const json = await res.json().catch(() => ({}));

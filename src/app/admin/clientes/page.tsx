@@ -5,12 +5,14 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { WhatsAppSidebar } from "@/components/admin/WhatsAppSidebar";
 import { PatientDetailView } from "@/components/admin/PatientDetailView";
 import { SubmissionData } from "@/lib/types";
+import { useToast } from "@/components/ui/Toast";
 import {
   MessageSquareText,
   ArrowLeft,
 } from "lucide-react";
 
 function ClientesContent() {
+  const toast = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialId = searchParams.get("id");
@@ -105,9 +107,13 @@ function ClientesContent() {
             sub.id === selectedId ? { ...sub, status: newStatus as SubmissionData["status"] } : sub
           )
         );
+        toast.sucesso("Status atualizado.");
+      } else {
+        toast.erro("Não foi possível atualizar o status.");
       }
     } catch (e) {
       console.error("Erro ao atualizar status:", e);
+      toast.erro("Falha de conexão ao atualizar o status.");
     }
   };
 

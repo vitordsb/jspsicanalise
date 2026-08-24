@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
   // A Vercel envia "Bearer <CRON_SECRET>" nas chamadas de cron.
   if (!segredo || autorizacao !== `Bearer ${segredo}`) {
-    return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
   const r = await limparAnamnesesExpiradas();

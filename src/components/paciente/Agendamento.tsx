@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { CalendarDays, Check, X, AlertTriangle, Clock } from "lucide-react";
 import { formatarDataHora, NOMES_DIA } from "@/lib/agenda";
 import { Spinner, BotaoConteudo, EsqueletoCartoes } from "@/components/ui/Carregando";
+import { useToast } from "@/components/ui/Toast";
 
 interface Vaga {
   inicioIso: string;
@@ -28,6 +29,7 @@ interface MeuAgendamento {
 }
 
 export function Agendamento({ aoMudar }: { aoMudar?: () => void }) {
+  const toast = useToast();
   const [vagas, setVagas] = useState<Vaga[]>([]);
   const [meus, setMeus] = useState<MeuAgendamento[]>([]);
   const [semJanelas, setSemJanelas] = useState(false);
@@ -69,14 +71,17 @@ export function Agendamento({ aoMudar }: { aoMudar?: () => void }) {
       const d = await res.json().catch(() => ({}));
       if (!res.ok) {
         setErro(d.error || "Não foi possível marcar.");
+        toast.erro(d.error || "Não foi possível marcar sua consulta.");
         // Vaga pode ter sido tomada por outra pessoa: recarrega a lista.
         if (res.status === 409) carregar();
         return;
       }
+      toast.sucesso("Consulta marcada. Guarde a data e o horário.");
       await carregar();
       aoMudar?.();
     } catch {
       setErro("Falha de conexão ao marcar.");
+      toast.erro("Falha de conexão. Verifique sua internet.");
     } finally {
       setSalvando("");
     }
@@ -88,8 +93,11 @@ export function Agendamento({ aoMudar }: { aoMudar?: () => void }) {
     try {
       const res = await fetch(`/api/paciente/agenda/${id}/cancelar`, { method: "POST" });
       if (res.ok) {
+        toast.aviso("Consulta cancelada. Escolha um novo horário quando quiser.");
         await carregar();
         aoMudar?.();
+      } else {
+        toast.erro("Não foi possível cancelar. Tente novamente.");
       }
     } finally {
       setSalvando("");

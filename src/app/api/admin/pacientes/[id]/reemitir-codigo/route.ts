@@ -27,7 +27,7 @@ export async function POST(
   });
 
   if (!paciente) {
-    return NextResponse.json({ error: "Paciente nao encontrado." }, { status: 404 });
+    return NextResponse.json({ error: "Paciente não encontrado." }, { status: 404 });
   }
 
   const token = gerarTokenAcesso();

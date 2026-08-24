@@ -14,9 +14,11 @@ import {
 } from "lucide-react";
 import { BotaoConteudo, TelaCarregando } from "@/components/ui/Carregando";
 import { EditorHorarios } from "@/components/admin/EditorHorarios";
+import { useToast } from "@/components/ui/Toast";
 
 export default function AdminConfiguracoesPage() {
   const router = useRouter();
+  const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
@@ -85,11 +87,14 @@ export default function AdminConfiguracoesPage() {
       }
 
       if (res.ok) {
-        setSuccessMsg("Configurações atualizadas com sucesso!");
-        setTimeout(() => setSuccessMsg(""), 4000);
+        toast.sucesso("Configurações salvas.");
+      } else {
+        const j = await res.json().catch(() => ({}));
+        toast.erro(j.error || "Não foi possível salvar as configurações.");
       }
     } catch (e) {
       console.error("Erro ao salvar perfil:", e);
+      toast.erro("Falha de conexão ao salvar.");
     } finally {
       setSaving(false);
     }

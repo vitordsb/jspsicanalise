@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { SubmissionData, FormSection } from "@/lib/types";
 import { formatDate, formatDateTime, calculateAge, formatCPF } from "@/lib/formatters";
 import { ContractModal } from "./ContractModal";
+import { useToast } from "@/components/ui/Toast";
 import {
   User,
   FileSignature,
@@ -40,6 +41,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
   // Codigo de acesso do paciente: so existe em claro no instante da emissao.
   const [reemitindo, setReemitindo] = useState(false);
   const [codigoNovo, setCodigoNovo] = useState("");
+  const toast = useToast();
   // Atalho de rolagem da ficha: com 36 perguntas, chegar ao fim na mao cansa.
   const areaFicha = useRef<HTMLDivElement>(null);
   const [perto, setPerto] = useState<"topo" | "meio" | "fim">("topo");
@@ -56,10 +58,12 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
     setNotesSavedSuccess(false);
     try {
       await onNotesSave(clinicalNotes);
+      toast.sucesso("Anotações salvas.");
       setNotesSavedSuccess(true);
       setTimeout(() => setNotesSavedSuccess(false), 3000);
     } catch (e) {
       console.error("Erro ao salvar anotações:", e);
+      toast.erro("Não foi possível salvar as anotações. Copie o texto antes de sair da tela.");
     } finally {
       setSavingNotes(false);
     }
@@ -100,10 +104,14 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
     try {
       const res = await fetch(`/api/admin/pacientes/${patient.id}/reemitir-codigo`, { method: "POST" });
       const dados = await res.json().catch(() => ({}));
-      if (res.ok) setCodigoNovo(dados.codigoFormatado || dados.codigo || "");
-      else alert(dados.error || "Nao foi possivel emitir o codigo.");
+      if (res.ok) {
+        setCodigoNovo(dados.codigoFormatado || dados.codigo || "");
+        toast.sucesso("Novo código emitido. Passe para o paciente agora.");
+      } else {
+        toast.erro(dados.error || "Não foi possível emitir o código.");
+      }
     } catch {
-      alert("Falha de conexao ao emitir o codigo.");
+      toast.erro("Falha de conexão ao emitir o código.");
     } finally {
       setReemitindo(false);
     }
@@ -549,13 +557,21 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setIsContractModalOpen(true)}
-                          className="px-4 py-1.5 rounded-full bg-white border border-[#f0ded8] text-xs font-semibold text-[#5d0c1d] hover:bg-[#f8dad2] transition"
+                      {/* Leva para a pagina dedicada de impressao, a mesma
+                          usada pelos contratos avulsos. O modal so serve para
+                          CRIAR: abrir contrato existente por ele rendia um
+                          documento sem logotipo, marca d'agua nem dados de
+                          pagamento. */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        <a
+                          href={`/admin/contratos/${contract.id}/imprimir`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white border border-[#f0ded8] text-xs font-semibold text-[#5d0c1d] hover:bg-[#f8dad2] transition"
                         >
-                          Visualizar / Imprimir
-                        </button>
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>Visualizar / Imprimir</span>
+                        </a>
                       </div>
                     </div>
                   ))}

@@ -26,6 +26,7 @@ import { formatCPF } from "@/lib/formatters";
 import { TelaCarregando, BotaoConteudo, BarraProgresso } from "@/components/ui/Carregando";
 import { ProximosAgendamentos } from "./ProximosAgendamentos";
 import { EscolherPaciente } from "./EscolherPaciente";
+import { useToast } from "@/components/ui/Toast";
 
 interface Agendamento {
   id: string;
@@ -67,6 +68,7 @@ function iniciais(nome: string) {
 
 export function CalendarioSemanal() {
   const router = useRouter();
+  const toast = useToast();
   const [dados, setDados] = useState<Dados | null>(null);
   const [semana, setSemana] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(true);
@@ -129,10 +131,13 @@ export function CalendarioSemanal() {
       const j = await res.json().catch(() => ({}));
       if (!res.ok) {
         setErro(j.error || "Nao foi possivel atualizar.");
+        toast.erro(j.error || "Não foi possível atualizar a consulta.");
         return false;
       }
       if (j.foraDaJanela) {
-        setAviso("Consulta marcada fora do seu horario de atendimento. Ela vale, mas o paciente nao conseguiria escolher esse horario sozinho.");
+        const texto = "Consulta marcada fora do seu horário de atendimento. Ela vale, mas o paciente não conseguiria escolher esse horário sozinho.";
+        setAviso(texto);
+        toast.aviso(texto);
       }
       await carregar(semana, true);
       return true;
@@ -158,8 +163,10 @@ export function CalendarioSemanal() {
       const j = await res.json().catch(() => ({}));
       if (!res.ok) {
         setErro(j.error || "Nao foi possivel agendar.");
+        toast.erro(j.error || "Não foi possível agendar.");
         return false;
       }
+      toast.sucesso("Consulta agendada. Avise o paciente.");
       if (j.foraDaJanela) {
         setAviso("Consulta marcada fora do seu horario de atendimento. Ela vale, mas o paciente nao conseguiria escolher esse horario sozinho.");
       }
@@ -167,6 +174,7 @@ export function CalendarioSemanal() {
       return true;
     } catch {
       setErro("Falha de conexao.");
+      toast.erro("Falha de conexão. Verifique sua internet.");
       return false;
     } finally {
       setSalvando(false);
@@ -177,6 +185,7 @@ export function CalendarioSemanal() {
     if (!selecionado) return;
     const ok = await patch(selecionado.id, { inicioIso: montarInstante(data, hora) });
     if (ok) {
+      toast.sucesso("Consulta remanejada. Avise o paciente do novo horário.");
       setMovendo(false);
       setSelecionado(null);
     }
@@ -399,10 +408,22 @@ export function CalendarioSemanal() {
           salvando={salvando}
           aoFechar={() => { setSelecionado(null); setMovendo(false); }}
           aoMover={() => setMovendo(true)}
-          aoMudarStatus={(status) => patch(selecionado.id, { status })}
+          aoMudarStatus={async (status) => {
+            const ok = await patch(selecionado.id, { status });
+            if (ok) {
+              const rotulo: Record<string, string> = {
+                realizado: "Consulta marcada como realizada.",
+                falta: "Falta registrada.",
+                cancelado: "Consulta cancelada.",
+              };
+              toast.sucesso(rotulo[status] ?? "Consulta atualizada.");
+            }
+          }}
           aoExcluir={async () => {
             if (!confirm("Excluir este agendamento? A ação não pode ser desfeita.")) return;
-            await fetch(`/api/admin/agenda/${selecionado.id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/agenda/${selecionado.id}`, { method: "DELETE" });
+            if (res.ok) toast.sucesso("Agendamento excluído.");
+            else toast.erro("Não foi possível excluir o agendamento.");
             setSelecionado(null);
             carregar(semana, true);
           }}

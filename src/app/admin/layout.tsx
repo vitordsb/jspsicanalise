@@ -10,6 +10,7 @@
 
 import { usePathname } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { ToastProvider } from "@/components/ui/Toast";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -17,9 +18,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const semNavegacao =
     pathname === "/admin/login" || /^\/admin\/contratos\/[^/]+\/imprimir$/.test(pathname);
 
-  if (semNavegacao) return <>{children}</>;
+  if (semNavegacao) return <ToastProvider>{children}</ToastProvider>;
 
-  return (
+  const corpo = (
     // Coluna no celular (barra do menu em cima, conteudo embaixo) e linha a
     // partir do desktop (trilho a esquerda). Sem o flex-col, a barra do menu
     // virava uma coluna estreita na lateral e espremia o conteudo.
@@ -28,4 +29,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex-1 min-w-0 flex flex-col">{children}</div>
     </div>
   );
+
+  return <ToastProvider>{corpo}</ToastProvider>;
 }

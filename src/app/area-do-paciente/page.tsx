@@ -18,6 +18,7 @@ import {
 import { formatDateTime, formatCurrency, formatCPF } from "@/lib/formatters";
 import { TelaCarregando, BotaoConteudo } from "@/components/ui/Carregando";
 import { Agendamento } from "@/components/paciente/Agendamento";
+import { useToast } from "@/components/ui/Toast";
 
 interface Anamnese {
   id: string;
@@ -237,6 +238,7 @@ export default function AreaDoPacientePage() {
 
 /** Cartao de um contrato, com impressao e envio do assinado. */
 function CartaoContrato({ contrato, aoEnviar }: { contrato: Contrato; aoEnviar: () => void }) {
+  const toast = useToast();
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [msg, setMsg] = useState("");
@@ -263,14 +265,17 @@ function CartaoContrato({ contrato, aoEnviar }: { contrato: Contrato; aoEnviar: 
       if (!res.ok) {
         setFalhou(true);
         setMsg(dados.error || "Não foi possível enviar o arquivo.");
+        toast.erro(dados.error || "Não foi possível enviar o arquivo.");
         return;
       }
       setMsg(dados.message || "Contrato recebido.");
+      toast.sucesso("Contrato enviado. A Dra. Joane vai conferir.");
       setArquivo(null);
       aoEnviar();
     } catch {
       setFalhou(true);
       setMsg("Falha de conexão ao enviar.");
+      toast.erro("Falha de conexão. Verifique sua internet e tente de novo.");
     } finally {
       setEnviando(false);
     }

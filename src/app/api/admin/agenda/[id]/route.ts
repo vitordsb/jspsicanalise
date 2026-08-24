@@ -27,7 +27,7 @@ export async function PATCH(
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Nao foi possivel ler os dados." }, { status: 400 });
+    return NextResponse.json({ error: "Não foi possível ler os dados." }, { status: 400 });
   }
 
   const { inicioIso, status, observacao } = (body ?? {}) as {
@@ -38,7 +38,7 @@ export async function PATCH(
 
   const atual = await prisma.agendamento.findUnique({ where: { id } });
   if (!atual) {
-    return NextResponse.json({ error: "Agendamento nao encontrado." }, { status: 404 });
+    return NextResponse.json({ error: "Agendamento não encontrado." }, { status: 404 });
   }
 
   const dados: Record<string, unknown> = {};
@@ -47,7 +47,7 @@ export async function PATCH(
   if (inicioIso !== undefined) {
     const novo = new Date(inicioIso);
     if (isNaN(novo.getTime())) {
-      return NextResponse.json({ error: "Data invalida." }, { status: 400 });
+      return NextResponse.json({ error: "Data inválida." }, { status: 400 });
     }
 
     const perfil = await prisma.user.findFirst({ select: { horariosAtendimento: true } });
@@ -66,7 +66,7 @@ export async function PATCH(
 
   if (status !== undefined) {
     if (!STATUS_VALIDOS.includes(status as (typeof STATUS_VALIDOS)[number])) {
-      return NextResponse.json({ error: "Status invalido." }, { status: 400 });
+      return NextResponse.json({ error: "Status inválido." }, { status: 400 });
     }
     dados.status = status;
     if (status === "cancelado") {
@@ -97,12 +97,12 @@ export async function PATCH(
     // P2002: a restricao unica pegou outro agendamento no mesmo horario.
     if (typeof e === "object" && e && "code" in e && (e as { code: string }).code === "P2002") {
       return NextResponse.json(
-        { error: "Ja existe uma consulta marcada nesse horario." },
+        { error: "Já existe uma consulta marcada nesse horário." },
         { status: 409 }
       );
     }
     console.error("Erro ao atualizar agendamento:", e);
-    return NextResponse.json({ error: "Nao foi possivel atualizar." }, { status: 500 });
+    return NextResponse.json({ error: "Não foi possível atualizar." }, { status: 500 });
   }
 }
 

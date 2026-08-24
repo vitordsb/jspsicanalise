@@ -27,7 +27,7 @@ export async function GET(
   });
 
   if (!contrato) {
-    return NextResponse.json({ error: "Contrato nao encontrado." }, { status: 404 });
+    return NextResponse.json({ error: "Contrato não encontrado." }, { status: 404 });
   }
 
   // Contrato ainda nao assinado reflete o que esta nas Configuracoes, igual

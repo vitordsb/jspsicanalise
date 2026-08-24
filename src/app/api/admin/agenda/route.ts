@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Nao foi possivel ler os dados." }, { status: 400 });
+    return NextResponse.json({ error: "Não foi possível ler os dados." }, { status: 400 });
   }
 
   const { patientId, inicioIso, duracaoMinutos, observacao } = (body ?? {}) as {
@@ -86,12 +86,12 @@ export async function POST(req: NextRequest) {
   };
 
   if (!patientId || !inicioIso) {
-    return NextResponse.json({ error: "Escolha o paciente e o horario." }, { status: 400 });
+    return NextResponse.json({ error: "Escolha o paciente e o horário." }, { status: 400 });
   }
 
   const inicio = new Date(inicioIso);
   if (isNaN(inicio.getTime())) {
-    return NextResponse.json({ error: "Data invalida." }, { status: 400 });
+    return NextResponse.json({ error: "Data inválida." }, { status: 400 });
   }
 
   const paciente = await prisma.patient.findUnique({
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
     select: { id: true },
   });
   if (!paciente) {
-    return NextResponse.json({ error: "Paciente nao encontrado." }, { status: 404 });
+    return NextResponse.json({ error: "Paciente não encontrado." }, { status: 404 });
   }
 
   // Duracao vem do contrato mais recente, com 50 minutos como padrao.
@@ -134,11 +134,11 @@ export async function POST(req: NextRequest) {
   } catch (e: unknown) {
     if (typeof e === "object" && e && "code" in e && (e as { code: string }).code === "P2002") {
       return NextResponse.json(
-        { error: "Ja existe uma consulta marcada nesse horario." },
+        { error: "Já existe uma consulta marcada nesse horário." },
         { status: 409 }
       );
     }
     console.error("Erro ao agendar pelo painel:", e);
-    return NextResponse.json({ error: "Nao foi possivel agendar." }, { status: 500 });
+    return NextResponse.json({ error: "Não foi possível agendar." }, { status: 500 });
   }
 }

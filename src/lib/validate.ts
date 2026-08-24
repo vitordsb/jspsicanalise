@@ -32,7 +32,7 @@ export const checkCpfSchema = z.object({
 });
 
 export const submitAnamnesisSchema = z.object({
-  templateId: z.string().min(1, "templateId e obrigatorio."),
+  templateId: z.string().min(1, "Formulário não identificado. Recarregue a página."),
   // A mensagem vai tambem no z.boolean, nao so no refine: quando o campo vem
   // ausente o Zod falha na checagem de tipo e nunca chega no refine, e o
   // paciente acabava vendo o texto cru "expected boolean, received undefined".
@@ -84,7 +84,7 @@ export const updateSubmissionSchema = z.object({
 const centsSchema = z.number().int().positive().max(9_999_999);
 
 export const createContractSchema = z.object({
-  patientId:    z.string().min(1, "patientId e obrigatorio."),
+  patientId:    z.string().min(1, "Paciente não identificado."),
   submissionId: z.string().optional().nullable(),
 
   // Cabecalho
@@ -176,13 +176,13 @@ export const updateProfileSchema = z
     bankName:      z.string().max(200).optional(),
     bankAgency:    z
       .string()
-      .max(20, "Agencia: maximo 20 caracteres.")
-      .regex(bankFieldRegex, "Agencia: caracteres invalidos.")
+      .max(20, "Agência: máximo de 20 caracteres.")
+      .regex(bankFieldRegex, "Agência: use apenas números, letras, hífen ou barra.")
       .optional(),
     bankAccount:   z
       .string()
-      .max(30, "Conta: maximo 30 caracteres.")
-      .regex(bankFieldRegex, "Conta: caracteres invalidos.")
+      .max(30, "Conta: máximo de 30 caracteres.")
+      .regex(bankFieldRegex, "Conta: use apenas números, letras, hífen ou barra.")
       .optional(),
   })
   .superRefine((data, ctx) => {
@@ -197,7 +197,7 @@ export const updateProfileSchema = z
       if (!isValidCpf(normalized)) {
         ctx.addIssue({
           code: "custom",
-          message: "Chave PIX (CPF) invalida.",
+          message: "Chave PIX inválida: o CPF informado não confere.",
           path: ["pixKey"],
         });
       }
@@ -206,7 +206,7 @@ export const updateProfileSchema = z
       if (!isValidCnpj(normalized)) {
         ctx.addIssue({
           code: "custom",
-          message: "Chave PIX (CNPJ) invalida.",
+          message: "Chave PIX inválida: o CNPJ informado não confere.",
           path: ["pixKey"],
         });
       }
@@ -215,7 +215,7 @@ export const updateProfileSchema = z
       if (!emailResult.success) {
         ctx.addIssue({
           code: "custom",
-          message: "Chave PIX (e-mail) invalida.",
+          message: "Chave PIX inválida: o e-mail informado não é válido.",
           path: ["pixKey"],
         });
       }

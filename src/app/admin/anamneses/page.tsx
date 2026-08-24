@@ -13,8 +13,10 @@ import {
   Layers,
 } from "lucide-react";
 import { EsqueletoCartoes } from "@/components/ui/Carregando";
+import { useToast } from "@/components/ui/Toast";
 
 export default function AdminAnamnesesPage() {
+  const toast = useToast();
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
@@ -49,11 +51,14 @@ export default function AdminAnamnesesPage() {
         body: JSON.stringify({ isActive: true }),
       });
       if (res.ok) {
-        setMessage({ type: "success", text: "Modelo ativado com sucesso para o link público!" });
+        toast.sucesso("Modelo ativado. É ele que o paciente vai preencher.");
         fetchTemplates();
+      } else {
+        toast.erro("Não foi possível ativar o modelo.");
       }
     } catch (e) {
       console.error("Erro ao ativar modelo:", e);
+      toast.erro("Falha de conexão ao ativar o modelo.");
     }
   };
 
@@ -65,11 +70,14 @@ export default function AdminAnamnesesPage() {
         body: JSON.stringify({ duplicateFromId: id }),
       });
       if (res.ok) {
-        setMessage({ type: "success", text: "Nova versão duplicada com sucesso!" });
+        toast.sucesso("Nova versão criada a partir deste modelo.");
         fetchTemplates();
+      } else {
+        toast.erro("Não foi possível duplicar o modelo.");
       }
     } catch (e) {
       console.error("Erro ao duplicar:", e);
+      toast.erro("Falha de conexão ao duplicar.");
     }
   };
 
@@ -81,14 +89,17 @@ export default function AdminAnamnesesPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage({
-          type: "success",
-          text: data.message || "Modelo excluído com sucesso!",
-        });
+        // Modelo com respostas atreladas e desativado em vez de apagado, e a
+        // API avisa isso na mensagem.
+        if (data.deactivated) toast.aviso(data.message);
+        else toast.sucesso(data.message || "Modelo excluído.");
         fetchTemplates();
+      } else {
+        toast.erro(data.error || "Não foi possível excluir o modelo.");
       }
     } catch (e) {
       console.error("Erro ao excluir:", e);
+      toast.erro("Falha de conexão ao excluir.");
     }
   };
 
@@ -119,7 +130,7 @@ export default function AdminAnamnesesPage() {
 
   const handleSaveTemplate = async () => {
     if (!editingTemplate || !editingTemplate.title.trim()) {
-      alert("O título do formulário é obrigatório.");
+      toast.erro("O título do formulário é obrigatório.");
       return;
     }
 
@@ -132,7 +143,7 @@ export default function AdminAnamnesesPage() {
           body: JSON.stringify(editingTemplate),
         });
         if (res.ok) {
-          setMessage({ type: "success", text: "Modelo de anamnese atualizado com sucesso!" });
+          toast.sucesso("Modelo atualizado.");
           setEditingTemplate(null);
           setIsCreating(false);
           fetchTemplates();
@@ -144,7 +155,7 @@ export default function AdminAnamnesesPage() {
           body: JSON.stringify(editingTemplate),
         });
         if (res.ok) {
-          setMessage({ type: "success", text: "Novo modelo criado com sucesso!" });
+          toast.sucesso("Modelo criado.");
           setEditingTemplate(null);
           setIsCreating(false);
           fetchTemplates();
@@ -152,6 +163,7 @@ export default function AdminAnamnesesPage() {
       }
     } catch (e) {
       console.error("Erro ao salvar template:", e);
+      toast.erro("Falha de conexão ao salvar o modelo.");
     } finally {
       setSaving(false);
     }
