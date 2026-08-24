@@ -10,6 +10,8 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { enviarAvisoDeConsulta } from "@/lib/mail";
+import { avisarEmSegundoPlano } from "@/lib/avisos";
 import { requireAuth } from "@/lib/auth-session";
 import { lerJanelas, inicioDaSemana, diasDaSemana, vagaEhValida } from "@/lib/agenda";
 
@@ -127,9 +129,24 @@ export async function POST(req: NextRequest) {
         observacao: observacao ? String(observacao).slice(0, 500) : "",
       },
       include: {
-        patient: { select: { id: true, fullName: true, phone: true, cpf: true } },
+        patient: { select: { id: true, fullName: true, phone: true, cpf: true, email: true } },
       },
     });
+
+    // Marcacao feita pela Joane: para o paciente isso chega sem ele ter
+    // pedido nada, entao o aviso e o que evita a pessoa nao saber que tem
+    // consulta. A observacao vai junto porque costuma ser o combinado.
+    avisarEmSegundoPlano("consulta marcada pela Joane", () =>
+      enviarAvisoDeConsulta({
+        para: criado.patient.email,
+        nome: criado.patient.fullName,
+        tipo: "marcada",
+        inicioEm: criado.inicioEm,
+        duracaoMinutos: criado.duracaoMinutos,
+        motivo: criado.observacao,
+      })
+    );
+
     return NextResponse.json({ success: true, agendamento: criado, foraDaJanela });
   } catch (e: unknown) {
     if (typeof e === "object" && e && "code" in e && (e as { code: string }).code === "P2002") {

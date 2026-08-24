@@ -1,7 +1,8 @@
-import { NextResponse, after } from "next/server";
+import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendAnamnesisNotificationEmail } from "@/lib/mail";
+import { sendAnamnesisNotificationEmail, enviarCodigoDeAcesso } from "@/lib/mail";
+import { avisarEmSegundoPlano } from "@/lib/avisos";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { submitAnamnesisSchema } from "@/lib/validate";
 import { ZodError } from "zod";
@@ -171,24 +172,22 @@ export async function POST(req: NextRequest) {
     const recipientEmail =
       adminUser?.notificationEmail || "enaoj22@gmail.com";
 
-    // Aviso sem dado do paciente: so diz que chegou ficha nova e leva ao
-    // painel.
-    //
-    // Vai em after() e nao em promise solta. Promise solta depois do return
-    // e aposta: em serverless a funcao pode ser suspensa assim que a resposta
-    // sai, e o envio morre no meio sem deixar rastro no log. after() faz a
-    // plataforma segurar a funcao viva ate o envio terminar, sem que o
-    // paciente espere por ele.
-    //
-    // O catch fica aqui dentro de proposito: falha de e-mail nunca pode
-    // derrubar a anamnese, que a essa altura ja esta salva no banco.
-    after(async () => {
-      try {
-        await sendAnamnesisNotificationEmail({ recipientEmail });
-      } catch (err) {
-        console.error("Falha no envio do aviso de anamnese:", err);
-      }
-    });
+    // Aviso para a Joane: so diz que chegou ficha nova e leva ao painel,
+    // sem dado nenhum de paciente.
+    avisarEmSegundoPlano("anamnese nova", () =>
+      sendAnamnesisNotificationEmail({ recipientEmail })
+    );
+
+    // Codigo de acesso para o paciente. Este e o unico instante em que ele
+    // existe em claro: dali para frente so guardamos o hash scrypt. Se a
+    // pessoa fechar a tela sem anotar, o e-mail e o que salva o acesso dela.
+    avisarEmSegundoPlano("codigo de acesso", () =>
+      enviarCodigoDeAcesso({
+        para: personalInfo.email,
+        nome: personalInfo.fullName,
+        codigo: tokenAcesso,
+      })
+    );
 
     return NextResponse.json({
       success: true,

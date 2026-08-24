@@ -11,6 +11,8 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { enviarAvisoDeConsulta } from "@/lib/mail";
+import { avisarEmSegundoPlano } from "@/lib/avisos";
 import { exigirPaciente } from "@/lib/paciente-session";
 import { lerJanelas, gerarVagas, vagaEhValida } from "@/lib/agenda";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -136,7 +138,21 @@ export async function POST(req: NextRequest) {
         duracaoMinutos: duracao,
         status: "agendado",
       },
+      include: { patient: { select: { fullName: true, email: true } } },
     });
+
+    // Confirmacao com data e horario. Vale como comprovante do que a pessoa
+    // escolheu, e como lembrete depois que a tela fechou.
+    avisarEmSegundoPlano("consulta marcada pelo paciente", () =>
+      enviarAvisoDeConsulta({
+        para: criado.patient.email,
+        nome: criado.patient.fullName,
+        tipo: "marcada",
+        inicioEm: criado.inicioEm,
+        duracaoMinutos: criado.duracaoMinutos,
+      })
+    );
+
     return NextResponse.json({ success: true, agendamento: criado });
   } catch (e: unknown) {
     // P2002: a restricao unica do banco pegou uma corrida entre duas pessoas

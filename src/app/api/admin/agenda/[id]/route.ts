@@ -11,6 +11,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-session";
 import { lerJanelas, vagaEhValida } from "@/lib/agenda";
+import { enviarAvisoDeConsulta } from "@/lib/mail";
+import { avisarEmSegundoPlano, consultaAindaVale } from "@/lib/avisos";
 
 const STATUS_VALIDOS = ["agendado", "realizado", "cancelado", "falta"] as const;
 
@@ -43,12 +45,17 @@ export async function PATCH(
 
   const dados: Record<string, unknown> = {};
   let foraDaJanela = false;
+  // O que avisar ao paciente so da para saber comparando com o estado
+  // anterior: mudou a hora e remanejamento, virou cancelado e cancelamento.
+  let horarioMudou = false;
+  let virouCancelado = false;
 
   if (inicioIso !== undefined) {
     const novo = new Date(inicioIso);
     if (isNaN(novo.getTime())) {
       return NextResponse.json({ error: "Data inválida." }, { status: 400 });
     }
+    horarioMudou = novo.getTime() !== atual.inicioEm.getTime();
 
     const perfil = await prisma.user.findFirst({ select: { horariosAtendimento: true } });
     const janelas = lerJanelas(perfil?.horariosAtendimento);
@@ -69,6 +76,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Status inválido." }, { status: 400 });
     }
     dados.status = status;
+    virouCancelado = status === "cancelado" && atual.status !== "cancelado";
     if (status === "cancelado") {
       dados.canceladoEm = new Date();
       dados.motivoCancelamento = "Cancelado pela profissional";
@@ -90,8 +98,38 @@ export async function PATCH(
     const atualizado = await prisma.agendamento.update({
       where: { id },
       data: dados,
-      include: { patient: { select: { id: true, fullName: true, phone: true, cpf: true } } },
+      include: {
+        patient: { select: { id: true, fullName: true, phone: true, cpf: true, email: true } },
+      },
     });
+
+    // O paciente nao esta olhando a tela quando a Joane remaneja. Sem este
+    // aviso ele so descobre a mudanca aparecendo na hora errada.
+    //
+    // "realizado" e "falta" sao anotacao interna da Joane e nao viram e-mail.
+    if (virouCancelado && atual.inicioEm.getTime() > Date.now()) {
+      avisarEmSegundoPlano("consulta cancelada pela Joane", () =>
+        enviarAvisoDeConsulta({
+          para: atualizado.patient.email,
+          nome: atualizado.patient.fullName,
+          tipo: "cancelada",
+          inicioEm: atual.inicioEm,
+        })
+      );
+    } else if (horarioMudou && consultaAindaVale(atualizado.inicioEm, atualizado.status)) {
+      avisarEmSegundoPlano("consulta remarcada", () =>
+        enviarAvisoDeConsulta({
+          para: atualizado.patient.email,
+          nome: atualizado.patient.fullName,
+          tipo: "remarcada",
+          inicioEm: atualizado.inicioEm,
+          duracaoMinutos: atualizado.duracaoMinutos,
+          anteriorEm: atual.inicioEm,
+          motivo: atualizado.observacao,
+        })
+      );
+    }
+
     return NextResponse.json({ success: true, agendamento: atualizado, foraDaJanela });
   } catch (e: unknown) {
     // P2002: a restricao unica pegou outro agendamento no mesmo horario.
@@ -113,6 +151,27 @@ export async function DELETE(
   const authError = await requireAuth();
   if (authError) return authError;
   const { id } = await params;
+
+  // Le antes de apagar: depois do delete nao sobra para quem avisar.
+  const alvo = await prisma.agendamento.findUnique({
+    where: { id },
+    include: { patient: { select: { fullName: true, email: true } } },
+  });
+
   await prisma.agendamento.delete({ where: { id } }).catch(() => {});
+
+  // So avisa consulta futura que ainda valia. Apagar registro antigo ou ja
+  // cancelado e faxina de agenda, e o paciente nao precisa ouvir sobre isso.
+  if (alvo && consultaAindaVale(alvo.inicioEm, alvo.status)) {
+    avisarEmSegundoPlano("consulta removida pela Joane", () =>
+      enviarAvisoDeConsulta({
+        para: alvo.patient.email,
+        nome: alvo.patient.fullName,
+        tipo: "cancelada",
+        inicioEm: alvo.inicioEm,
+      })
+    );
+  }
+
   return NextResponse.json({ success: true });
 }
