@@ -167,7 +167,22 @@ export async function DELETE(
     include: { patient: { select: { fullName: true, email: true } } },
   });
 
-  await prisma.agendamento.delete({ where: { id } }).catch(() => {});
+  // O catch vazio que existia aqui devolvia sucesso mesmo com a exclusao
+  // falhando: o card sumia da tela e a consulta continuava no banco, o pior
+  // dos dois mundos numa agenda.
+  try {
+    await prisma.agendamento.delete({ where: { id } });
+  } catch (e: unknown) {
+    // P2025: ja nao existe. Para quem chamou o efeito desejado aconteceu.
+    if (typeof e === "object" && e && "code" in e && (e as { code: string }).code === "P2025") {
+      return NextResponse.json({ success: true });
+    }
+    console.error("Erro ao excluir agendamento:", e);
+    return NextResponse.json(
+      { error: "Não foi possível excluir o agendamento." },
+      { status: 500 }
+    );
+  }
 
   // So avisa consulta futura que ainda valia. Apagar registro antigo ou ja
   // cancelado e faxina de agenda, e o paciente nao precisa ouvir sobre isso.

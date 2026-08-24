@@ -126,3 +126,37 @@ describe("isValidCents", () => {
     expect(isValidCents(180.5)).toBe(false);
   });
 });
+
+describe("parseCents: ponto decimal x separador de milhar", () => {
+  // Regressao de um bug que gravava valor 100 vezes maior no contrato: a
+  // versao antiga apagava TODO ponto, entao "200.00" virava 20000 e saia
+  // impresso como R$ 20.000,00 no lugar de R$ 200,00.
+  it("le ponto como decimal quando vem com dois digitos", () => {
+    expect(parseCents("200.00")).toBe(20_000);
+    expect(parseCents("1800.50")).toBe(180_050);
+    expect(parseCents("0.99")).toBe(99);
+  });
+
+  it("le ponto como milhar nos outros casos", () => {
+    expect(parseCents("1.800")).toBe(180_000);
+    expect(parseCents("1.234.567")).toBe(123_456_700);
+  });
+
+  it("com virgula, ela manda e o ponto e milhar", () => {
+    expect(parseCents("200,00")).toBe(20_000);
+    expect(parseCents("1.800,00")).toBe(180_000);
+    expect(parseCents("R$ 1.234,56")).toBe(123_456);
+  });
+
+  it("numero inteiro sem separador nenhum", () => {
+    expect(parseCents("200")).toBe(20_000);
+    expect(parseCents(200)).toBe(20_000);
+  });
+
+  it("recusa entrada que nao e valor", () => {
+    expect(parseCents("")).toBeNull();
+    expect(parseCents("abc")).toBeNull();
+    expect(parseCents("-5")).toBeNull();
+    expect(parseCents(null)).toBeNull();
+  });
+});

@@ -45,9 +45,28 @@ export function parseCents(input: unknown): number | null {
     return Math.round(input * 100);
   }
   if (typeof input === "string") {
-    // Remove simbolo de moeda, espacos e converte virgula em ponto
-    const clean = input.replace(/R\$\s?/g, "").replace(/\./g, "").replace(",", ".").trim();
-    const num = parseFloat(clean);
+    const bruto = input.replace(/R\$\s?/g, "").trim();
+    if (!bruto) return null;
+
+    // O ponto e ambiguo em portugues: em "1.800" separa milhar, em "200.00"
+    // e decimal. Apagar todo ponto, como se fazia aqui, transformava "200.00"
+    // em 20000 e gravava R$ 20.000,00 no lugar de R$ 200,00. Num contrato de
+    // psicanalise isso e um zero a mais no valor da sessao.
+    //
+    // Regra: se ha virgula, ela e o decimal e todo ponto e milhar. Sem
+    // virgula, um unico ponto seguido de exatamente dois digitos e decimal
+    // ("200.00", "1800.50"); qualquer outro arranjo de pontos e milhar
+    // ("1.800", "1.234.567").
+    let normalizado: string;
+    if (bruto.includes(",")) {
+      normalizado = bruto.replace(/\./g, "").replace(",", ".");
+    } else if (/^\d+\.\d{2}$/.test(bruto)) {
+      normalizado = bruto;
+    } else {
+      normalizado = bruto.replace(/\./g, "");
+    }
+
+    const num = parseFloat(normalizado);
     if (isNaN(num) || num < 0) return null;
     return Math.round(num * 100);
   }

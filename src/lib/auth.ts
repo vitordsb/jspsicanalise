@@ -22,10 +22,23 @@ function getSecret(): string {
   return secret;
 }
 
-/** Retorna email e hash da senha do admin a partir das variaveis de ambiente. */
+/**
+ * Email e hash da senha do admin, vindos do ambiente.
+ *
+ * Falha alto quando falta configuracao, como getSecret. Antes havia um email
+ * embutido como reserva e um hash vazio: ambiente mal configurado nao
+ * quebrava, passava a aceitar uma credencial que ninguem escolheu e que
+ * estava escrita no repositorio. Erro de configuracao tem que aparecer no
+ * deploy, nao virar porta de entrada.
+ */
 export function getAdminCredentials(): { email: string; passwordHash: string } {
-  const email = process.env.ADMIN_EMAIL || "joane@psicanalise.com.br";
-  const passwordHash = process.env.ADMIN_PASSWORD_HASH || "";
+  const email = process.env.ADMIN_EMAIL;
+  const passwordHash = process.env.ADMIN_PASSWORD_HASH;
+  if (!email || !passwordHash) {
+    throw new Error(
+      "ADMIN_EMAIL e ADMIN_PASSWORD_HASH precisam estar configurados."
+    );
+  }
   return { email, passwordHash };
 }
 

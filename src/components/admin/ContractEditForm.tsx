@@ -13,7 +13,7 @@
 import React, { useState } from "react";
 import { Save, X } from "lucide-react";
 import { BotaoConteudo } from "@/components/ui/Carregando";
-import { PERIODICIDADES, sessoesPorMes } from "@/lib/money";
+import { PERIODICIDADES, sessoesPorMes, parseCents } from "@/lib/money";
 
 interface Props {
   contract: Record<string, unknown>;
@@ -28,13 +28,15 @@ function centavosParaTexto(c: unknown): string {
   return (n / 100).toFixed(2).replace(".", ",");
 }
 
-/** Converte o texto digitado de volta para centavos (ex: "200,00" -> 20000). */
+/**
+ * Converte o texto digitado de volta para centavos.
+ *
+ * Delega para parseCents em vez de reimplementar: a copia que existia aqui
+ * apagava todo ponto e transformava "200.00" em R$ 20.000,00.
+ */
 function textoParaCentavos(t: string): number | undefined {
-  const limpo = t.replace(/\./g, "").replace(",", ".").trim();
-  if (!limpo) return undefined;
-  const n = Number(limpo);
-  if (!Number.isFinite(n) || n <= 0) return undefined;
-  return Math.round(n * 100);
+  const c = parseCents(t);
+  return c && c > 0 ? c : undefined;
 }
 
 const s = (v: unknown) => (typeof v === "string" ? v : "");
