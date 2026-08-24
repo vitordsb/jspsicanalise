@@ -95,7 +95,7 @@ export function EscolherPaciente({
                 <UserPlus className="w-4.5 h-4.5" />
                 Agendar cliente
               </h3>
-              <p className="text-xs text-[#6f5f62] mt-1 capitalize">
+              <p className="text-xs text-[#6f5f62] mt-1 first-letter:uppercase">
                 {formatarDataHora(inicioIso)}
               </p>
             </div>

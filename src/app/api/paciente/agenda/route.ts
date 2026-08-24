@@ -54,15 +54,41 @@ export async function GET() {
     agora,
   });
 
-  const meus = await prisma.agendamento.findMany({
-    where: { patientId, status: "agendado" },
+  // Todas as consultas do paciente, nao so a proxima. A Joane pode marcar
+  // varias pela agenda dela, e antes a tela mostrava apenas a primeira da
+  // lista, que podia ate ser uma consulta ja passada.
+  const todas = await prisma.agendamento.findMany({
+    where: { patientId },
     orderBy: { inicioEm: "asc" },
-    select: { id: true, inicioEm: true, duracaoMinutos: true, status: true },
+    select: {
+      id: true,
+      inicioEm: true,
+      duracaoMinutos: true,
+      status: true,
+      observacao: true,
+      remarcacaoPedidaEm: true,
+      remarcacaoMotivo: true,
+      remarcacaoRecusadaEm: true,
+      remarcacaoRecusaMotivo: true,
+    },
   });
+
+  const limite = agora.getTime();
+  const proximas = todas.filter(
+    (a) => a.status === "agendado" && a.inicioEm.getTime() > limite
+  );
+  // Historico: o que ja passou e o que foi cancelado, do mais recente para o
+  // mais antigo, que e a ordem em que se procura por uma consulta anterior.
+  const historico = todas
+    .filter((a) => !proximas.includes(a))
+    .sort((a, b) => b.inicioEm.getTime() - a.inicioEm.getTime());
 
   return NextResponse.json({
     vagas,
-    meusAgendamentos: meus,
+    proximas,
+    historico,
+    // Mantido por compatibilidade com quem ainda le o campo antigo.
+    meusAgendamentos: proximas,
     duracaoMinutos: duracao,
     semJanelas: janelas.length === 0,
   });

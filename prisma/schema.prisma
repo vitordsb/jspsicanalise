@@ -231,8 +231,21 @@ model Agendamento {
   criadoEm       DateTime @default(now())
   atualizadoEm   DateTime @updatedAt
 
+  // Pedido de remarcacao aberto pelo paciente. Nulo quando nao ha pedido em
+  // aberto: a Joane responder (remarcando ou recusando) sempre limpa.
+  remarcacaoPedidaEm     DateTime?
+  remarcacaoMotivo       String?   @default("")
+  // Recusa fica registrada para o paciente ver o porque na area dele.
+  remarcacaoRecusadaEm   DateTime?
+  remarcacaoRecusaMotivo String?   @default("")
+
   // Impede duas pessoas reservarem o mesmo horario. A checagem em codigo tem
   // corrida entre a leitura e a escrita: a restricao no banco e o que garante.
-  @@unique([inicioEm])
+  //
+  // O indice unico e PARCIAL, criado em SQL na migration 0007, porque o
+  // Prisma nao modela `WHERE` em indice. Consulta cancelada nao pode segurar
+  // o horario: era o motivo de nao dar para remarcar de volta para um horario
+  // que ficou livre. Aqui o campo fica so documentado.
   @@index([patientId])
+  @@index([remarcacaoPedidaEm])
 }

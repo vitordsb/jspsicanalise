@@ -52,12 +52,24 @@ export async function GET(req: NextRequest) {
     },
   });
 
+  // Pedidos de remarcacao esperando resposta. Ficam fora do recorte de semana
+  // de proposito: um pedido de uma consulta daqui a tres semanas nao pode
+  // ficar invisivel so porque a Joane esta olhando a semana atual.
+  const pedidos = await prisma.agendamento.findMany({
+    where: { remarcacaoPedidaEm: { not: null }, status: "agendado" },
+    orderBy: { remarcacaoPedidaEm: "asc" },
+    include: {
+      patient: { select: { id: true, fullName: true, phone: true, cpf: true } },
+    },
+  });
+
   return NextResponse.json({
     semanaInicio: segunda.toISOString(),
     dias: diasDaSemana(segunda, agora),
     janelas,
     agendamentos: daSemana,
     proximas,
+    pedidos,
   });
 }
 

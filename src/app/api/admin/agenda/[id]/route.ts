@@ -57,6 +57,15 @@ export async function PATCH(
     }
     horarioMudou = novo.getTime() !== atual.inicioEm.getTime();
 
+    // Remarcar responde ao pedido do paciente. Sem isto o pedido ficaria
+    // aberto para sempre no painel, mesmo ja atendido.
+    if (horarioMudou) {
+      dados.remarcacaoPedidaEm = null;
+      dados.remarcacaoMotivo = "";
+      dados.remarcacaoRecusadaEm = null;
+      dados.remarcacaoRecusaMotivo = "";
+    }
+
     const perfil = await prisma.user.findFirst({ select: { horariosAtendimento: true } });
     const janelas = lerJanelas(perfil?.horariosAtendimento);
     foraDaJanela = !vagaEhValida(inicioIso, janelas, atual.duracaoMinutos);

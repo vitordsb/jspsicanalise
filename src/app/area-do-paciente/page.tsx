@@ -146,7 +146,7 @@ export default function AreaDoPacientePage() {
             Vem primeiro porque e a acao pendente mais urgente: sem consulta
             marcada, a ficha e removida em 24 horas. */}
         <section className="space-y-3">
-          <h2 className="font-serif text-lg font-bold text-[#5d0c1d]">Sua consulta</h2>
+          <h2 className="font-serif text-lg font-bold text-[#5d0c1d]">Sua agenda</h2>
           {prazoRestante && (
             <div className="bg-[#fffbeb] border border-[#fde68a] rounded-3xl p-4 text-xs text-[#78350f] flex items-start gap-2">
               <Clock className="w-4 h-4 shrink-0 mt-0.5" />

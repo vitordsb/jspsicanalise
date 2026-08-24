@@ -10,6 +10,11 @@
  * Remanejar e em dois toques: seleciona a consulta, depois toca no horario
  * novo. Preferi isso a arrastar porque funciona igual no celular, onde
  * arrastar disputa com a rolagem da pagina.
+ *
+ * Durante o remanejamento a grade inteira muda de aparencia: destino valido
+ * fica destacado e piscando, horario ocupado fica apagado e recusa o clique
+ * dizendo o porque, e a celula de origem fica marcada como "atual". Antes so
+ * havia uma tarja no topo, e nada na grade indicava onde era possivel soltar.
  */
 
 import React, { useCallback, useEffect, useState } from "react";
@@ -26,6 +31,7 @@ import { formatCPF } from "@/lib/formatters";
 import { TelaCarregando, BotaoConteudo, BarraProgresso } from "@/components/ui/Carregando";
 import { ProximosAgendamentos } from "./ProximosAgendamentos";
 import { EscolherPaciente } from "./EscolherPaciente";
+import { PedidosDeRemarcacao } from "./PedidosDeRemarcacao";
 import { useToast } from "@/components/ui/Toast";
 
 interface Agendamento {
@@ -34,6 +40,8 @@ interface Agendamento {
   duracaoMinutos: number;
   status: string;
   observacao: string | null;
+  remarcacaoPedidaEm?: string | null;
+  remarcacaoMotivo?: string | null;
   patient: { id: string; fullName: string; phone: string; cpf: string };
 }
 
@@ -43,6 +51,12 @@ interface Dados {
   janelas: JanelaAtendimento[];
   agendamentos: Agendamento[];
   proximas: Agendamento[];
+  pedidos: Agendamento[];
+}
+
+/** Consulta cancelada nao ocupa mais o horario: da para remarcar por cima. */
+function ocupaHorario(a: Agendamento | undefined | null): boolean {
+  return Boolean(a) && a?.status !== "cancelado";
 }
 
 const COR_STATUS: Record<string, string> = {
@@ -109,13 +123,24 @@ export function CalendarioSemanal() {
 
   useEffect(() => { carregar(semana, Boolean(dados)); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [semana]);
 
+  // Esc sai do modo de remanejamento. Sem isto o unico jeito era achar o
+  // botao Cancelar na tarja, que some da vista ao rolar a grade.
+  useEffect(() => {
+    if (!movendo) return;
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") setMovendo(false); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [movendo]);
+
   const irParaSemana = (delta: number) => {
     if (!dados) return;
     const base = new Date(dados.semanaInicio);
     base.setUTCDate(base.getUTCDate() + delta * 7);
     setSemana(base.toISOString().slice(0, 10));
-    setSelecionado(null);
-    setMovendo(false);
+    // Navegar de semana mantem o remanejamento em andamento: mover uma
+    // consulta para outra semana e justamente o caso mais comum, e zerar aqui
+    // obrigava a recomecar a cada seta.
+    if (!movendo) setSelecionado(null);
   };
 
   const patch = async (id: string, corpo: Record<string, unknown>) => {
@@ -166,7 +191,7 @@ export function CalendarioSemanal() {
         toast.erro(j.error || "Não foi possível agendar.");
         return false;
       }
-      toast.sucesso("Consulta agendada. Avise o paciente.");
+      toast.sucesso("Consulta agendada. O paciente foi avisado por e-mail.");
       if (j.foraDaJanela) {
         setAviso("Consulta marcada fora do seu horario de atendimento. Ela vale, mas o paciente nao conseguiria escolher esse horario sozinho.");
       }
@@ -185,7 +210,7 @@ export function CalendarioSemanal() {
     if (!selecionado) return;
     const ok = await patch(selecionado.id, { inicioIso: montarInstante(data, hora) });
     if (ok) {
-      toast.sucesso("Consulta remanejada. Avise o paciente do novo horário.");
+      toast.sucesso("Consulta remanejada. O paciente foi avisado por e-mail.");
       setMovendo(false);
       setSelecionado(null);
     }
@@ -210,9 +235,14 @@ export function CalendarioSemanal() {
   const horas = mostrarVazias ? todasAsHoras : todasAsHoras.filter(horaUtil);
   const escondidas = todasAsHoras.length - horas.length;
 
+  // Com o indice parcial, um horario pode ter uma consulta cancelada e uma
+  // ativa. A ativa e a que manda na celula; a cancelada so apareceria para
+  // confundir.
   const porCelula = new Map<string, Agendamento>();
   for (const a of dados.agendamentos) {
-    porCelula.set(`${chaveDia(a.inicioEm)}|${chaveHora(a.inicioEm)}`, a);
+    const chave = `${chaveDia(a.inicioEm)}|${chaveHora(a.inicioEm)}`;
+    const atual = porCelula.get(chave);
+    if (!atual || (!ocupaHorario(atual) && ocupaHorario(a))) porCelula.set(chave, a);
   }
 
   const primeiroDia = dados.dias[0];
@@ -220,6 +250,21 @@ export function CalendarioSemanal() {
 
   const grade = (
     <div className="space-y-4">
+      {/* PEDIDOS DE REMARCACAO */}
+      <PedidosDeRemarcacao
+        pedidos={dados.pedidos ?? []}
+        aoResponder={() => carregar(semana, true)}
+        aoEscolherHorario={(id) => {
+          const alvo = (dados.pedidos ?? []).find((a) => a.id === id);
+          if (!alvo) return;
+          setSelecionado(alvo);
+          setMovendo(true);
+          // Leva a grade para a semana da consulta, senao ela entraria em
+          // modo de remanejamento numa semana onde a origem nem aparece.
+          setSemana(alvo.inicioEm.slice(0, 10));
+        }}
+      />
+
       {/* NAVEGACAO DE SEMANA */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
@@ -266,17 +311,26 @@ export function CalendarioSemanal() {
       )}
 
       {movendo && selecionado && (
-        <div className="bg-[#5d0c1d] text-white p-3.5 rounded-2xl text-xs flex items-center gap-2 flex-wrap">
-          <MoveRight className="w-4 h-4 shrink-0" />
-          <span className="flex-1">
-            Escolha o novo horário para <strong>{selecionado.patient.fullName}</strong>.
-          </span>
-          <button
-            onClick={() => setMovendo(false)}
-            className="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 font-semibold transition"
-          >
-            Cancelar
-          </button>
+        <div className="bg-[#5d0c1d] text-white p-4 rounded-2xl text-xs space-y-2 shadow-lg">
+          <div className="flex items-center gap-2 flex-wrap">
+            <MoveRight className="w-4 h-4 shrink-0" />
+            <span className="flex-1 min-w-[200px]">
+              Movendo a consulta de <strong>{selecionado.patient.fullName}</strong>
+            </span>
+            <button
+              onClick={() => setMovendo(false)}
+              className="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 font-semibold transition"
+            >
+              Cancelar
+            </button>
+          </div>
+          <p className="text-white/80 first-letter:uppercase">
+            Hoje em {formatarDataHora(selecionado.inicioEm)}
+          </p>
+          <p className="text-white/90 flex items-center gap-1.5 flex-wrap">
+            <MoveRight className="w-3.5 h-3.5 shrink-0" />
+            <span>Toque numa célula com seta para mover. Esc cancela.</span>
+          </p>
         </div>
       )}
 
@@ -318,18 +372,44 @@ export function CalendarioSemanal() {
                   const ag = porCelula.get(chave);
                   const trabalha = dentroDaJanela(d.diaSemana, hora, dados.janelas, duracao);
 
-                  if (ag) {
+                  // Durante o remanejamento so consulta ATIVA barra o
+                  // destino. Cancelada nao ocupa mais o horario.
+                  if (ag && ocupaHorario(ag)) {
                     const ativo = selecionado?.id === ag.id;
+                    const ehOrigem = movendo && ativo;
+                    const bloqueia = movendo && !ativo;
+
                     return (
                       <button
                         key={chave}
-                        onClick={() => { setSelecionado(ag); setMovendo(false); }}
-                        title={`${ag.patient.fullName} - ${ROTULO_STATUS[ag.status] ?? ag.status}`}
+                        onClick={() => {
+                          if (bloqueia) {
+                            // Antes o clique aqui trocava a selecao em
+                            // silencio e o remanejamento sumia sem explicacao.
+                            toast.aviso(
+                              `${ag.patient.fullName} já tem consulta nesse horário. Escolha um horário destacado.`
+                            );
+                            return;
+                          }
+                          setSelecionado(ag);
+                          setMovendo(false);
+                        }}
+                        title={
+                          ehOrigem
+                            ? "Horário atual desta consulta"
+                            : bloqueia
+                              ? `Ocupado por ${ag.patient.fullName}`
+                              : `${ag.patient.fullName} - ${ROTULO_STATUS[ag.status] ?? ag.status}`
+                        }
                         className={`min-h-[52px] rounded-xl px-1.5 py-1.5 text-[11px] font-semibold text-left transition ${
                           COR_STATUS[ag.status] ?? COR_STATUS.agendado
-                        } ${ativo ? "ring-2 ring-[#aa2d47] ring-offset-1" : "hover:opacity-90"}`}
+                        } ${ativo ? "ring-2 ring-[#aa2d47] ring-offset-1" : "hover:opacity-90"} ${
+                          bloqueia ? "opacity-30 cursor-not-allowed" : ""
+                        }`}
                       >
-                        <span className="block truncate">{iniciais(ag.patient.fullName)}</span>
+                        <span className="block truncate">
+                          {ehOrigem ? "ATUAL" : iniciais(ag.patient.fullName)}
+                        </span>
                         <span className="block truncate font-normal opacity-90">
                           {ag.patient.fullName.split(" ")[0]}
                         </span>
@@ -337,6 +417,9 @@ export function CalendarioSemanal() {
                     );
                   }
 
+                  // Destino livre. Em modo de remanejamento ele grita, para
+                  // a Joane enxergar de imediato onde da para soltar.
+                  const cancelada = ag?.status === "cancelado";
                   return (
                     <button
                       key={chave}
@@ -348,18 +431,26 @@ export function CalendarioSemanal() {
                       disabled={salvando}
                       title={
                         movendo
-                          ? "Mover a consulta para este horário"
-                          : trabalha
-                          ? "Livre. Toque para agendar um cliente"
-                          : "Fora do seu horário de atendimento. Toque para agendar mesmo assim"
+                          ? cancelada
+                            ? "Livre outra vez: a consulta aqui foi cancelada. Toque para mover"
+                            : "Toque para mover a consulta para este horário"
+                          : cancelada
+                            ? "Consulta cancelada. O horário está livre, toque para agendar"
+                            : trabalha
+                              ? "Livre. Toque para agendar um cliente"
+                              : "Fora do seu horário de atendimento. Toque para agendar mesmo assim"
                       }
                       className={`group min-h-[52px] rounded-xl transition flex items-center justify-center ${
-                        trabalha
-                          ? "bg-[#fbf3ef] border border-[#f0ded8]"
-                          : "bg-[#f7f5f4] border border-dashed border-[#eae2d7]"
-                      } hover:bg-[#f8dad2] hover:border-[#5d0c1d] cursor-pointer`}
+                        movendo
+                          ? "bg-[#f8dad2] border-2 border-[#5d0c1d] ring-2 ring-[#5d0c1d]/25 animate-pulse hover:animate-none hover:bg-[#5d0c1d]"
+                          : trabalha
+                            ? "bg-[#fbf3ef] border border-[#f0ded8] hover:bg-[#f8dad2] hover:border-[#5d0c1d]"
+                            : "bg-[#f7f5f4] border border-dashed border-[#eae2d7] hover:bg-[#f8dad2] hover:border-[#5d0c1d]"
+                      } cursor-pointer`}
                     >
-                      {!movendo && (
+                      {movendo ? (
+                        <MoveRight className="w-4 h-4 text-[#5d0c1d] group-hover:text-white transition" />
+                      ) : (
                         <Plus className="w-3.5 h-3.5 text-[#5d0c1d] opacity-0 group-hover:opacity-60 transition" />
                       )}
                     </button>
@@ -383,6 +474,19 @@ export function CalendarioSemanal() {
       )}
 
       {/* LEGENDA */}
+      {movendo ? (
+        <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#6f5f62]">
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded bg-[#f8dad2] border-2 border-[#5d0c1d]" /> Pode mover para cá
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded bg-[#5d0c1d] opacity-30" /> Ocupado
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded bg-[#5d0c1d] ring-2 ring-[#aa2d47]" /> Horário atual
+          </span>
+        </div>
+      ) : (
       <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#6f5f62]">
         <span className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded bg-[#5d0c1d]" /> Agendado
@@ -400,6 +504,7 @@ export function CalendarioSemanal() {
           <span className="w-3 h-3 rounded bg-[#f7f5f4] border border-dashed border-[#eae2d7]" /> Fora do expediente
         </span>
       </div>
+      )}
 
       {/* DETALHE DA CONSULTA SELECIONADA */}
       {selecionado && (
@@ -478,7 +583,7 @@ function DetalheConsulta({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-serif font-bold text-sm text-[#241a1c]">{a.patient.fullName}</p>
-          <p className="text-xs text-[#6f5f62] mt-0.5 capitalize">{formatarDataHora(a.inicioEm)}</p>
+          <p className="text-xs text-[#6f5f62] mt-0.5 first-letter:uppercase">{formatarDataHora(a.inicioEm)}</p>
           <p className="text-[11px] text-[#9c8b8e] mt-0.5">
             {a.duracaoMinutos} minutos - CPF {formatCPF(a.patient.cpf)} - {ROTULO_STATUS[a.status] ?? a.status}
           </p>
@@ -560,7 +665,7 @@ function DetalheConsulta({
       </div>
 
       <p className="text-[11px] text-[#9c8b8e]">
-        Ao remanejar, avise o paciente: o sistema não envia aviso automático.
+        Ao remanejar ou cancelar, o paciente recebe um e-mail com o novo horário.
       </p>
     </div>
   );

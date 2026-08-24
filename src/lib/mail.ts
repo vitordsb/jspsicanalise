@@ -195,6 +195,23 @@ export async function sendAnamnesisNotificationEmail({
   });
 }
 
+/** Pedido de remarcacao aberto por um paciente. Sem dizer por quem. */
+export async function enviarPedidoDeRemarcacao({
+  recipientEmail = "enaoj22@gmail.com",
+}: { recipientEmail?: string } = {}): Promise<ResultadoEnvio> {
+  const link = `${getAppUrl()}/admin/agenda`;
+  return enviar(recipientEmail, "Pedido de remarcação de consulta", {
+    titulo: "Pedido de remarcação",
+    saudacao: "Olá, Dra. Joane,",
+    paragrafos: [
+      "Um paciente pediu para remarcar a consulta dele.",
+      "Entre na agenda para ver o pedido e escolher o novo horário, ou recusar.",
+    ],
+    botao: { texto: "Abrir a agenda", url: link },
+    aviso: "Por segurança, os dados do paciente ficam apenas no painel.",
+  });
+}
+
 // --- Para o paciente --------------------------------------------------------
 
 /**
@@ -320,5 +337,36 @@ export async function enviarAvisoDeConsulta({
     blocos,
     botao: { texto: "Abrir minha área", url: link },
     aviso: "Perdeu o código de acesso? Fale com a Dra. Joane para receber um novo.",
+  });
+}
+
+/** Recusa de um pedido de remarcacao. O horario original continua valendo. */
+export async function enviarRemarcacaoRecusada({
+  para,
+  nome,
+  inicioEm,
+  motivo,
+}: {
+  para: string;
+  nome: string;
+  inicioEm: Date | string;
+  motivo?: string | null;
+}): Promise<ResultadoEnvio> {
+  const link = `${getAppUrl()}/area-do-paciente`;
+  const nomeCurto = primeiroNome(nome);
+  const quando = formatarDataHora(inicioEm);
+
+  const blocos: Bloco[] = [{ rotulo: "Sua consulta continua em", valor: quando }];
+  if (motivo?.trim()) blocos.push({ rotulo: "Resposta da Dra. Joane", valor: motivo.trim() });
+
+  return enviar(para, "Sobre o seu pedido de remarcação", {
+    titulo: "Pedido de remarcação",
+    saudacao: nomeCurto ? `Olá, ${nomeCurto},` : "Olá,",
+    paragrafos: [
+      "A Dra. Joane não conseguiu remarcar a sua consulta desta vez, então o horário combinado segue valendo.",
+    ],
+    blocos,
+    botao: { texto: "Abrir minha área", url: link },
+    aviso: "Se não puder comparecer, fale com a Dra. Joane.",
   });
 }
