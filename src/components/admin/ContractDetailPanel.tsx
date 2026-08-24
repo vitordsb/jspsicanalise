@@ -13,11 +13,13 @@ import {
   ArrowRight,
   Printer,
   Pencil,
+  Link2,
   FileText,
   Loader2,
 } from "lucide-react";
 import { ContractEditForm } from "./ContractEditForm";
 import { useToast } from "@/components/ui/Toast";
+import { VincularAnamnese } from "./VincularAnamnese";
 
 // Mapa de labels pt-BR para os status
 const STATUS_LABELS: Record<ContractStatus, string> = {
@@ -62,6 +64,7 @@ export function ContractStatusBadge({ status }: { status: string }) {
 export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanelProps) {
   const [editando, setEditando] = useState(false);
   const toast = useToast();
+  const [vinculando, setVinculando] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [uploadState, setUploadState] = useState<"idle" | "uploading" | "success" | "error">("idle");
@@ -288,7 +291,16 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
-        {/* Abre a pagina dedicada de impressao. Rota propria, sem modal nem
+        {vinculando && (
+        <VincularAnamnese
+          contratoId={contract.id}
+          nomePaciente={contract.patientFullName || contract.patient?.fullName || "este paciente"}
+          aoFechar={() => setVinculando(false)}
+          aoVincular={onRefresh}
+        />
+      )}
+
+      {/* Abre a pagina dedicada de impressao. Rota propria, sem modal nem
             layout do painel, porque ancestral com overflow ou altura fixa
             quebra a paginacao do navegador. */}
         <a
@@ -300,6 +312,18 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
           <Printer className="w-4 h-4" />
           <span>Abrir contrato para impressão</span>
         </a>
+
+        {/* Contrato sem anamnese atrelada. Acontece quando o contrato sai
+            antes de a pessoa preencher a ficha, que e ordem comum na pratica. */}
+        {!contract.submissionId && (
+          <button
+            onClick={() => setVinculando(true)}
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-[#eae2d7] text-[#5d0c1d] text-xs font-semibold hover:bg-[#fbf3ef] transition"
+          >
+            <Link2 className="w-4 h-4" />
+            <span>Vincular a uma anamnese</span>
+          </button>
+        )}
 
         {podeEditar && (
           <button
