@@ -119,11 +119,39 @@ export async function PUT(
   try {
     const { id } = await params;
 
+    // Campos que o servidor decide, fora do que o cliente pode mandar.
+    const extras: Record<string, unknown> = {};
+
+    // Contrato assinado nao se edita. O documento foi congelado em texto no
+    // instante da assinatura; mexer nos campos depois faria a tela mostrar
+    // uma coisa e o texto assinado dizer outra, e a assinatura deixaria de
+    // provar o que quer que seja. Para mudar o combinado, o caminho e um
+    // aditivo ou um contrato novo.
+    const assinado = await prisma.contract.findUnique({
+      where: { id },
+      select: { signedAt: true, status: true },
+    });
+    if (assinado?.signedAt) {
+      // Mudar o status segue permitido: aprovar e recusar acontecem depois
+      // da assinatura e nao tocam no texto.
+      const soStatus =
+        Object.keys(parsed).every((k) => k === "status") && parsed.status !== undefined;
+      if (!soStatus) {
+        return NextResponse.json(
+          {
+            error:
+              "Este contrato já foi assinado e não pode ser alterado. Para mudar o que foi combinado, emita um aditivo ou um novo contrato.",
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     // Se o status esta sendo alterado, valida a transicao
     if (parsed.status !== undefined) {
       const current = await prisma.contract.findUnique({
         where: { id },
-        select: { status: true },
+        select: { status: true, therapistName: true, issuedAt: true },
       });
       if (!current) {
         return NextResponse.json(
@@ -145,6 +173,20 @@ export async function PUT(
           );
         }
 
+        // Enviar para assinatura e o aceite da Joane: ela esta autenticada no
+        // painel e esse ato fica registrado com data. O documento sai com os
+        // dois lados assinados, o dela na emissao e o do paciente na
+        // assinatura eletronica.
+        //
+        // A data tambem congela aqui: antes o documento usava a data de hoje
+        // no "local e data", entao o mesmo contrato impresso outro dia saia
+        // com outra data.
+        if (toStatus === "aguardando_assinatura") {
+          const perfil = await prisma.user.findFirst({ select: { name: true } });
+          extras.issuedAt = new Date();
+          extras.issuedByName = perfil?.name || current.therapistName || "";
+        }
+
         // Registra evento de transicao antes de atualizar
         await prisma.contractEvent.create({
           data: {
@@ -159,9 +201,10 @@ export async function PUT(
     }
 
     // Monta objeto de update apenas com campos enviados (sem undefined)
-    const data = Object.fromEntries(
-      Object.entries(parsed).filter(([, v]) => v !== undefined)
-    );
+    const data = {
+      ...Object.fromEntries(Object.entries(parsed).filter(([, v]) => v !== undefined)),
+      ...extras,
+    };
 
     const updated = await prisma.contract.update({
       where: { id },

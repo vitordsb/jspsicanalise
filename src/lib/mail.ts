@@ -212,6 +212,22 @@ export async function enviarPedidoDeRemarcacao({
   });
 }
 
+/** Contrato assinado por um paciente. Sem dizer por quem. */
+export async function avisarJoaneContratoAssinado({
+  recipientEmail = "enaoj22@gmail.com",
+}: { recipientEmail?: string } = {}): Promise<ResultadoEnvio> {
+  const link = `${getAppUrl()}/admin/contratos`;
+  return enviar(recipientEmail, "Contrato assinado", {
+    titulo: "Contrato assinado",
+    saudacao: "Olá, Dra. Joane,",
+    paragrafos: [
+      "Um contrato foi assinado eletronicamente. Ele já está disponível no painel, com a data da assinatura e o código de verificação.",
+    ],
+    botao: { texto: "Ver os contratos", url: link },
+    aviso: "Por segurança, os dados do paciente ficam apenas no painel.",
+  });
+}
+
 // --- Para o paciente --------------------------------------------------------
 
 /**
@@ -368,5 +384,43 @@ export async function enviarRemarcacaoRecusada({
     blocos,
     botao: { texto: "Abrir minha área", url: link },
     aviso: "Se não puder comparecer, fale com a Dra. Joane.",
+  });
+}
+
+/**
+ * Recibo da assinatura.
+ *
+ * Vale como comprovante do ato: diz quando foi e traz o codigo de
+ * verificacao. Nao carrega o contrato em anexo nem seus valores, porque
+ * e-mail nao e canal seguro e o documento inteiro esta na area dele,
+ * atras de autenticacao.
+ */
+export async function enviarContratoAssinado({
+  para,
+  nome,
+  assinadoEm,
+  codigoVerificacao,
+}: {
+  para: string;
+  nome: string;
+  assinadoEm: Date | string;
+  codigoVerificacao: string;
+}): Promise<ResultadoEnvio> {
+  const link = `${getAppUrl()}/area-do-paciente`;
+  const nomeCurto = primeiroNome(nome);
+
+  return enviar(para, "Seu contrato foi assinado", {
+    titulo: "Contrato assinado",
+    saudacao: nomeCurto ? `Olá, ${nomeCurto},` : "Olá,",
+    paragrafos: [
+      "Seu contrato foi assinado com sucesso. Guarde este e-mail como comprovante.",
+      "O documento assinado fica disponível na sua área, onde você pode ler e baixar quando quiser.",
+    ],
+    blocos: [
+      { rotulo: "Assinado em", valor: formatarDataHora(assinadoEm) },
+      { rotulo: "Código de verificação", valor: codigoVerificacao, monoespacado: true },
+    ],
+    botao: { texto: "Ver meu contrato", url: link },
+    aviso: "O código de verificação confirma a autenticidade do documento.",
   });
 }

@@ -190,6 +190,33 @@ model Contract {
   // Controle de versoes (incrementado a cada upload de correcao)
   signedVersion        Int @default(0)
 
+  // --- Assinatura eletronica ---------------------------------------------
+  // "eletronica" quando assinado na plataforma, "papel" quando o PDF assinado
+  // foi enviado. Vazio enquanto nao houver assinatura.
+  signatureMethod      String?   @default("")
+
+  // Emissao pela Joane. Ela ja esta autenticada no painel quando envia o
+  // contrato para assinatura, entao esse ato e o aceite dela, com data.
+  issuedAt             DateTime?
+  issuedByName         String?   @default("")
+
+  // Assinatura do paciente.
+  signedAt             DateTime?
+  signerName           String?   @default("")
+  signerCpf            String?   @default("")
+  signerIp             String?   @default("")
+  signerUserAgent      String?   @default("")
+
+  // O documento CONGELADO no instante da assinatura, em texto, mais o
+  // SHA-256 dele. Sem isto a assinatura nao prova nada: o contrato e montado
+  // de 57 campos do banco e qualquer edicao posterior mudaria em silencio o
+  // documento que a pessoa assinou.
+  signedText           String?
+  signedTextHash       String?   @default("")
+  // Codigo curto derivado do hash, carimbado em toda pagina. Serve para casar
+  // uma folha impressa com o registro; a prova mesmo e o hash.
+  verificationCode     String?   @default("")
+
   // --- Decisao (aprovar/recusar) ---
   decisionAt    DateTime?
   refusalReason String?   // obrigatorio quando status = recusado

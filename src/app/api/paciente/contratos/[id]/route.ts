@@ -23,7 +23,13 @@ export async function GET(
   // o paciente nao precisa deles e expor o caminho e desnecessario.
   const contrato = await prisma.contract.findFirst({
     where: { id, patientId },
-    omit: { signedFileKey: true, signedFileHash: true },
+    // signerIp e signerUserAgent sao pericia, ficam so do lado da Joane.
+    // signedText sai por tamanho: o documento e remontado dos campos, que o
+    // servidor impede de mudar depois da assinatura.
+    omit: {
+      signedFileKey: true, signedFileHash: true,
+      signedText: true, signerIp: true, signerUserAgent: true,
+    },
   });
 
   if (!contrato) {

@@ -109,6 +109,74 @@ export const ESTILOS_IMPRESSAO = `
 .assinatura .nome { font-weight: 700; font-size: 10pt; margin: 0; text-align: center; }
 .assinatura .doc { font-size: 8.5pt; color: #444; margin: 0.5mm 0 0 0; text-align: center; }
 
+/* ---- Assinatura eletronica ---- */
+
+/* Assinado nao tem risco para assinar em caneta: o traco some e no lugar
+   entra a rubrica com o nome de quem assinou. Manter a linha em branco num
+   documento ja assinado convidaria alguem a escrever por cima. */
+/* Assinado: a rubrica fica ACIMA da linha, fora da caixa do risco. Dentro
+   dela, com deslocamento negativo, nome de duas linhas invadia o texto de
+   cima. Assim aguenta nome de qualquer tamanho. */
+.assinatura .risco-assinado { border-top: 0.9pt solid #333; margin-top: 0; padding-top: 1.5mm; }
+.assinatura .rubrica {
+  font-family: "Segoe Script", "Brush Script MT", "Lucida Handwriting", cursive;
+  font-size: 13.5pt;
+  color: #1f3a63;
+  margin: 8mm 0 0.5mm 0;
+  text-align: center;
+  line-height: 1.15;
+}
+.assinatura .assinado-em {
+  font-size: 7pt;
+  color: #666;
+  margin: 1mm 0 0 0;
+  text-align: center;
+}
+
+.selo-assinatura {
+  margin-top: 10mm;
+  padding: 3mm 4mm;
+  border: 0.8pt solid #999;
+  border-radius: 1.5mm;
+  background: #fafafa;
+  font-size: 8pt;
+  color: #333;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+.selo-assinatura p { margin: 0 0 1.5mm 0; text-align: justify; font-size: 8pt; }
+.selo-assinatura p:last-child { margin-bottom: 0; }
+.selo-titulo {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 7.5pt !important;
+  color: #555;
+}
+.selo-assinatura .codigo {
+  font-family: "Courier New", Courier, monospace;
+  letter-spacing: 0.08em;
+}
+
+/* Carimbo repetido: position fixed faz aparecer em TODA pagina impressa, que
+   e o ponto. Numa folha solta ele e o que liga o papel ao registro. */
+.carimbo-assinatura {
+  display: none;
+  position: fixed;
+  bottom: 4mm;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 6.5pt;
+  letter-spacing: 0.1em;
+  color: #8a8a8a;
+  font-family: "Courier New", Courier, monospace;
+  pointer-events: none;
+  user-select: none;
+}
+
 .rodape-doc {
   margin-top: 8mm;
   padding-top: 2.5mm;
@@ -187,6 +255,13 @@ export const ESTILOS_IMPRESSAO = `
   }
 
   .barra-acoes, .nao-imprimir { display: none !important; }
+
+  /* So na impressao: na tela o carimbo repetido so poluiria. */
+  .carimbo-assinatura {
+    display: block !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
 
   /* Sem isto o navegador nao imprime a marca d'agua */
   .marca-dagua {

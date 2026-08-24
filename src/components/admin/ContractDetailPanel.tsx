@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { ContractEditForm } from "./ContractEditForm";
 import { useToast } from "@/components/ui/Toast";
+import { AssinaturaDoContrato } from "./AssinaturaDoContrato";
 import { VincularAnamnese } from "./VincularAnamnese";
 
 // Mapa de labels pt-BR para os status
@@ -259,6 +260,9 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
   // Contrato ja aprovado nao deve ser editado: foi assinado com o teor que
   // esta ali. Para mudar, emite-se um novo.
   const podeEditar = contract.status !== "aprovado";
+  // Assinado nao se edita: o texto foi congelado na assinatura e o servidor
+  // recusa a alteracao. Manter o botao so entregaria um 409 na cara dela.
+  const assinadoEletronicamente = Boolean(contract.signedAt);
 
   if (editando) {
     return (
@@ -325,7 +329,7 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
           </button>
         )}
 
-        {podeEditar && (
+        {podeEditar && !assinadoEletronicamente && (
           <button
             onClick={() => setEditando(true)}
             className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-[#eae2d7] text-[#5d0c1d] text-xs font-semibold hover:bg-[#fbf3ef] transition"
@@ -335,6 +339,21 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
           </button>
         )}
       </div>
+
+      {/* ASSINATURA ELETRONICA
+          Vem antes das acoes: num contrato assinado, quem assinou e se o
+          documento continua integro e a informacao principal sobre ele. */}
+      {contract.signedAt && (
+        <AssinaturaDoContrato
+          contratoId={contract.id}
+          assinadoEm={contract.signedAt}
+          assinadoPor={contract.signerName}
+          cpfDoAssinante={contract.signerCpf}
+          codigoVerificacao={contract.verificationCode}
+          emitidoEm={contract.issuedAt}
+          emitidoPor={contract.issuedByName}
+        />
+      )}
 
       {/* Dados do contrato */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
@@ -465,9 +484,11 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
       {/* APROVAR / RECUSAR */}
       {canApproveOrRefuse && (
         <div className="border border-[#f0ded8] rounded-3xl p-5 space-y-4 bg-[#fbf3ef]">
-          <h4 className="font-serif font-bold text-[#5d0c1d]">Revisao do Contrato Assinado</h4>
+          <h4 className="font-serif font-bold text-[#5d0c1d]">Revisão do contrato assinado</h4>
           <p className="text-xs text-[#6f5f62]">
-            O paciente enviou o PDF assinado. Revise o documento antes de aprovar ou recusar.
+            {assinadoEletronicamente
+              ? "O paciente assinou eletronicamente. Confira a assinatura acima e aprove para encerrar o fluxo."
+              : "O paciente enviou o PDF assinado. Revise o documento antes de aprovar ou recusar."}
           </p>
 
           {hasSignedFile && (

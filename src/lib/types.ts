@@ -178,6 +178,15 @@ export interface ContractData {
 
   // Historico de transicoes (apenas no GET /[id])
   events?: ContractEvent[];
+
+  // Assinatura eletronica
+  signatureMethod?: string | null;
+  issuedAt?: string | null;
+  issuedByName?: string | null;
+  signedAt?: string | null;
+  signerName?: string | null;
+  signerCpf?: string | null;
+  verificationCode?: string | null;
 }
 
 export interface AdminUser {

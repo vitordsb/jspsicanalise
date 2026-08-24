@@ -50,6 +50,13 @@ export interface ContratoImpressao {
   paymentBankAgency: string;
   paymentBankAccount: string;
   createdAt: string;
+  signatureMethod?: string | null;
+  issuedAt?: string | null;
+  issuedByName?: string | null;
+  signedAt?: string | null;
+  signerName?: string | null;
+  signerCpf?: string | null;
+  verificationCode?: string | null;
   patient?: { fullName?: string; cpf?: string; email?: string; phone?: string; birthDate?: string };
 }
 
@@ -94,7 +101,14 @@ export function DocumentoContrato({ contrato }: { contrato: ContratoImpressao })
   const nomePaciente = c.patientFullName || c.patient?.fullName || "";
   const cpfPaciente = c.patientCpf || c.patient?.cpf || "";
   const valorSessao = formatCurrency(c.sessionPriceCents / 100);
-  const dataHoje = formatDate(new Date());
+
+  // A data do documento e a da assinatura, ou a da emissao, ou a da criacao.
+  // Nunca a de hoje: com new Date() o mesmo contrato impresso em outro dia
+  // saia com outra data, o que num documento assinado invalidaria a propria
+  // assinatura.
+  const dataDoDocumento = c.signedAt || c.issuedAt || c.createdAt;
+  const dataHoje = formatDate(dataDoDocumento);
+  const assinado = Boolean(c.signedAt);
 
   const sessoesMes = sessoesPorMes(c.frequency);
   const totalMensal =
@@ -315,17 +329,29 @@ export function DocumentoContrato({ contrato }: { contrato: ContratoImpressao })
         <div className="assinaturas">
           <div className="assinaturas-linha">
             <div className="assinatura">
-              <div className="risco">
+              {assinado && <p className="rubrica">{c.therapistName}</p>}
+              <div className={assinado ? "risco risco-assinado" : "risco"}>
                 <p className="nome">{c.therapistName}</p>
                 <p className="doc">
                   {c.professionalDocNumber?.trim() ? c.professionalDocNumber : "CONTRATADA"}
                 </p>
+                {assinado && c.issuedAt && (
+                  <p className="assinado-em">
+                    Emitido e assinado eletronicamente em {formatDateTime(c.issuedAt)}
+                  </p>
+                )}
               </div>
             </div>
             <div className="assinatura">
-              <div className="risco">
+              {assinado && <p className="rubrica">{c.signerName || nomePaciente}</p>}
+              <div className={assinado ? "risco risco-assinado" : "risco"}>
                 <p className="nome">{nomePaciente}</p>
                 <p className="doc">{cpfPaciente ? `CPF ${formatCPF(cpfPaciente)}` : "CONTRATANTE"}</p>
+                {assinado && (
+                  <p className="assinado-em">
+                    Assinado eletronicamente em {formatDateTime(c.signedAt!)}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -348,9 +374,37 @@ export function DocumentoContrato({ contrato }: { contrato: ContratoImpressao })
           )}
         </div>
 
+        {assinado && c.verificationCode && (
+          <div className="selo-assinatura">
+            <p className="selo-titulo">Assinatura eletrônica</p>
+            <p>
+              Documento assinado eletronicamente por{" "}
+              <strong>{c.signerName || nomePaciente}</strong>
+              {c.signerCpf ? `, CPF ${formatCPF(c.signerCpf)}` : ""}, em{" "}
+              {formatDateTime(c.signedAt!)}, mediante autenticação por CPF e código de
+              acesso pessoal, nos termos da Lei 14.063/2020 e da MP 2.200-2/2001.
+            </p>
+            <p>
+              A autenticidade pode ser conferida pelo código{" "}
+              <strong className="codigo">{c.verificationCode}</strong>, que identifica de
+              forma única o conteúdo deste documento. Qualquer alteração no texto produz
+              um código diferente.
+            </p>
+          </div>
+        )}
+
         <div className="rodape-doc">
-          <p>Documento emitido em {formatDateTime(new Date())}.</p>
+          <p>Documento emitido em {formatDateTime(dataDoDocumento)}.</p>
         </div>
+
+        {/* Carimbo repetido em toda pagina impressa: e o que permite casar uma
+            folha solta com o registro no sistema. Fica no rodape fixo, junto
+            da marca d'agua, e some da tela. */}
+        {assinado && c.verificationCode && (
+          <div className="carimbo-assinatura" aria-hidden="true">
+            Assinado eletronicamente · {c.verificationCode}
+          </div>
+        )}
       </div>
   );
 }
