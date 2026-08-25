@@ -6,7 +6,7 @@ import { avisarEmSegundoPlano } from "@/lib/avisos";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { submitAnamnesisSchema } from "@/lib/validate";
 import { ZodError } from "zod";
-import { gerarTokenAcesso, hashToken } from "@/lib/paciente-auth";
+import { gerarTokenAcesso, hashToken, cookieSessaoPaciente } from "@/lib/paciente-auth";
 
 /** Nome tecnico do campo -> como o paciente o ve no formulario. */
 const NOMES_DE_CAMPO: Record<string, string> = {
@@ -114,6 +114,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Cadastro que ja existia e ja tem contrato ou consulta e caso delicado:
+    // quem souber o CPF dessa pessoa poderia preencher a ficha, receber um
+    // codigo novo e entrar na area dela para ler contrato com endereco e RG.
+    // Nesses casos a ficha e aceita, mas o codigo antigo continua valendo e
+    // nao ha login automatico.
+    let temHistorico = false;
+    if (existingPatient) {
+      const [contratos, consultas] = await Promise.all([
+        prisma.contract.count({ where: { patientId: existingPatient.id } }),
+        prisma.agendamento.count({ where: { patientId: existingPatient.id } }),
+      ]);
+      temHistorico = contratos > 0 || consultas > 0;
+    }
+    const podeEntrarDireto = !temHistorico;
+
     // Token de acesso a area do paciente. Numerico para poder ser ditado e
     // anotado. Guardamos so o hash; o valor em claro e devolvido uma unica vez
     // nesta resposta, para a tela mostrar e a pessoa anotar.
@@ -148,8 +163,12 @@ export async function POST(req: NextRequest) {
           gender: personalInfo.gender || patient.gender,
           occupation: personalInfo.occupation || patient.occupation,
           maritalStatus: personalInfo.maritalStatus || patient.maritalStatus,
-          accessTokenHash: hashToken(tokenAcesso),
-          accessTokenAt: new Date(),
+          // So emite codigo novo quando nao ha o que proteger. Trocar o codigo
+          // de quem ja tem contrato deixaria a propria pessoa de fora.
+          ...(podeEntrarDireto && {
+            accessTokenHash: hashToken(tokenAcesso),
+            accessTokenAt: new Date(),
+          }),
         },
         include: { submissions: true },
       });
@@ -189,15 +208,30 @@ export async function POST(req: NextRequest) {
       })
     );
 
-    return NextResponse.json({
+    const resposta = NextResponse.json({
       success: true,
       message: "Anamnese enviada com sucesso.",
       submissionId: submission.id,
       patientId: patient.id,
       // Unico momento em que o token aparece em claro. Depois daqui so existe
       // o hash, e uma nova via precisa ser emitida pela Joane no painel.
-      tokenAcesso,
+      tokenAcesso: podeEntrarDireto ? tokenAcesso : "",
+      // Diz a tela se ela pode mandar direto para a agenda ou se precisa
+      // pedir para a pessoa entrar com o codigo que ja tem.
+      autenticado: podeEntrarDireto,
     });
+
+    // Login automatico. A ficha so vale se virar consulta em 24 horas, e
+    // obrigar a pessoa a digitar CPF e oito digitos justo nesse momento
+    // derrubava boa parte antes de chegar na agenda. Ela acabou de provar
+    // quem e preenchendo o proprio cadastro, e o cadastro e novo: nao ha
+    // dado anterior de ninguem para alcancar por aqui.
+    if (podeEntrarDireto) {
+      const cookie = cookieSessaoPaciente(patient.id);
+      resposta.cookies.set(cookie.name, cookie.value, cookie.options);
+    }
+
+    return resposta;
   } catch (error) {
     console.error("Erro ao processar envio de anamnese:", error);
     return NextResponse.json(

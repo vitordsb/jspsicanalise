@@ -56,6 +56,9 @@ export default function PreencherAnamnesePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Codigo de acesso a area do paciente. So existe em claro neste momento.
   const [tokenAcesso, setTokenAcesso] = useState("");
+  // Quando o servidor ja abriu a sessao, a pessoa vai direto escolher horario
+  // em vez de ter que digitar CPF e codigo logo depois de recebe-lo.
+  const [autenticado, setAutenticado] = useState(false);
   const [alreadySubmittedInfo, setAlreadySubmittedInfo] = useState<{
     createdAt?: string;
     status?: string;
@@ -245,6 +248,7 @@ export default function PreencherAnamnesePage() {
       setIsSuccess(true);
       setSubmittedId(data.submissionId);
       setTokenAcesso(data.tokenAcesso || "");
+      setAutenticado(Boolean(data.autenticado));
 
       confetti({
         particleCount: 80,
@@ -314,10 +318,31 @@ export default function PreencherAnamnesePage() {
                     para você.
                   </p>
                   <a
+                    href={autenticado ? "/area-do-paciente" : "/area-do-paciente/entrar"}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#5d0c1d] hover:bg-[#8b1c31] text-white text-xs font-semibold transition"
+                  >
+                    <span>
+                      {autenticado ? "Escolher meu horário agora" : "Entrar e marcar minha consulta"}
+                    </span>
+                  </a>
+                </div>
+              )}
+
+              {!tokenAcesso && (
+                <div className="bg-[#fbf3ef] border border-[#f0ded8] rounded-2xl p-6 max-w-md mx-auto space-y-3 text-left">
+                  <p className="font-serif text-sm font-bold text-[#5d0c1d]">
+                    Você já tem acesso à sua área
+                  </p>
+                  <p className="text-xs text-[#5f5456] leading-relaxed">
+                    Encontramos um cadastro seu. Entre com o seu CPF e o código de
+                    acesso que você já recebeu para marcar sua consulta. Se não tiver
+                    o código à mão, fale com a Dra. Joane que ela emite outro.
+                  </p>
+                  <a
                     href="/area-do-paciente/entrar"
                     className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#5d0c1d] hover:bg-[#8b1c31] text-white text-xs font-semibold transition"
                   >
-                    <span>Marcar minha consulta agora</span>
+                    <span>Entrar na minha área</span>
                   </a>
                 </div>
               )}
@@ -331,6 +356,15 @@ export default function PreencherAnamnesePage() {
                   1. Marque sua consulta em até 24 horas. Sem agendamento, sua ficha
                   é removida e você precisa preencher de novo.
                 </p>
+                {autenticado && (
+                  <a
+                    href="/area-do-paciente"
+                    className="inline-flex items-center gap-1.5 text-[#5d0c1d] font-bold hover:underline"
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Ver horários disponíveis</span>
+                  </a>
+                )}
                 <p>2. A Dra. Joane fara a leitura detalhada das suas respostas.</p>
                 <p>3. Ela entrara em contato pelo seu WhatsApp (<strong>{personalInfo.phone}</strong>) para alinhar o primeiro encontro.</p>
               </div>
