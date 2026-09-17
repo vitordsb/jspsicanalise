@@ -5,21 +5,10 @@ import {
   ADMIN_COOKIE_NAME,
 } from "@/lib/auth";
 import { buildSessionCookie } from "@/lib/auth-session";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { loginSchema } from "@/lib/validate";
 import { ZodError } from "zod";
 
 export async function POST(req: NextRequest) {
-  // Rate limit: 5 tentativas por 15 minutos por IP
-  const ip = getClientIp(req);
-  const allowed = checkRateLimit(`login:${ip}`, 5, 15 * 60 * 1000);
-  if (!allowed) {
-    return NextResponse.json(
-      { error: "Muitas tentativas. Aguarde alguns minutos e tente novamente." },
-      { status: 429 }
-    );
-  }
-
   let body: unknown;
   try {
     body = await req.json();
