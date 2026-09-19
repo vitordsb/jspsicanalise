@@ -20,15 +20,6 @@ const NOMES_DE_CAMPO: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
-  // Rate limit conservador: 3 envios por hora por IP
-  const ip = getClientIp(req);
-  if (!checkRateLimit(`submit-anamnese:${ip}`, 3, 60 * 60 * 1000)) {
-    return NextResponse.json(
-      { error: "Muitas tentativas. Aguarde um pouco antes de tentar novamente." },
-      { status: 429 }
-    );
-  }
-
   // Limite de payload: 512KB
   const contentLength = req.headers.get("content-length");
   if (contentLength && parseInt(contentLength) > 512_000) {
@@ -75,7 +66,20 @@ export async function POST(req: NextRequest) {
     throw e;
   }
 
-  const { personalInfo, answers, templateId, lgpdConsent } = parsed;
+  // Rate limit conservador: 3 envios por hora por IP. Fica depois da
+  // validacao de conteudo de proposito: corrigir um CPF ou e-mail digitado
+  // errado e reenviar nao pode gastar a mesma cota de quem esta de fato
+  // martelando a rota. So conta tentativa que passou pela validacao e vai
+  // tocar banco/e-mail de verdade.
+  const ip = getClientIp(req);
+  if (!checkRateLimit(`submit-anamnese:${ip}`, 3, 60 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "Muitas tentativas. Aguarde um pouco antes de tentar novamente." },
+      { status: 429 }
+    );
+  }
+
+  const { personalInfo, answers, templateId, lgpdConsent, templateVersion, templateSections } = parsed;
   // CPF ja normalizado (so digitos) pelo schema
   const cleanCpf = personalInfo.cpf;
 
@@ -174,12 +178,23 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Snapshot do que a pessoa realmente viu na tela, nao o que esta no
+    // banco agora. templateSections vem do front (carregado junto com o
+    // GET /api/anamnese/active que abriu o formulario); se a Joane editar o
+    // template nesse meio-tempo, o registro nao muda debaixo da resposta ja
+    // dada. Sem esse campo (bundle antigo em cache), cai no comportamento
+    // anterior de reconsultar o banco.
+    const snapshotSections = templateSections
+      ? JSON.stringify(templateSections)
+      : template.sections;
+    const snapshotVersion = templateVersion ?? template.version;
+
     const submission = await prisma.anamnesisSubmission.create({
       data: {
         patientId: patient.id,
         templateId: template.id,
-        templateVersion: template.version,
-        templateSnapshot: template.sections,
+        templateVersion: snapshotVersion,
+        templateSnapshot: snapshotSections,
         answers: JSON.stringify(answers),
         status: "pending",
         lgpdConsent: lgpdConsent,

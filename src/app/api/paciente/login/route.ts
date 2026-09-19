@@ -60,30 +60,38 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const paciente = await prisma.patient.findUnique({
-    where: { cpf: cpfLimpo },
-    select: { id: true, fullName: true, accessTokenHash: true },
-  });
+  try {
+    const paciente = await prisma.patient.findUnique({
+      where: { cpf: cpfLimpo },
+      select: { id: true, fullName: true, accessTokenHash: true },
+    });
 
-  // Mensagem unica para CPF inexistente e token errado: nao confirmamos se
-  // determinada pessoa e paciente da clinica.
-  // verificarToken roda sempre (com hash real ou fantasma) para nivelar o
-  // tempo de resposta e impedir que um atacante descubra via timing quais
-  // CPFs sao pacientes da clinica.
-  const generico = NextResponse.json(
-    { error: "CPF ou código de acesso inválido." },
-    { status: 401 }
-  );
+    // Mensagem unica para CPF inexistente e token errado: nao confirmamos se
+    // determinada pessoa e paciente da clinica.
+    // verificarToken roda sempre (com hash real ou fantasma) para nivelar o
+    // tempo de resposta e impedir que um atacante descubra via timing quais
+    // CPFs sao pacientes da clinica.
+    const generico = NextResponse.json(
+      { error: "CPF ou código de acesso inválido." },
+      { status: 401 }
+    );
 
-  const hashParaComparar = paciente?.accessTokenHash || HASH_FANTASMA;
-  const tokenValido = verificarToken(tokenLimpo, hashParaComparar);
-  if (!paciente || !paciente.accessTokenHash || !tokenValido) return generico;
+    const hashParaComparar = paciente?.accessTokenHash || HASH_FANTASMA;
+    const tokenValido = verificarToken(tokenLimpo, hashParaComparar);
+    if (!paciente || !paciente.accessTokenHash || !tokenValido) return generico;
 
-  const cookie = cookieSessaoPaciente(paciente.id);
-  const res = NextResponse.json({
-    success: true,
-    nome: paciente.fullName,
-  });
-  res.cookies.set(cookie.name, cookie.value, cookie.options);
-  return res;
+    const cookie = cookieSessaoPaciente(paciente.id);
+    const res = NextResponse.json({
+      success: true,
+      nome: paciente.fullName,
+    });
+    res.cookies.set(cookie.name, cookie.value, cookie.options);
+    return res;
+  } catch (error) {
+    console.error("Erro ao processar login do paciente:", error);
+    return NextResponse.json(
+      { error: "Não foi possível entrar agora. Tente novamente em alguns instantes." },
+      { status: 500 }
+    );
+  }
 }

@@ -4,7 +4,7 @@
  * Recebe o PDF fisicamente assinado pelo paciente.
  * Validacoes de seguranca:
  *   - Autenticacao obrigatoria
- *   - Contrato deve estar em status "aguardando_assinatura" ou "recusado"
+ *   - Contrato deve estar em status "aguardando_assinatura" (via isValidTransition)
  *   - Magic bytes: arquivo deve comecar com %PDF- (nao confia no Content-Type)
  *   - Tamanho maximo: 10 MB
  *   - Nome do arquivo no Storage: UUID.pdf (nunca o nome enviado pelo usuario)
@@ -71,7 +71,7 @@ export async function POST(
   if (!isValidTransition(fromStatus, toStatus)) {
     return NextResponse.json(
       {
-        error: `Upload nao permitido no status atual: "${fromStatus}". Contrato deve estar em "aguardando_assinatura" ou "recusado".`,
+        error: `Upload nao permitido no status atual: "${fromStatus}". Contrato precisa estar em "aguardando_assinatura" (contrato recusado precisa ser reenviado para assinatura antes de receber novo upload).`,
       },
       { status: 422 }
     );

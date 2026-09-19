@@ -3,6 +3,7 @@
 import React from "react";
 import { SubmissionData } from "@/lib/types";
 import { formatDate, formatCPF } from "@/lib/formatters";
+import { temSinalDeRisco } from "@/lib/risco-clinico";
 import {
   Search,
   RefreshCw,
@@ -12,25 +13,6 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { EsqueletoListaPacientes, BarraProgresso } from "@/components/ui/Carregando";
-
-/**
- * Detecta sinalizacao de risco nas respostas da anamnese.
- * Retorna true se q_ideacao for uma resposta de risco (nao "Nao" nem "Prefiro nao responder aqui")
- * ou se q_autolesao for "Sim, recentemente".
- */
-export function hasRiskFlag(answers: Record<string, unknown>): boolean {
-  const ideacao = answers["q_ideacao"] as string | undefined;
-  const autolesao = answers["q_autolesao"] as string | undefined;
-
-  const riskIdeacao =
-    !!ideacao &&
-    ideacao !== "Não" &&
-    ideacao !== "Prefiro não responder aqui";
-
-  const riskAutolesao = autolesao === "Sim, recentemente";
-
-  return riskIdeacao || riskAutolesao;
-}
 
 interface WhatsAppSidebarProps {
   submissions: SubmissionData[];
@@ -206,14 +188,14 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
           // Fichas com sinalizacao de risco aparecem primeiro
           [...submissions]
             .sort((a, b) => {
-              const aRisk = hasRiskFlag(a.answers ?? {}) ? 1 : 0;
-              const bRisk = hasRiskFlag(b.answers ?? {}) ? 1 : 0;
+              const aRisk = temSinalDeRisco(a.answers ?? {}) ? 1 : 0;
+              const bRisk = temSinalDeRisco(b.answers ?? {}) ? 1 : 0;
               return bRisk - aRisk;
             })
             .map((sub) => {
             const isSelected = selectedId === sub.id;
             const isPending = sub.status === "pending";
-            const isRisk = hasRiskFlag(sub.answers ?? {});
+            const isRisk = temSinalDeRisco(sub.answers ?? {});
 
             return (
               <div

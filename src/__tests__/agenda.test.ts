@@ -45,10 +45,22 @@ describe("geracao de vagas", () => {
   it("horario ja ocupado sai da lista", () => {
     const todas = gerarVagas({ ...base, diasAFrente: 0 });
     const semPrimeira = gerarVagas({
-      ...base, diasAFrente: 0, ocupados: [todas[0].inicioIso],
+      ...base, diasAFrente: 0,
+      ocupados: [{ inicioIso: todas[0].inicioIso, duracaoMinutos: base.duracaoMinutos }],
     });
     expect(semPrimeira).toHaveLength(todas.length - 1);
     expect(semPrimeira.find((x) => x.inicioIso === todas[0].inicioIso)).toBeUndefined();
+  });
+
+  it("sessao ocupada bloqueia vaga sobreposta, nao so o instante exato", () => {
+    // Segunda 08:00 (UTC 11:00), sessao de 120min ocupa ate as 10:00.
+    const inicioOcupado = "2026-08-24T11:00:00.000Z";
+    const v = gerarVagas({
+      ...base, diasAFrente: 0, duracaoMinutos: 50,
+      ocupados: [{ inicioIso: inicioOcupado, duracaoMinutos: 120 }],
+    });
+    // 08:00 e 09:00 caem dentro da sessao ocupada (08:00-10:00); so sobra 10:00.
+    expect(v.map((x) => x.hora)).toEqual(["10:00"]);
   });
 
   it("respeita a antecedencia minima", () => {

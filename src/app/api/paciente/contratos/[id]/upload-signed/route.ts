@@ -16,6 +16,7 @@ import { prisma } from "@/lib/prisma";
 import { exigirPaciente } from "@/lib/paciente-session";
 import { uploadSignedPdf } from "@/lib/supabase-storage";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { isValidTransition, type ContractStatus } from "@/lib/validate";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const PDF_MAGIC = Buffer.from("%PDF-");
@@ -49,14 +50,15 @@ export async function POST(
     return NextResponse.json({ error: "Contrato não encontrado." }, { status: 404 });
   }
 
-  const podeEnviar =
-    contrato.status === "aguardando_assinatura" ||
-    contrato.status === "recusado" ||
-    contrato.status === "gerado";
-
-  if (!podeEnviar) {
+  // Mesma maquina de estados da rota do admin: so aceita upload vindo de
+  // "aguardando_assinatura". Contrato "gerado" ou "recusado" precisa passar
+  // pela emissao (que carimba issuedAt/issuedByName, usados no texto do
+  // contrato) antes de poder receber assinatura — pular essa etapa deixava
+  // o documento sem a data/nome de emissao correta.
+  const fromStatus = contrato.status as ContractStatus;
+  if (!isValidTransition(fromStatus, "assinado_recebido")) {
     return NextResponse.json(
-      { error: "Este contrato não está aguardando envio de assinatura." },
+      { error: "Este contrato não está aguardando envio de assinatura. Aguarde a Dra. Joane liberar o contrato." },
       { status: 409 }
     );
   }

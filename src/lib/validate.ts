@@ -33,6 +33,15 @@ export const checkCpfSchema = z.object({
 
 export const submitAnamnesisSchema = z.object({
   templateId: z.string().min(1, "Formulário não identificado. Recarregue a página."),
+  // Versao e secoes do template TAL COMO o front carregou e renderizou.
+  // O template e editavel pela Joane e mutavel em cima da mesma linha (sem
+  // historico de versao no banco): se ela editar enquanto alguem preenche,
+  // reconsultar o banco no momento do envio traria a versao NOVA, nao a que
+  // a pessoa realmente respondeu. Opcionais por compatibilidade com bundle
+  // antigo em cache durante deploy; sem eles, cai no comportamento anterior
+  // (reconsulta o banco).
+  templateVersion: z.number().int().positive().optional(),
+  templateSections: z.array(z.unknown()).optional(),
   // A mensagem vai tambem no z.boolean, nao so no refine: quando o campo vem
   // ausente o Zod falha na checagem de tipo e nunca chega no refine, e o
   // paciente acabava vendo o texto cru "expected boolean, received undefined".

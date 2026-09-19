@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { QuestionField } from "@/components/form/QuestionField";
 import { formatCPF, formatPhone, formatDateInput, isValidDateBRL } from "@/lib/formatters";
+import { isValidCpf } from "@/lib/cpf";
+import { temSinalDeRisco } from "@/lib/risco-clinico";
 import { FormSection } from "@/lib/types";
 import confetti from "canvas-confetti";
 import {
@@ -94,6 +96,16 @@ export default function PreencherAnamnesePage() {
   const handleCpfBlur = async () => {
     const rawCpf = personalInfo.cpf.trim();
     if (rawCpf.length >= 11) {
+      // CPF com digito verificador errado: avisa aqui mesmo, sem gastar uma
+      // chamada ao backend. Antes esse caso caia no "senao" abaixo e o
+      // formulario tratava como CPF livre, sem avisar nada — a pessoa so
+      // descobria o erro de digitacao depois de preencher a ficha inteira.
+      if (!isValidCpf(rawCpf)) {
+        setAlreadySubmittedInfo(null);
+        setErrorMessage("CPF inválido. Confira os números digitados.");
+        return;
+      }
+
       try {
         const res = await fetch("/api/anamnese/check-cpf", {
           method: "POST",
@@ -136,20 +148,20 @@ export default function PreencherAnamnesePage() {
     if (errorMessage) setErrorMessage("");
   };
 
-  // Detecta sinalizacao de risco nas respostas atuais
-  const riskIdeacao =
-    !!answers["q_ideacao"] &&
-    answers["q_ideacao"] !== "Não" &&
-    answers["q_ideacao"] !== "Prefiro não responder aqui";
-  const riskAutolesao = answers["q_autolesao"] === "Sim, recentemente";
-  const showRiskAlert = riskIdeacao || riskAutolesao;
+  // Detecta sinalizacao de risco nas respostas atuais. Mesma funcao usada
+  // na limpeza de fichas expiradas e no destaque do painel administrativo:
+  // se a Joane renomear a pergunta no editor de template, os tres lugares
+  // continuam detectando junto, em vez de so um deles sobreviver.
+  const showRiskAlert = temSinalDeRisco(answers);
 
-  // Validacao da Etapa 1
+  // Validacao da Etapa 1. Espelha as regras de submitAnamnesisSchema
+  // (src/lib/validate.ts) para o erro aparecer aqui, nao so depois de
+  // preencher a ficha inteira e levar 400 no envio final.
   const validateStep1 = () => {
-    if (!personalInfo.fullName.trim()) return "Por favor, preencha seu nome completo.";
-    if (!personalInfo.cpf.trim() || personalInfo.cpf.replace(/\D/g, "").length !== 11) return "Por favor, informe um CPF valido com 11 digitos.";
+    if (personalInfo.fullName.trim().length < 3) return "Por favor, preencha seu nome completo.";
+    if (!personalInfo.cpf.trim() || !isValidCpf(personalInfo.cpf)) return "Por favor, informe um CPF válido. Confira os números digitados.";
     if (!personalInfo.birthDate || !isValidDateBRL(personalInfo.birthDate)) return "Por favor, informe uma data de nascimento valida no formato DD/MM/AAAA.";
-    if (!personalInfo.email.trim() || !personalInfo.email.includes("@")) return "Por favor, informe um e-mail valido.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(personalInfo.email.trim())) return "Por favor, informe um e-mail valido.";
     if (!personalInfo.phone.trim() || personalInfo.phone.replace(/\D/g, "").length < 10) return "Por favor, informe seu telefone/WhatsApp completo com DDD.";
     return null;
   };
@@ -227,6 +239,12 @@ export default function PreencherAnamnesePage() {
           personalInfo,
           answers,
           templateId: template.id,
+          // Versao e secoes tal como carregadas ao abrir o formulario, nao
+          // o que estiver no banco no instante do envio: se a Joane editar
+          // o template enquanto a pessoa preenche, o registro salvo precisa
+          // bater com o que ela realmente respondeu.
+          templateVersion: template.version,
+          templateSections: template.sections,
           lgpdConsent: true,
         }),
       });

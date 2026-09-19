@@ -14,11 +14,14 @@ import { prisma } from "@/lib/prisma";
 import { enviarAvisoDeConsulta } from "@/lib/mail";
 import { avisarEmSegundoPlano } from "@/lib/avisos";
 import { exigirPaciente } from "@/lib/paciente-session";
-import { lerJanelas, gerarVagas, vagaEhValida } from "@/lib/agenda";
+import { lerJanelas, gerarVagas, vagaEhValida, seSobrepoe } from "@/lib/agenda";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const DIAS_A_FRENTE = 21;
 const ANTECEDENCIA_HORAS = 2;
+
+/** Sinaliza, de dentro da transacao, que o paciente ja tem consulta ativa. */
+class ConsultaAtivaExistenteError extends Error {}
 
 /** Duracao da sessao: vem do contrato do paciente, com 50 minutos por padrao. */
 async function duracaoDaSessao(patientId: string): Promise<number> {
@@ -39,10 +42,12 @@ export async function GET() {
   const duracao = await duracaoDaSessao(patientId);
 
   const agora = new Date();
-  // Todos os agendamentos ativos ocupam vaga, de qualquer paciente.
+  // Todos os agendamentos ativos ocupam vaga, de qualquer paciente. Leva a
+  // duracao propria de cada um: uma sessao de 90min ocupa a vaga da hora
+  // seguinte tambem, nao so o instante exato em que comeca.
   const ocupados = await prisma.agendamento.findMany({
     where: { status: "agendado", inicioEm: { gte: agora } },
-    select: { inicioEm: true },
+    select: { inicioEm: true, duracaoMinutos: true },
   });
 
   const vagas = gerarVagas({
@@ -50,7 +55,10 @@ export async function GET() {
     duracaoMinutos: duracao,
     diasAFrente: DIAS_A_FRENTE,
     antecedenciaHoras: ANTECEDENCIA_HORAS,
-    ocupados: ocupados.map((o) => o.inicioEm.toISOString()),
+    ocupados: ocupados.map((o) => ({
+      inicioIso: o.inicioEm.toISOString(),
+      duracaoMinutos: o.duracaoMinutos,
+    })),
     agora,
   });
 
@@ -138,13 +146,21 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Uma consulta ativa por vez: a marcacao aqui e da primeira sessao.
-  const jaTem = await prisma.agendamento.findFirst({
-    where: { patientId, status: "agendado", inicioEm: { gte: new Date() } },
+  // Revalidacao de sobreposicao: vagaEhValida so confere a janela de
+  // atendimento, nao se o intervalo cruza outra consulta ja marcada (sessao
+  // de 90min as 08:00 ocupa a vaga das 09:00 tambem, nao so o instante
+  // exato). O indice unico do banco so pega colisao no instante identico,
+  // entao essa checagem e quem impede a sobreposicao de verdade.
+  const ativos = await prisma.agendamento.findMany({
+    where: { status: "agendado", inicioEm: { gte: new Date() } },
+    select: { inicioEm: true, duracaoMinutos: true },
   });
-  if (jaTem) {
+  const sobrepoe = ativos.some((a) =>
+    seSobrepoe(inicio, duracao, a.inicioEm, a.duracaoMinutos)
+  );
+  if (sobrepoe) {
     return NextResponse.json(
-      { error: "Você já tem uma consulta marcada. Cancele a atual para escolher outro horário." },
+      { error: "Este horário conflita com outra consulta já marcada. Escolha outro, por favor." },
       { status: 409 }
     );
   }
@@ -156,15 +172,31 @@ export async function POST(req: NextRequest) {
   });
 
   try {
-    const criado = await prisma.agendamento.create({
-      data: {
-        patientId,
-        submissionId: ultimaAnamnese?.id ?? null,
-        inicioEm: inicio,
-        duracaoMinutos: duracao,
-        status: "agendado",
-      },
-      include: { patient: { select: { fullName: true, email: true } } },
+    const criado = await prisma.$transaction(async (tx) => {
+      // Trava por paciente: duas abas ou dois dispositivos do mesmo
+      // paciente batendo o POST quase ao mesmo tempo passavam os dois pela
+      // checagem de "ja tem consulta" antes de qualquer um criar (corrida
+      // classica leitura-antes-da-escrita). hashtext(patientId) cabe em
+      // bigint; a trava e liberada sozinha ao fim da transacao.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${patientId})::bigint)`;
+
+      // Uma consulta ativa por vez: a marcacao aqui e da primeira sessao.
+      // Reconferido AQUI DENTRO da trava, nao antes: e o que fecha a corrida.
+      const jaTem = await tx.agendamento.findFirst({
+        where: { patientId, status: "agendado", inicioEm: { gte: new Date() } },
+      });
+      if (jaTem) throw new ConsultaAtivaExistenteError();
+
+      return tx.agendamento.create({
+        data: {
+          patientId,
+          submissionId: ultimaAnamnese?.id ?? null,
+          inicioEm: inicio,
+          duracaoMinutos: duracao,
+          status: "agendado",
+        },
+        include: { patient: { select: { fullName: true, email: true } } },
+      });
     });
 
     // Confirmacao com data e horario. Vale como comprovante do que a pessoa
@@ -181,6 +213,12 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, agendamento: criado });
   } catch (e: unknown) {
+    if (e instanceof ConsultaAtivaExistenteError) {
+      return NextResponse.json(
+        { error: "Você já tem uma consulta marcada. Cancele a atual para escolher outro horário." },
+        { status: 409 }
+      );
+    }
     // P2002: a restricao unica do banco pegou uma corrida entre duas pessoas
     // escolhendo a mesma vaga no mesmo instante.
     if (typeof e === "object" && e && "code" in e && (e as { code: string }).code === "P2002") {

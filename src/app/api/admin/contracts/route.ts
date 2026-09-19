@@ -77,6 +77,18 @@ export async function POST(req: NextRequest) {
     throw e;
   }
 
+  // Criacao so pode nascer em rascunho ou gerado. Os demais status so se
+  // alcancam pela maquina de estados (PUT /[id] com isValidTransition),
+  // que carimba data de emissao, evento de auditoria etc — pular pra
+  // "aprovado" ou "assinado_recebido" direto na criacao criaria um
+  // contrato sem nunca ter passado pela assinatura.
+  if (parsed.status && parsed.status !== "rascunho" && parsed.status !== "gerado") {
+    return NextResponse.json(
+      { error: "Um contrato novo só pode começar como rascunho ou gerado." },
+      { status: 400 }
+    );
+  }
+
   try {
     // Busca dados do admin para preencher campos da contratada se omitidos
     const admin = await prisma.user.findFirst();

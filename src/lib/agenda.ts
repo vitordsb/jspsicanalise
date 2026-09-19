@@ -75,12 +75,40 @@ export interface Vaga {
   nomeDia: string;
 }
 
+export interface IntervaloOcupado {
+  /** Instante de inicio em UTC, no formato ISO. */
+  inicioIso: string;
+  duracaoMinutos: number;
+}
+
+/**
+ * Dois intervalos [inicio, inicio+duracao) se cruzam?
+ * Sessao de 90min as 08:00 ocupa ate as 09:30: as 09:00 tambem esta ocupado,
+ * nao so o instante exato das 08:00.
+ */
+export function seSobrepoe(
+  inicioA: Date | string,
+  duracaoAMinutos: number,
+  inicioB: Date | string,
+  duracaoBMinutos: number
+): boolean {
+  const a = typeof inicioA === "string" ? new Date(inicioA) : inicioA;
+  const b = typeof inicioB === "string" ? new Date(inicioB) : inicioB;
+  const fimA = a.getTime() + duracaoAMinutos * 60_000;
+  const fimB = b.getTime() + duracaoBMinutos * 60_000;
+  return a.getTime() < fimB && b.getTime() < fimA;
+}
+
 /**
  * Gera as vagas livres a partir das janelas semanais.
  *
  * Uma vaga comeca a cada hora cheia dentro da janela e so entra na lista se a
  * sessao inteira couber antes do fim dela. Janela de 09:00 as 10:00 com sessao
  * de 50 minutos rende uma vaga; de 08:00 as 11:00 rende tres.
+ *
+ * Um candidato tambem cai fora se a sessao cruzar qualquer intervalo ja
+ * ocupado, nao so quando comeca no mesmo instante: sessao de 90min as 08:00
+ * ocupa a vaga das 09:00 tambem, mesmo sem bater exatamente no inicio.
  */
 export function gerarVagas(opcoes: {
   janelas: JanelaAtendimento[];
@@ -89,15 +117,14 @@ export function gerarVagas(opcoes: {
   diasAFrente: number;
   /** Antecedencia minima entre agora e a consulta. */
   antecedenciaHoras: number;
-  /** Inicios ja ocupados, em ISO. */
-  ocupados: string[];
+  /** Intervalos ja ocupados (inicio + duracao propria de cada um). */
+  ocupados: IntervaloOcupado[];
   /** Momento de referencia. Parametro para o calculo ser testavel. */
   agora: Date;
 }): Vaga[] {
   const { janelas, duracaoMinutos, diasAFrente, antecedenciaHoras, ocupados, agora } = opcoes;
   if (janelas.length === 0) return [];
 
-  const ocupadosSet = new Set(ocupados);
   const limiteInferior = new Date(agora.getTime() + antecedenciaHoras * 3600_000);
   const vagas: Vaga[] = [];
 
@@ -118,7 +145,10 @@ export function gerarVagas(opcoes: {
         if (inicio < limiteInferior) continue;
 
         const iso = inicio.toISOString();
-        if (ocupadosSet.has(iso)) continue;
+        const sobrepoe = ocupados.some((o) =>
+          seSobrepoe(inicio, duracaoMinutos, o.inicioIso, o.duracaoMinutos)
+        );
+        if (sobrepoe) continue;
 
         const hh = String(Math.floor(m / 60)).padStart(2, "0");
         const mm = String(m % 60).padStart(2, "0");

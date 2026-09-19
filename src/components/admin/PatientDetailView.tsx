@@ -23,7 +23,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { BotaoConteudo } from "@/components/ui/Carregando";
-import { hasRiskFlag } from "./WhatsAppSidebar";
+import { temSinalDeRisco } from "@/lib/risco-clinico";
 
 interface PatientDetailViewProps {
   submission: SubmissionData;
@@ -59,7 +59,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
 
   const { patient, answers, templateSnapshot, createdAt, status } = submission;
   const age = calculateAge(patient.birthDate);
-  const riskFlag = hasRiskFlag(answers ?? {});
+  const riskFlag = temSinalDeRisco(answers ?? {});
 
   const handleSaveNotes = async () => {
     setSavingNotes(true);
