@@ -195,20 +195,86 @@ export async function sendAnamnesisNotificationEmail({
   });
 }
 
-/** Pedido de remarcacao aberto por um paciente. Sem dizer por quem. */
-export async function enviarPedidoDeRemarcacao({
+export type TipoAvisoAgendaJoane =
+  | "marcada"
+  | "cancelada"
+  | "pedido-remarcacao"
+  | "pedido-remarcacao-retirado";
+
+/**
+ * Mudanca na agenda feita pelo paciente: marcou, cancelou, pediu para
+ * remarcar ou desistiu do pedido. O que a Joane faz pelo painel nao vira
+ * aviso para ela mesma.
+ *
+ * Leva nome do paciente, data e horario: e o que poupa a ida ate a agenda.
+ * O nome entrou a pedido do Vitor, ciente de que e-mail nao e canal seguro.
+ * O motivo escrito pelo paciente continua de fora: texto livre pode carregar
+ * conteudo clinico, e isso fica so no painel.
+ */
+export async function avisarJoaneSobreConsulta({
   recipientEmail = "enaoj22@gmail.com",
-}: { recipientEmail?: string } = {}): Promise<ResultadoEnvio> {
+  tipo,
+  nomePaciente,
+  inicioEm,
+  duracaoMinutos,
+}: {
+  recipientEmail?: string;
+  tipo: TipoAvisoAgendaJoane;
+  nomePaciente: string;
+  inicioEm: Date | string;
+  duracaoMinutos?: number;
+}): Promise<ResultadoEnvio> {
   const link = `${getAppUrl()}/admin/agenda`;
-  return enviar(recipientEmail, "Pedido de remarcação de consulta", {
-    titulo: "Pedido de remarcação",
+  const quando = formatarDataHora(inicioEm);
+
+  const conteudo: Record<
+    TipoAvisoAgendaJoane,
+    { titulo: string; paragrafos: string[]; rotulo: string }
+  > = {
+    marcada: {
+      titulo: "Consulta marcada",
+      paragrafos: ["Uma consulta foi marcada pela área do paciente."],
+      rotulo: "Data e horário",
+    },
+    cancelada: {
+      titulo: "Consulta cancelada",
+      paragrafos: [
+        "Uma consulta foi cancelada pela área do paciente. O horário voltou a ficar livre na agenda.",
+      ],
+      rotulo: "Horário cancelado",
+    },
+    "pedido-remarcacao": {
+      titulo: "Pedido de remarcação",
+      paragrafos: [
+        "Pediram para remarcar uma consulta. O horário atual continua reservado até você decidir.",
+        "Entre na agenda para ver o pedido e escolher o novo horário, ou recusar.",
+      ],
+      rotulo: "Horário atual",
+    },
+    "pedido-remarcacao-retirado": {
+      titulo: "Pedido de remarcação retirado",
+      paragrafos: [
+        "O pedido de remarcação foi retirado. A consulta continua no horário combinado e não há nada a fazer.",
+      ],
+      rotulo: "Consulta mantida em",
+    },
+  };
+
+  const c = conteudo[tipo];
+  const blocos: Bloco[] = [];
+  if (nomePaciente?.trim()) blocos.push({ rotulo: "Paciente", valor: nomePaciente.trim() });
+  blocos.push({ rotulo: c.rotulo, valor: quando });
+  if (tipo === "marcada" && duracaoMinutos && duracaoMinutos > 0) {
+    blocos.push({ rotulo: "Duração", valor: `${duracaoMinutos} minutos` });
+  }
+
+  return enviar(recipientEmail, `${c.titulo} - ${quando}`, {
+    titulo: c.titulo,
     saudacao: "Olá, Dra. Joane,",
-    paragrafos: [
-      "Um paciente pediu para remarcar a consulta dele.",
-      "Entre na agenda para ver o pedido e escolher o novo horário, ou recusar.",
-    ],
+    paragrafos: c.paragrafos,
+    blocos,
     botao: { texto: "Abrir a agenda", url: link },
-    aviso: "Por segurança, os dados do paciente ficam apenas no painel.",
+    aviso: "Os dados clínicos do paciente ficam apenas no painel.",
   });
 }
 

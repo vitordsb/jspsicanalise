@@ -53,7 +53,7 @@ export async function POST(
   // Mesma maquina de estados da rota do admin: so aceita upload vindo de
   // "aguardando_assinatura". Contrato "gerado" ou "recusado" precisa passar
   // pela emissao (que carimba issuedAt/issuedByName, usados no texto do
-  // contrato) antes de poder receber assinatura — pular essa etapa deixava
+  // contrato) antes de poder receber assinatura. Pular essa etapa deixava
   // o documento sem a data/nome de emissao correta.
   const fromStatus = contrato.status as ContractStatus;
   if (!isValidTransition(fromStatus, "assinado_recebido")) {

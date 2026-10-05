@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { enviarAvisoDeConsulta } from "@/lib/mail";
+import { enviarAvisoDeConsulta, avisarJoaneSobreConsulta } from "@/lib/mail";
 import { avisarEmSegundoPlano } from "@/lib/avisos";
 import { exigirPaciente } from "@/lib/paciente-session";
 import { lerJanelas, gerarVagas, vagaEhValida, seSobrepoe } from "@/lib/agenda";
@@ -210,6 +210,19 @@ export async function POST(req: NextRequest) {
         duracaoMinutos: criado.duracaoMinutos,
       })
     );
+
+    avisarEmSegundoPlano("consulta marcada pelo paciente (Joane)", async () => {
+      // Busca dentro da tarefa: falha aqui nao pode virar erro de uma
+      // operacao que ja foi gravada.
+      const perfil = await prisma.user.findFirst({ select: { notificationEmail: true } });
+      return avisarJoaneSobreConsulta({
+        recipientEmail: perfil?.notificationEmail || undefined,
+        tipo: "marcada",
+        nomePaciente: criado.patient.fullName,
+        inicioEm: criado.inicioEm,
+        duracaoMinutos: criado.duracaoMinutos,
+      });
+    });
 
     return NextResponse.json({ success: true, agendamento: criado });
   } catch (e: unknown) {

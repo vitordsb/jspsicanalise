@@ -60,3 +60,71 @@ describe("envio de e-mail", () => {
     expect(r.simulated).toBe(true);
   });
 });
+
+describe("aviso de mudanca na agenda para a Joane", () => {
+  const original = { ...process.env };
+  const sendMail = vi.fn(async () => ({ messageId: "teste" }));
+
+  beforeEach(() => {
+    process.env.SMTP_HOST = "smtp.exemplo.com";
+    process.env.SMTP_USER = "usuario";
+    process.env.SMTP_PASS = "senha";
+    sendMail.mockClear();
+    // O bloco anterior ja carregou mail.ts com o nodemailer de verdade.
+    vi.resetModules();
+    vi.doMock("nodemailer", () => ({
+      default: { createTransport: () => ({ sendMail }) },
+    }));
+  });
+  afterEach(() => {
+    process.env = { ...original };
+    vi.doUnmock("nodemailer");
+    vi.resetModules();
+  });
+
+  // quinta, 03/09/2026, 09:00 em Sao Paulo
+  const INICIO = new Date("2026-09-03T12:00:00.000Z");
+
+  const casos = [
+    ["marcada", "Consulta marcada"],
+    ["cancelada", "Consulta cancelada"],
+    ["pedido-remarcacao", "Pedido de remarcação"],
+    ["pedido-remarcacao-retirado", "Pedido de remarcação retirado"],
+  ] as const;
+
+  for (const [tipo, titulo] of casos) {
+    it(`${tipo}: chega no e-mail configurado, com o horario no assunto`, async () => {
+      const { avisarJoaneSobreConsulta } = await import("@/lib/mail");
+      const r = await avisarJoaneSobreConsulta({
+        recipientEmail: "joane@exemplo.com",
+        tipo,
+        nomePaciente: "Maria <b>Souza</b>",
+        inicioEm: INICIO,
+        duracaoMinutos: 50,
+      });
+
+      expect(r.success).toBe(true);
+      expect(r.simulated).toBeUndefined();
+      expect(sendMail).toHaveBeenCalledTimes(1);
+
+      const msg = (sendMail.mock.calls[0] as unknown as [Record<string, string>])[0];
+      expect(msg.to).toBe("joane@exemplo.com");
+      // O horario e o que poupa a ida ate a agenda.
+      expect(msg.subject.startsWith(`${titulo} - `)).toBe(true);
+      expect(msg.subject).toContain("09:00");
+      expect(msg.text).toContain("09:00");
+      expect(msg.html).toContain("/admin/agenda");
+      // Nome no corpo, escapado: e entrada livre do cadastro.
+      expect(msg.text).toContain("Paciente: Maria <b>Souza</b>");
+      expect(msg.html).toContain("Maria &lt;b&gt;Souza&lt;/b&gt;");
+      expect(msg.html).not.toContain("<b>Souza</b>");
+    });
+  }
+
+  it("sem e-mail configurado cai no padrao da Joane", async () => {
+    const { avisarJoaneSobreConsulta } = await import("@/lib/mail");
+    await avisarJoaneSobreConsulta({ tipo: "cancelada", nomePaciente: "Maria", inicioEm: INICIO });
+    const msg = (sendMail.mock.calls[0] as unknown as [Record<string, string>])[0];
+    expect(msg.to).toBe("enaoj22@gmail.com");
+  });
+});

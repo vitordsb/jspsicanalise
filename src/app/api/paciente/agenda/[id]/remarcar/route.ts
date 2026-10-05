@@ -13,8 +13,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { exigirPaciente } from "@/lib/paciente-session";
-import { enviarPedidoDeRemarcacao } from "@/lib/mail";
-import { avisarEmSegundoPlano } from "@/lib/avisos";
+import { avisarJoaneSobreConsulta } from "@/lib/mail";
+import { avisarEmSegundoPlano, consultaAindaVale } from "@/lib/avisos";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const MOTIVO_MAX = 500;
@@ -48,6 +48,7 @@ export async function POST(
   // outra pessoa passando um id qualquer.
   const consulta = await prisma.agendamento.findFirst({
     where: { id, patientId },
+    include: { patient: { select: { fullName: true } } },
   });
 
   if (!consulta) {
@@ -86,12 +87,15 @@ export async function POST(
     },
   });
 
-  const perfil = await prisma.user.findFirst({ select: { notificationEmail: true } });
-  avisarEmSegundoPlano("pedido de remarcacao", () =>
-    enviarPedidoDeRemarcacao({
+  avisarEmSegundoPlano("pedido de remarcacao", async () => {
+    const perfil = await prisma.user.findFirst({ select: { notificationEmail: true } });
+    return avisarJoaneSobreConsulta({
       recipientEmail: perfil?.notificationEmail || undefined,
-    })
-  );
+      tipo: "pedido-remarcacao",
+      nomePaciente: consulta.patient.fullName,
+      inicioEm: atualizado.inicioEm,
+    });
+  });
 
   return NextResponse.json({ success: true, agendamento: atualizado });
 }
@@ -105,7 +109,10 @@ export async function DELETE(
   if (erro) return erro;
 
   const { id } = await params;
-  const consulta = await prisma.agendamento.findFirst({ where: { id, patientId } });
+  const consulta = await prisma.agendamento.findFirst({
+    where: { id, patientId },
+    include: { patient: { select: { fullName: true } } },
+  });
   if (!consulta) {
     return NextResponse.json({ error: "Consulta não encontrada." }, { status: 404 });
   }
@@ -114,6 +121,20 @@ export async function DELETE(
     where: { id },
     data: { remarcacaoPedidaEm: null, remarcacaoMotivo: "" },
   });
+
+  // A Joane recebeu o aviso do pedido; sem este, ela abriria a agenda para
+  // resolver algo que ja nao existe. Sem pedido aberto nada mudou.
+  if (consulta.remarcacaoPedidaEm && consultaAindaVale(consulta.inicioEm, consulta.status)) {
+    avisarEmSegundoPlano("pedido de remarcacao retirado", async () => {
+      const perfil = await prisma.user.findFirst({ select: { notificationEmail: true } });
+      return avisarJoaneSobreConsulta({
+        recipientEmail: perfil?.notificationEmail || undefined,
+        tipo: "pedido-remarcacao-retirado",
+        nomePaciente: consulta.patient.fullName,
+        inicioEm: consulta.inicioEm,
+      });
+    });
+  }
 
   return NextResponse.json({ success: true });
 }
