@@ -14,24 +14,15 @@ import { prisma } from "@/lib/prisma";
 import { enviarAvisoDeConsulta, avisarJoaneSobreConsulta } from "@/lib/mail";
 import { avisarEmSegundoPlano } from "@/lib/avisos";
 import { exigirPaciente } from "@/lib/paciente-session";
-import { lerJanelas, gerarVagas, vagaEhValida, seSobrepoe } from "@/lib/agenda";
+import {
+  lerJanelas, gerarVagas, vagaEhValida, seSobrepoe,
+  DIAS_A_FRENTE, ANTECEDENCIA_HORAS,
+} from "@/lib/agenda";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
-
-const DIAS_A_FRENTE = 21;
-const ANTECEDENCIA_HORAS = 2;
+import { duracaoDaSessao } from "@/lib/agendamento-publico";
 
 /** Sinaliza, de dentro da transacao, que o paciente ja tem consulta ativa. */
 class ConsultaAtivaExistenteError extends Error {}
-
-/** Duracao da sessao: vem do contrato do paciente, com 50 minutos por padrao. */
-async function duracaoDaSessao(patientId: string): Promise<number> {
-  const c = await prisma.contract.findFirst({
-    where: { patientId },
-    orderBy: { createdAt: "desc" },
-    select: { durationMinutes: true },
-  });
-  return c?.durationMinutes && c.durationMinutes > 0 ? c.durationMinutes : 50;
-}
 
 export async function GET() {
   const { patientId, erro } = await exigirPaciente();

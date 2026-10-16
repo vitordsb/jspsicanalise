@@ -65,11 +65,18 @@ export function CalendarioPaciente({
   duracaoMinutos,
   salvando,
   aoMarcar,
+  tituloDialogo = "Confirmar consulta",
+  textoDialogo = "Você receberá um e-mail confirmando. Se precisar mudar depois, dá para pedir remarcação pela sua área.",
+  rotuloConfirmar = "Confirmar",
 }: {
   vagas: Vaga[];
   duracaoMinutos: number;
   salvando: string;
   aoMarcar: (inicioIso: string) => void;
+  /** Textos do dialogo. O link publico /agendar usa este calendario so para escolher o horario. */
+  tituloDialogo?: string;
+  textoDialogo?: string;
+  rotuloConfirmar?: string;
 }) {
   const [escolhida, setEscolhida] = useState<Vaga | null>(null);
 
@@ -231,7 +238,7 @@ export function CalendarioPaciente({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="font-serif text-base font-bold text-[#5d0c1d]">
-                  Confirmar consulta
+                  {tituloDialogo}
                 </h3>
                 <p className="text-sm text-[#241a1c] mt-2 first-letter:uppercase font-semibold">
                   {formatarDataHora(escolhida.inicioIso)}
@@ -250,8 +257,7 @@ export function CalendarioPaciente({
             </div>
 
             <p className="text-xs text-[#6f5f62] leading-relaxed bg-[#fbf3ef] rounded-2xl p-3">
-              Você receberá um e-mail confirmando. Se precisar mudar depois, dá
-              para pedir remarcação pela sua área.
+              {textoDialogo}
             </p>
 
             <div className="flex gap-2">
@@ -261,7 +267,7 @@ export function CalendarioPaciente({
                 className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-[#5d0c1d] text-white text-sm font-bold hover:bg-[#7d1128] disabled:opacity-60 transition"
               >
                 {salvando ? <Spinner tamanho="sm" /> : <Check className="w-4 h-4" />}
-                <span>Confirmar</span>
+                <span>{rotuloConfirmar}</span>
               </button>
               <button
                 onClick={() => setEscolhida(null)}

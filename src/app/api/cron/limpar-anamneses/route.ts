@@ -10,6 +10,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { limparAnamnesesExpiradas } from "@/lib/limpeza-anamneses";
+import { limparPedidosVencidos } from "@/lib/agendamento-publico";
 
 export async function GET(req: NextRequest) {
   const segredo = process.env.CRON_SECRET;
@@ -21,6 +22,10 @@ export async function GET(req: NextRequest) {
   }
 
   const r = await limparAnamnesesExpiradas();
-  console.log(`[cron] removidas: ${r.removidas}, mantidas por risco: ${r.mantidasPorRisco}`);
-  return NextResponse.json(r);
+  // Pedidos de agendamento que ninguem confirmou: dado pessoal sem finalidade.
+  const pedidosVencidos = await limparPedidosVencidos();
+  console.log(
+    `[cron] removidas: ${r.removidas}, mantidas por risco: ${r.mantidasPorRisco}, pedidos vencidos: ${pedidosVencidos}`
+  );
+  return NextResponse.json({ ...r, pedidosVencidos });
 }

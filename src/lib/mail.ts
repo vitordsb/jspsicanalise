@@ -19,15 +19,9 @@
 import nodemailer from "nodemailer";
 import { formatarDataHora } from "./agenda";
 import { formatarToken } from "./paciente-auth";
+import { urlDoApp } from "./url-app";
 
-/** URL publica da aplicacao, para os links apontarem para o lugar certo. */
-function getAppUrl(): string {
-  const explicita = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL;
-  if (explicita) return explicita.replace(/\/$/, "");
-  // Na Vercel, VERCEL_URL vem sem protocolo.
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return "http://localhost:3000";
-}
+const getAppUrl = urlDoApp;
 
 export interface ResultadoEnvio {
   success: boolean;
@@ -217,12 +211,15 @@ export async function avisarJoaneSobreConsulta({
   nomePaciente,
   inicioEm,
   duracaoMinutos,
+  semAnamnese = false,
 }: {
   recipientEmail?: string;
   tipo: TipoAvisoAgendaJoane;
   nomePaciente: string;
   inicioEm: Date | string;
   duracaoMinutos?: number;
+  /** Marcada pelo link publico por quem ainda nao preencheu a ficha. */
+  semAnamnese?: boolean;
 }): Promise<ResultadoEnvio> {
   const link = `${getAppUrl()}/admin/agenda`;
   const quando = formatarDataHora(inicioEm);
@@ -261,6 +258,12 @@ export async function avisarJoaneSobreConsulta({
   };
 
   const c = conteudo[tipo];
+  if (tipo === "marcada" && semAnamnese) {
+    c.paragrafos = [
+      "Uma consulta foi marcada pelo link de agendamento, sem anamnese.",
+      "A pessoa ainda não preencheu a ficha. Se faltar pouco para a consulta, você pode pedir a anamnese por e-mail direto pela agenda.",
+    ];
+  }
   const blocos: Bloco[] = [];
   if (nomePaciente?.trim()) blocos.push({ rotulo: "Paciente", valor: nomePaciente.trim() });
   blocos.push({ rotulo: c.rotulo, valor: quando });
@@ -419,6 +422,128 @@ export async function enviarAvisoDeConsulta({
     blocos,
     botao: { texto: "Abrir minha área", url: link },
     aviso: "Perdeu o código de acesso? Fale com a Dra. Joane para receber um novo.",
+  });
+}
+
+/**
+ * Link de confirmacao do agendamento feito pelo link publico.
+ *
+ * O botao leva a uma pagina com o resumo e um botao de confirmar, e nao
+ * confirma ao abrir o link: programas de seguranca de e-mail abrem todo link
+ * antes de o destinatario ver a mensagem, e isso confirmaria sozinho.
+ */
+export async function enviarLinkDeConfirmacao({
+  para,
+  nome,
+  inicioEm,
+  link,
+  validadeMinutos,
+}: {
+  para: string;
+  nome: string;
+  inicioEm: Date | string;
+  link: string;
+  validadeMinutos: number;
+}): Promise<ResultadoEnvio> {
+  const nomeCurto = primeiroNome(nome);
+  const quando = formatarDataHora(inicioEm);
+
+  return enviar(para, "Confirme a sua consulta", {
+    titulo: "Confirme a sua consulta",
+    saudacao: nomeCurto ? `Olá, ${nomeCurto},` : "Olá,",
+    paragrafos: [
+      "Recebemos o seu pedido de consulta com a Dra. Joane Souza Oliveira de Andrade. Falta só um passo: confirmar pelo botão abaixo.",
+      `O horário fica reservado para você por ${validadeMinutos} minutos. Depois disso ele volta para a agenda.`,
+    ],
+    blocos: [{ rotulo: "Data e horário", valor: quando }],
+    botao: { texto: "Confirmar minha consulta", url: link },
+    aviso: "Não foi você? É só ignorar este e-mail: nada será marcado.",
+  });
+}
+
+/**
+ * Consulta confirmada pelo link publico.
+ *
+ * Quando a pessoa e nova, leva o codigo de acesso: e o unico instante em que
+ * ele existe em claro. A anamnese entra como convite, nao como exigencia: a
+ * consulta ja esta marcada de qualquer jeito.
+ */
+export async function enviarConsultaConfirmada({
+  para,
+  nome,
+  inicioEm,
+  duracaoMinutos,
+  codigo,
+  pedirAnamnese,
+}: {
+  para: string;
+  nome: string;
+  inicioEm: Date | string;
+  duracaoMinutos?: number;
+  /** Presente so quando o cadastro foi criado agora. */
+  codigo?: string;
+  /** A pessoa ainda nao tem anamnese: inclui o convite para preencher. */
+  pedirAnamnese: boolean;
+}): Promise<ResultadoEnvio> {
+  const nomeCurto = primeiroNome(nome);
+  const quando = formatarDataHora(inicioEm);
+  const base = getAppUrl();
+
+  const paragrafos = ["Sua consulta com a Dra. Joane Souza Oliveira de Andrade está confirmada para:"];
+  const blocos: Bloco[] = [{ rotulo: "Data e horário", valor: quando }];
+  if (duracaoMinutos && duracaoMinutos > 0) {
+    blocos.push({ rotulo: "Duração", valor: `${duracaoMinutos} minutos` });
+  }
+
+  if (pedirAnamnese) {
+    paragrafos.push(
+      "Antes da consulta, a Dra. Joane pede que você preencha a ficha de anamnese. Leva poucos minutos e ajuda a preparar o nosso primeiro encontro. Você pode fazer isso agora pelo botão abaixo."
+    );
+  }
+
+  if (codigo) {
+    paragrafos.push(
+      `Com o seu CPF e o código abaixo você entra na sua área para ver, remarcar ou cancelar a consulta: ${base}/area-do-paciente/entrar`
+    );
+    blocos.push({ rotulo: "Seu código de acesso", valor: formatarToken(codigo), monoespacado: true });
+  }
+
+  return enviar(para, `Consulta confirmada - ${quando}`, {
+    titulo: "Consulta confirmada",
+    saudacao: nomeCurto ? `Olá, ${nomeCurto},` : "Olá,",
+    paragrafos,
+    blocos,
+    botao: pedirAnamnese
+      ? { texto: "Preencher a anamnese", url: `${base}/preencher-anamnese` }
+      : { texto: "Abrir minha área", url: `${base}/area-do-paciente` },
+    aviso: codigo
+      ? "O código é pessoal. Não compartilhe com ninguém."
+      : "Perdeu o código de acesso? Fale com a Dra. Joane para receber um novo.",
+  });
+}
+
+/** Pedido da Joane, feito pela agenda, para quem marcou e ainda nao preencheu a ficha. */
+export async function enviarPedidoDeAnamnese({
+  para,
+  nome,
+  inicioEm,
+}: {
+  para: string;
+  nome: string;
+  inicioEm: Date | string;
+}): Promise<ResultadoEnvio> {
+  const nomeCurto = primeiroNome(nome);
+  const quando = formatarDataHora(inicioEm);
+
+  return enviar(para, "Falta preencher a sua ficha de anamnese", {
+    titulo: "Ficha de anamnese",
+    saudacao: nomeCurto ? `Olá, ${nomeCurto},` : "Olá,",
+    paragrafos: [
+      "A Dra. Joane Souza Oliveira de Andrade pediu que você preencha a ficha de anamnese antes da sua consulta. Leva poucos minutos e ajuda a preparar o encontro.",
+    ],
+    blocos: [{ rotulo: "Sua consulta", valor: quando }],
+    botao: { texto: "Preencher a anamnese", url: `${getAppUrl()}/preencher-anamnese` },
+    aviso: "Se preferir, fale com a Dra. Joane pelo WhatsApp.",
   });
 }
 

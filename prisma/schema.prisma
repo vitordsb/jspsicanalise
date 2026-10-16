@@ -266,6 +266,10 @@ model Agendamento {
   remarcacaoRecusadaEm   DateTime?
   remarcacaoRecusaMotivo String?   @default("")
 
+  // Ultima vez que a Joane pediu a anamnese por e-mail. Serve para a tela
+  // mostrar "pedida as 14:03" e nao deixar o pedido sair duas vezes sem querer.
+  anamneseSolicitadaEm   DateTime?
+
   // Impede duas pessoas reservarem o mesmo horario. A checagem em codigo tem
   // corrida entre a leitura e a escrita: a restricao no banco e o que garante.
   //
@@ -275,4 +279,28 @@ model Agendamento {
   // que ficou livre. Aqui o campo fica so documentado.
   @@index([patientId])
   @@index([remarcacaoPedidaEm])
+}
+
+/// Pedido de consulta feito pelo link publico /agendar, ainda sem confirmacao
+/// por e-mail. Existe separado de Agendamento e de Patient de proposito: ate
+/// a pessoa clicar no link, nada disso vira cadastro nem ocupa a agenda da
+/// Joane, entao robo e digitacao errada nao deixam rastro. Vive minutos e e
+/// apagado ao confirmar ou depois de vencido.
+model PedidoAgendamento {
+  id             String   @id @default(cuid())
+  // Hash SHA-256 do token que vai no link do e-mail. O token em claro so
+  // existe no e-mail enviado.
+  tokenHash      String   @unique
+  nome           String
+  email          String
+  telefone       String
+  cpf            String
+  inicioEm       DateTime
+  duracaoMinutos Int      @default(50)
+  expiraEm       DateTime
+  criadoEm       DateTime @default(now())
+
+  @@index([cpf])
+  @@index([expiraEm])
+  @@index([inicioEm])
 }

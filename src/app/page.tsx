@@ -83,7 +83,7 @@ const PERGUNTAS_FREQUENTES = [
   {
     pergunta: "Como funciona a primeira consulta?",
     resposta:
-      "Você preenche uma ficha de anamnese virtual com seus dados e sua queixa principal. A Dra. Joane analisa suas respostas com atenção ética, e o contato para alinhar o primeiro encontro acontece logo em seguida.",
+      "Você escolhe um horário na agenda e confirma pelo e-mail. Antes do encontro, a Dra. Joane pede que você preencha uma ficha de anamnese virtual com seus dados e sua queixa principal, e analisa suas respostas com atenção ética para receber você da melhor forma.",
   },
   {
     pergunta: "O atendimento é sigiloso?",
@@ -98,7 +98,7 @@ const PERGUNTAS_FREQUENTES = [
   {
     pergunta: "Como eu agendo minha consulta?",
     resposta:
-      "Depois de enviar sua ficha de anamnese, você recebe um código de acesso à sua própria área, onde escolhe o horário disponível diretamente na agenda.",
+      "Pelo botão \"Agendar consulta\": você escolhe um horário livre, deixa seus dados e confirma pelo link que chega no seu e-mail. Não precisa preencher a ficha de anamnese antes de marcar.",
   },
 ] as const;
 
@@ -124,7 +124,7 @@ export default function HomePage() {
                 Joane Souza Oliveira de Andrade
               </span>
               <span className="hidden sm:block text-[11px] text-[#6f5f62]">
-                Psicóloga & Psicanalista Clínica
+                Psicanálise clínica e pós-graduação em psicologia
               </span>
             </div>
           </Link>
@@ -147,11 +147,11 @@ export default function HomePage() {
               <span className="hidden sm:inline">Área do Paciente</span>
             </Link>
             <Link
-              href="/preencher-anamnese"
+              href="/agendar"
               className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs sm:text-sm font-semibold shadow-sm transition"
             >
-              <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Preencher Ficha</span>
+              <CalendarCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Agendar consulta</span>
             </Link>
           </div>
         </nav>
@@ -198,12 +198,19 @@ export default function HomePage() {
 
                 <div className="flex flex-col items-center md:items-start gap-4">
                   <Link
-                    href="/preencher-anamnese"
+                    href="/agendar"
                     className="inline-flex items-center justify-center gap-3 px-9 py-4 rounded-2xl bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-base font-semibold shadow-xl shadow-[#5d0c1d]/25 transition transform active:scale-98"
                   >
-                    <FileText className="w-5 h-5" />
-                    <span>Preencher Ficha de Anamnese</span>
+                    <CalendarCheck className="w-5 h-5" />
+                    <span>Agendar consulta</span>
                     <ArrowRight className="w-4 h-4 ml-1" />
+                  </Link>
+                  <Link
+                    href="/preencher-anamnese"
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#5d0c1d] hover:text-[#aa2d47] transition"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Prefere começar pela ficha de anamnese?</span>
                   </Link>
                   <Link
                     href="/area-do-paciente/entrar"
@@ -253,9 +260,9 @@ export default function HomePage() {
                 <div className="w-10 h-10 rounded-full bg-[#5d0c1d] text-white font-bold flex items-center justify-center text-sm mb-4">
                   1
                 </div>
-                <h3 className="font-serif font-bold text-[#5d0c1d] text-lg mb-2">Preenchimento da Anamnese</h3>
+                <h3 className="font-serif font-bold text-[#5d0c1d] text-lg mb-2">Escolha do horário</h3>
                 <p className="text-xs sm:text-sm text-[#6f5f62] leading-relaxed">
-                  Você preenche a ficha virtual com seus dados, queixa principal, sintomas emocionais e histórico.
+                  Você vê os horários livres da agenda da Dra. Joane e reserva o que combina com a sua rotina. Não precisa de cadastro prévio.
                 </p>
               </div>
 
@@ -263,9 +270,9 @@ export default function HomePage() {
                 <div className="w-10 h-10 rounded-full bg-[#aa2d47] text-white font-bold flex items-center justify-center text-sm mb-4">
                   2
                 </div>
-                <h3 className="font-serif font-bold text-[#5d0c1d] text-lg mb-2">Análise Clínica Cuidadosa</h3>
+                <h3 className="font-serif font-bold text-[#5d0c1d] text-lg mb-2">Confirmação e anamnese</h3>
                 <p className="text-xs sm:text-sm text-[#6f5f62] leading-relaxed">
-                  A Dra. Joane analisa suas respostas com atenção ética e planeja o enquadre mais indicado para o seu momento.
+                  Você confirma a consulta pelo link do e-mail e preenche a ficha de anamnese, que a Dra. Joane analisa com atenção ética para preparar o encontro.
                 </p>
               </div>
 
@@ -273,19 +280,19 @@ export default function HomePage() {
                 <div className="w-10 h-10 rounded-full bg-[#ccb38d] text-[#5d0c1d] font-bold flex items-center justify-center text-sm mb-4">
                   3
                 </div>
-                <h3 className="font-serif font-bold text-[#5d0c1d] text-lg mb-2">Contato & Início das Sessões</h3>
+                <h3 className="font-serif font-bold text-[#5d0c1d] text-lg mb-2">Início das sessões</h3>
                 <p className="text-xs sm:text-sm text-[#6f5f62] leading-relaxed">
-                  Alinhamos o melhor horário na agenda (online ou presencial) e damos início ao seu processo.
+                  No dia combinado, online ou presencial, damos início ao seu processo.
                 </p>
               </div>
             </div>
 
             <div className="mt-12 text-center">
               <Link
-                href="/preencher-anamnese"
+                href="/agendar"
                 className="inline-flex items-center gap-2 text-sm font-bold text-[#5d0c1d] hover:text-[#aa2d47] transition underline underline-offset-4"
               >
-                <span>Clique aqui para preencher a sua ficha agora</span>
+                <span>Clique aqui para agendar a sua consulta</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -353,7 +360,7 @@ export default function HomePage() {
                   Dra. Joane Souza Oliveira de Andrade
                 </h3>
                 <p className="text-xs sm:text-sm font-semibold uppercase tracking-[1px] text-[#aa2d47]">
-                  Psicóloga & Psicanalista Clínica
+                  Psicanálise clínica e pós-graduação em psicologia
                 </p>
                 <p className="text-sm sm:text-base text-[#6f5f62] leading-relaxed">
                   Praticante da psicanálise com dedicação à escuta do inconsciente e suas manifestações subjetivas.
@@ -405,15 +412,15 @@ export default function HomePage() {
               Pronta para te escutar. O primeiro passo pode ser hoje.
             </h2>
             <p className="text-sm sm:text-base text-white/75 mt-3 mb-9">
-              Preencha sua ficha de anamnese, ou fale antes pelo WhatsApp, se preferir.
+              Escolha um horário na agenda, ou fale antes pelo WhatsApp, se preferir.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
-                href="/preencher-anamnese"
+                href="/agendar"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-white hover:bg-[#fdece8] text-[#5d0c1d] text-sm sm:text-base font-bold shadow-lg transition"
               >
-                <FileText className="w-4.5 h-4.5" />
-                <span>Preencher Ficha de Anamnese</span>
+                <CalendarCheck className="w-4.5 h-4.5" />
+                <span>Agendar consulta</span>
               </Link>
               <a
                 href={WHATSAPP_HREF}

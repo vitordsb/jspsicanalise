@@ -11,6 +11,26 @@
 export const FUSO = "America/Sao_Paulo";
 const OFFSET_HORAS = 3; // Brasilia esta 3 horas atras de UTC
 
+/**
+ * Regras de oferta de horarios, comuns a area do paciente e ao link publico
+ * /agendar. Ficam num lugar so para as duas portas nunca divergirem sobre
+ * quantos dias a frente se marca nem sobre a antecedencia minima.
+ */
+export const DIAS_A_FRENTE = 21;
+export const ANTECEDENCIA_HORAS = 2;
+/** Sessao sem contrato anterior: 50 minutos. */
+export const DURACAO_PADRAO_MINUTOS = 50;
+
+/** Falta menos de `horas` horas para o inicio (ou ele ja passou)? */
+export function faltamMenosDe(
+  inicio: Date | string,
+  horas: number,
+  agora: Date = new Date()
+): boolean {
+  const d = typeof inicio === "string" ? new Date(inicio) : inicio;
+  return d.getTime() - agora.getTime() < horas * 3600_000;
+}
+
 export interface JanelaAtendimento {
   /** 0=domingo, 1=segunda ... 6=sabado */
   dia: number;

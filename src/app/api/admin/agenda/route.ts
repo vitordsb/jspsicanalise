@@ -15,6 +15,18 @@ import { avisarEmSegundoPlano } from "@/lib/avisos";
 import { requireAuth } from "@/lib/auth-session";
 import { lerJanelas, inicioDaSemana, diasDaSemana, vagaEhValida } from "@/lib/agenda";
 
+/**
+ * Dados do paciente que a agenda mostra. O total de fichas diz se ele ja
+ * preencheu a anamnese: quem marcou pelo link publico pode nao ter feito.
+ */
+const PACIENTE_NA_AGENDA = {
+  id: true,
+  fullName: true,
+  phone: true,
+  cpf: true,
+  _count: { select: { submissions: true } },
+} as const;
+
 export async function GET(req: NextRequest) {
   const authError = await requireAuth();
   if (authError) return authError;
@@ -36,7 +48,7 @@ export async function GET(req: NextRequest) {
     where: { inicioEm: { gte: segunda, lt: domingoFim } },
     orderBy: { inicioEm: "asc" },
     include: {
-      patient: { select: { id: true, fullName: true, phone: true, cpf: true } },
+      patient: { select: PACIENTE_NA_AGENDA },
     },
   });
 
@@ -48,7 +60,7 @@ export async function GET(req: NextRequest) {
     orderBy: { inicioEm: "asc" },
     take: 30,
     include: {
-      patient: { select: { id: true, fullName: true, phone: true, cpf: true } },
+      patient: { select: PACIENTE_NA_AGENDA },
     },
   });
 
@@ -59,7 +71,7 @@ export async function GET(req: NextRequest) {
     where: { remarcacaoPedidaEm: { not: null }, status: "agendado" },
     orderBy: { remarcacaoPedidaEm: "asc" },
     include: {
-      patient: { select: { id: true, fullName: true, phone: true, cpf: true } },
+      patient: { select: PACIENTE_NA_AGENDA },
     },
   });
 

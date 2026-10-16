@@ -22,10 +22,11 @@ import { useRouter } from "next/navigation";
 import {
   ChevronLeft, ChevronRight, CalendarDays, X, Check,
   MessageSquareText, AlertTriangle, Trash2, CircleSlash, MoveRight, Plus,
+  FileText, Send,
 } from "lucide-react";
 import {
   faixaDeHoras, dentroDaJanela, chaveDia, chaveHora, montarInstante,
-  formatarDataHora, type JanelaAtendimento, type DiaDaSemana,
+  formatarDataHora, faltamMenosDe, type JanelaAtendimento, type DiaDaSemana,
 } from "@/lib/agenda";
 import { formatCPF } from "@/lib/formatters";
 import { TelaCarregando, BotaoConteudo, BarraProgresso } from "@/components/ui/Carregando";
@@ -42,7 +43,13 @@ interface Agendamento {
   observacao: string | null;
   remarcacaoPedidaEm?: string | null;
   remarcacaoMotivo?: string | null;
-  patient: { id: string; fullName: string; phone: string; cpf: string };
+  /** Quando a Joane pediu a anamnese por e-mail, se pediu. */
+  anamneseSolicitadaEm?: string | null;
+  patient: {
+    id: string; fullName: string; phone: string; cpf: string;
+    /** Quantas fichas de anamnese a pessoa ja enviou. */
+    _count?: { submissions: number };
+  };
 }
 
 interface Dados {
@@ -90,6 +97,7 @@ export function CalendarioSemanal() {
   const [selecionado, setSelecionado] = useState<Agendamento | null>(null);
   const [movendo, setMovendo] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [pedindoAnamnese, setPedindoAnamnese] = useState(false);
   const [aviso, setAviso] = useState("");
   const [erro, setErro] = useState("");
   const [mostrarVazias, setMostrarVazias] = useState(false);
@@ -141,6 +149,32 @@ export function CalendarioSemanal() {
     // consulta para outra semana e justamente o caso mais comum, e zerar aqui
     // obrigava a recomecar a cada seta.
     if (!movendo) setSelecionado(null);
+  };
+
+  /** Manda ao paciente o link da anamnese. Acao da Joane, nunca automatica. */
+  const pedirAnamnese = async (id: string) => {
+    setPedindoAnamnese(true);
+    try {
+      const res = await fetch(`/api/admin/agenda/${id}/pedir-anamnese`, { method: "POST" });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.erro(j.error || "Não foi possível pedir a anamnese.");
+        return;
+      }
+      toast.sucesso(
+        j.simulado
+          ? "Pedido registrado, mas o e-mail não saiu: o envio de e-mail não está configurado."
+          : "Pedido enviado por e-mail."
+      );
+      setSelecionado((atual) =>
+        atual && atual.id === id ? { ...atual, anamneseSolicitadaEm: j.solicitadaEm } : atual
+      );
+      await carregar(semana, true);
+    } catch {
+      toast.erro("Falha de conexão. Tente novamente.");
+    } finally {
+      setPedindoAnamnese(false);
+    }
   };
 
   const patch = async (id: string, corpo: Record<string, unknown>) => {
@@ -511,6 +545,8 @@ export function CalendarioSemanal() {
         <DetalheConsulta
           agendamento={selecionado}
           salvando={salvando}
+          pedindoAnamnese={pedindoAnamnese}
+          aoPedirAnamnese={() => pedirAnamnese(selecionado.id)}
           aoFechar={() => { setSelecionado(null); setMovendo(false); }}
           aoMover={() => setMovendo(true)}
           aoMudarStatus={async (status) => {
@@ -568,10 +604,12 @@ export function CalendarioSemanal() {
 
 /** Painel com os dados e as acoes da consulta selecionada. */
 function DetalheConsulta({
-  agendamento, salvando, aoFechar, aoMover, aoMudarStatus, aoExcluir,
+  agendamento, salvando, pedindoAnamnese, aoPedirAnamnese, aoFechar, aoMover, aoMudarStatus, aoExcluir,
 }: {
   agendamento: Agendamento;
   salvando: boolean;
+  pedindoAnamnese: boolean;
+  aoPedirAnamnese: () => void;
   aoFechar: () => void;
   aoMover: () => void;
   aoMudarStatus: (status: string) => void;
@@ -596,6 +634,12 @@ function DetalheConsulta({
           <X className="w-4 h-4" />
         </button>
       </div>
+
+      <AvisoDeAnamnese
+        agendamento={a}
+        pedindo={pedindoAnamnese}
+        aoPedir={aoPedirAnamnese}
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         <button
@@ -667,6 +711,60 @@ function DetalheConsulta({
       <p className="text-[11px] text-[#9c8b8e]">
         Ao remanejar ou cancelar, o paciente recebe um e-mail com o novo horário.
       </p>
+    </div>
+  );
+}
+
+/**
+ * Consulta marcada por alguem que ainda nao preencheu a anamnese.
+ *
+ * A anamnese nao e condicao para marcar (o link publico dispensa), entao esta
+ * faixa nao bloqueia nada: so mostra a pendencia e deixa a Joane pedir a ficha
+ * por e-mail com um clique. Quando falta menos de 2 horas ela ganha destaque,
+ * que e o momento em que costuma valer a pena insistir.
+ */
+function AvisoDeAnamnese({
+  agendamento: a, pedindo, aoPedir,
+}: {
+  agendamento: Agendamento;
+  pedindo: boolean;
+  aoPedir: () => void;
+}) {
+  const semFicha = a.patient._count?.submissions === 0;
+  const agora = new Date();
+  const futura = a.status === "agendado" && new Date(a.inicioEm).getTime() > agora.getTime();
+  if (!semFicha || !futura) return null;
+
+  const urgente = faltamMenosDe(a.inicioEm, 2, agora);
+  const pedida = a.anamneseSolicitadaEm ? formatarDataHora(a.anamneseSolicitadaEm) : "";
+
+  return (
+    <div
+      className={`rounded-2xl border p-3.5 flex flex-wrap items-center gap-3 ${
+        urgente ? "bg-[#fff0f3] border-[#f3cbc1]" : "bg-[#fbf3ef] border-[#f0ded8]"
+      }`}
+    >
+      <FileText className={`w-4 h-4 shrink-0 ${urgente ? "text-[#aa2d47]" : "text-[#9c8b8e]"}`} />
+      <div className="min-w-0 flex-1">
+        <p className={`text-xs font-semibold ${urgente ? "text-[#aa2d47]" : "text-[#241a1c]"}`}>
+          {urgente ? "Faltam menos de 2 horas e a anamnese não foi preenchida" : "Anamnese ainda não preenchida"}
+        </p>
+        <p className="text-[11px] text-[#6f5f62] mt-0.5">
+          {pedida
+            ? `Você pediu por e-mail em ${pedida}.`
+            : "A consulta está marcada. Se quiser, peça a ficha por e-mail."}
+        </p>
+      </div>
+      <button
+        onClick={aoPedir}
+        disabled={pedindo}
+        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#5d0c1d] text-[#5d0c1d] hover:bg-[#5d0c1d] hover:text-white disabled:opacity-60 text-xs font-semibold transition"
+      >
+        <BotaoConteudo carregando={pedindo} rotuloCarregando="Enviando..." claro={false}>
+          <Send className="w-3.5 h-3.5" />
+          <span>{pedida ? "Pedir de novo" : "Pedir anamnese"}</span>
+        </BotaoConteudo>
+      </button>
     </div>
   );
 }

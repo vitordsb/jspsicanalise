@@ -9,13 +9,16 @@
 
 import React from "react";
 import { MessageSquareText, CalendarDays } from "lucide-react";
-import { formatarHora, chaveDia, NOMES_DIA, FUSO } from "@/lib/agenda";
+import { formatarHora, chaveDia, faltamMenosDe, NOMES_DIA, FUSO } from "@/lib/agenda";
 
 interface Item {
   id: string;
   inicioEm: string;
   duracaoMinutos: number;
-  patient: { id: string; fullName: string; phone: string; cpf: string };
+  patient: {
+    id: string; fullName: string; phone: string; cpf: string;
+    _count?: { submissions: number };
+  };
 }
 
 /** Quanto falta, em texto curto: "em 2h", "amanha", "em 5 dias". */
@@ -110,6 +113,17 @@ export function ProximosAgendamentos({
                       {NOMES_DIA[diaSemana].slice(0, 3)}, {formatarHora(it.inicioEm)}
                       <span className="text-[#9c8b8e]"> · {quandoE(it.inicioEm, agora)}</span>
                     </p>
+                    {it.patient._count?.submissions === 0 && (
+                      <p
+                        className={`text-[10px] font-semibold mt-1 inline-block px-2 py-0.5 rounded-full ${
+                          faltamMenosDe(it.inicioEm, 2, agora)
+                            ? "bg-[#fff0f3] text-[#aa2d47]"
+                            : "bg-[#f8dad2] text-[#5d0c1d]"
+                        }`}
+                      >
+                        Sem anamnese
+                      </p>
+                    )}
                   </div>
 
                   {it.patient.phone && (
