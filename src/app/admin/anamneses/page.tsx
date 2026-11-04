@@ -117,7 +117,7 @@ export default function AdminAnamnesesPage() {
           questions: [
             {
               id: `q_${Date.now()}_1`,
-              label: "O que motivou sua busca pela psicoterapia/psicanálise?",
+              label: "O que motivou sua busca pela psicanálise?",
               type: "textarea",
               placeholder: "Descreva detalhadamente...",
               required: true,

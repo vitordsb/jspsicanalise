@@ -152,7 +152,7 @@ export function montarDocumento(
   const objeto: string[] = [];
   let p1 =
     `O presente instrumento tem por objeto a prestação de serviços de atendimento ` +
-    `psicanalítico e psicoterapêutico individual, na periodicidade **${c.frequency}**, ` +
+    `psicanalítico individual, na periodicidade **${c.frequency}**, ` +
     `com duração de **${porExtenso(c.durationMinutes)} minutos** por sessão, na ` +
     `modalidade **${NOME_MODALIDADE[c.modalidade] ?? "híbrida"}**.`;
   if (c.initialSessionsCount > 0) {
@@ -260,7 +260,7 @@ export function montarDocumento(
 
   return {
     titulo: "Contrato de Prestação de Serviços",
-    subtitulo: "Atendimento psicanalítico e psicoterapêutico individual",
+    subtitulo: "Atendimento psicanalítico individual",
     abertura:
       "Pelo presente instrumento particular, celebrado entre as partes abaixo " +
       "qualificadas, de um lado:",

@@ -34,22 +34,22 @@ const LINKS_DE_NAVEGACAO = [
 
 /** Pilulas de confianca logo abaixo do paragrafo de abertura do hero. */
 const SELOS_DO_HERO = [
-  { icone: Lock, rotulo: "Sigilo profissional" },
+  { icone: Lock, rotulo: "Sigilo total" },
   { icone: Brain, rotulo: "Escuta psicanalítica" },
   { icone: CalendarCheck, rotulo: "Online e presencial" },
 ] as const;
 
 /** Selos de abordagem exibidos junto ao retrato, na secao "Sobre". */
 const SELOS_DE_ABORDAGEM = [
-  { icone: HeartHandshake, rotulo: "Atendimento humanizado" },
-  { icone: Lock, rotulo: "Ética e sigilo profissional" },
-  { icone: Sparkles, rotulo: "Acolhimento personalizado" },
+  { icone: HeartHandshake, rotulo: "Atendimento acolhedor" },
+  { icone: Lock, rotulo: "Sigilo e respeito" },
+  { icone: Sparkles, rotulo: "Cuidado só seu" },
 ] as const;
 
 /**
  * Temas comuns trazidos ao consultorio. Framing deliberadamente aberto
  * ("um espaco para...") em vez de "eu trato X": nao ha especializacao
- * certificada a anunciar, e a psicologia tem restricao etica quanto a
+ * certificada a anunciar, e a pratica clinica tem restricao etica quanto a
  * promessa de resultado ou a linguagem que soe diagnostico comercial.
  */
 const AREAS_DE_ESCUTA = [
@@ -57,25 +57,25 @@ const AREAS_DE_ESCUTA = [
     icone: Waves,
     titulo: "Ansiedade e angústias",
     texto:
-      "Um espaço para colocar em palavras o que pesa no corpo e na mente, e compreender de onde vem essa inquietação.",
+      "Um espaço para colocar em palavras o que pesa no corpo e na cabeça, e entender de onde vem essa inquietação.",
   },
   {
     icone: Compass,
     titulo: "Autoconhecimento",
     texto:
-      "A investigação do inconsciente como caminho para reconhecer padrões, desejos e escolhas que nem sempre estão claros.",
+      "Olhar para dentro para perceber seus padrões, seus desejos e as escolhas que nem sempre ficam claras.",
   },
   {
     icone: Users,
     titulo: "Relacionamentos e vínculos",
     texto:
-      "Espaço para pensar sobre os próprios vínculos, familiares, afetivos ou de trabalho, com mais consciência e menos repetição.",
+      "Um espaço para pensar nas pessoas que fazem parte da sua vida, na família, no amor ou no trabalho, e sair do automático.",
   },
   {
     icone: HeartCrack,
     titulo: "Perdas e transições",
     texto:
-      "Acolhimento para momentos de luto, mudança ou ruptura, quando a vida pede uma reorganização emocional.",
+      "Um lugar de acolhimento para quando vem um luto, uma mudança ou um fim, e a vida pede que você se reorganize por dentro.",
   },
 ] as const;
 
@@ -83,22 +83,22 @@ const PERGUNTAS_FREQUENTES = [
   {
     pergunta: "Como funciona a primeira consulta?",
     resposta:
-      "Você escolhe um horário na agenda e confirma pelo e-mail. Antes do encontro, a Dra. Joane pede que você preencha uma ficha de anamnese virtual com seus dados e sua queixa principal, e analisa suas respostas com atenção ética para receber você da melhor forma.",
+      "Você escolhe um horário na agenda e confirma pelo e-mail. Antes do encontro, a Dra. Joane convida você a preencher uma ficha com algumas informações e com o que te trouxe até aqui. Ela lê tudo com cuidado para receber você da melhor forma.",
   },
   {
     pergunta: "O atendimento é sigiloso?",
     resposta:
-      "Sim. Todo o conteúdo das sessões é protegido por sigilo profissional, e seus dados são tratados com proteção conforme a LGPD, sem uso ou divulgação para qualquer finalidade fora do acompanhamento.",
+      "Sim. Tudo o que é dito nas sessões fica entre você e a Dra. Joane. Seus dados são guardados com cuidado, como manda a lei de proteção de dados (LGPD), e só servem para o seu acompanhamento.",
   },
   {
     pergunta: "É atendimento online ou presencial?",
     resposta:
-      "As duas modalidades estão disponíveis. Definimos juntas o formato mais confortável para a sua rotina ao longo da conversa inicial.",
+      "Os dois jeitos existem. Vocês combinam, na conversa inicial, o que fica mais confortável para a sua rotina.",
   },
   {
     pergunta: "Como eu agendo minha consulta?",
     resposta:
-      "Pelo botão \"Agendar consulta\": você escolhe um horário livre, deixa seus dados e confirma pelo link que chega no seu e-mail. Não precisa preencher a ficha de anamnese antes de marcar.",
+      "Pelo botão \"Agendar consulta\": você escolhe um horário livre, deixa seus dados e confirma pelo link que chega no seu e-mail. Não precisa preencher a ficha antes de marcar.",
   },
 ] as const;
 
@@ -168,7 +168,7 @@ export default function HomePage() {
               <div className="text-center md:text-left">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#f8dad2] text-[#5d0c1d] text-xs font-semibold uppercase tracking-[1px] mb-6 shadow-xs">
                   <Sparkles className="w-3.5 h-3.5 text-[#5d0c1d]" />
-                  <span>Psicologia & Psicanálise Clínica</span>
+                  <span>Psicanálise Clínica</span>
                 </div>
 
                 <h1 className="font-serif text-3xl sm:text-5xl font-bold text-[#5d0c1d] tracking-tight leading-[1.18] mb-6">
@@ -179,9 +179,9 @@ export default function HomePage() {
                 </h1>
 
                 <p className="max-w-lg mx-auto md:mx-0 text-base sm:text-lg text-[#6f5f62] leading-relaxed mb-6">
-                  Sou Joane Souza Oliveira de Andrade, psicóloga e psicanalista. Ofereço um
-                  espaço de escuta ética e sem julgamentos, para você compreender seus
-                  sentimentos e construir novos caminhos.
+                  Sou Joane Souza Oliveira de Andrade, psicanalista clínica com pós-graduação em psicologia. Ofereço um
+                  espaço de escuta sem julgamentos, para você entender o que sente e encontrar
+                  novos caminhos.
                 </p>
 
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-8">
@@ -251,7 +251,7 @@ export default function HomePage() {
                 Como funciona o início das sessões?
               </h2>
               <p className="text-sm text-[#6f5f62] mt-2">
-                Três etapas simples e seguras para iniciarmos seu acompanhamento terapêutico.
+                Três passos simples para a gente começar.
               </p>
             </div>
 
@@ -262,7 +262,7 @@ export default function HomePage() {
                 </div>
                 <h3 className="font-serif font-bold text-[#5d0c1d] text-lg mb-2">Escolha do horário</h3>
                 <p className="text-xs sm:text-sm text-[#6f5f62] leading-relaxed">
-                  Você vê os horários livres da agenda da Dra. Joane e reserva o que combina com a sua rotina. Não precisa de cadastro prévio.
+                  Você vê os horários livres da Dra. Joane e escolhe o que combina com a sua rotina. Não precisa de cadastro.
                 </p>
               </div>
 
@@ -270,9 +270,9 @@ export default function HomePage() {
                 <div className="w-10 h-10 rounded-full bg-[#aa2d47] text-white font-bold flex items-center justify-center text-sm mb-4">
                   2
                 </div>
-                <h3 className="font-serif font-bold text-[#5d0c1d] text-lg mb-2">Confirmação e anamnese</h3>
+                <h3 className="font-serif font-bold text-[#5d0c1d] text-lg mb-2">Confirmação e ficha</h3>
                 <p className="text-xs sm:text-sm text-[#6f5f62] leading-relaxed">
-                  Você confirma a consulta pelo link do e-mail e preenche a ficha de anamnese, que a Dra. Joane analisa com atenção ética para preparar o encontro.
+                  Você confirma a consulta pelo link que chega no e-mail e preenche uma ficha, para a Dra. Joane se preparar para te receber.
                 </p>
               </div>
 
@@ -282,7 +282,7 @@ export default function HomePage() {
                 </div>
                 <h3 className="font-serif font-bold text-[#5d0c1d] text-lg mb-2">Início das sessões</h3>
                 <p className="text-xs sm:text-sm text-[#6f5f62] leading-relaxed">
-                  No dia combinado, online ou presencial, damos início ao seu processo.
+                  No dia combinado, online ou presencial, a gente começa o seu processo.
                 </p>
               </div>
             </div>
@@ -363,9 +363,9 @@ export default function HomePage() {
                   Psicanálise clínica e pós-graduação em psicologia
                 </p>
                 <p className="text-sm sm:text-base text-[#6f5f62] leading-relaxed">
-                  Praticante da psicanálise com dedicação à escuta do inconsciente e suas manifestações subjetivas.
-                  O trabalho analítico propõe um espaço seguro onde, através da fala livre e sem julgamentos, o sujeito pode
-                  ressignificar suas dores, encontrar novos caminhos para o desejo e construir autonomia emocional.
+                  Trabalho com psicanálise, escutando com carinho o que você sente e nem sempre consegue explicar.
+                  Aqui você tem um lugar seguro para falar o que vier, sem julgamentos, dar um novo sentido às suas dores,
+                  encontrar o que te move e ganhar mais liberdade para viver.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
@@ -409,7 +409,7 @@ export default function HomePage() {
           />
           <div className="relative max-w-2xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="font-serif text-2xl sm:text-4xl font-bold text-white leading-tight">
-              Pronta para te escutar. O primeiro passo pode ser hoje.
+              Estou aqui para te escutar. O primeiro passo pode ser hoje.
             </h2>
             <p className="text-sm sm:text-base text-white/75 mt-3 mb-9">
               Escolha um horário na agenda, ou fale antes pelo WhatsApp, se preferir.
@@ -434,7 +434,7 @@ export default function HomePage() {
             </div>
             <p className="flex items-center justify-center gap-1.5 text-xs text-white/60 mt-8">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              Sigilo profissional e proteção de dados (LGPD) em todo o processo.
+              Seu sigilo e seus dados protegidos em todo o processo.
             </p>
 
             <Link

@@ -25,7 +25,7 @@ export default function AdminConfiguracoesPage() {
 
   const [profile, setProfile] = useState({
     name: "Dra. Joane Souza Oliveira de Andrade",
-    title: "Psicóloga & Psicanalista Clínica",
+    title: "Psicanalista Clínica",
     crp: "",
     phone: "",
     email: "",
@@ -136,7 +136,7 @@ export default function AdminConfiguracoesPage() {
                 Registro Profissional pendente de preenchimento
               </h4>
               <p className="text-xs text-[#78350f] leading-relaxed">
-                O campo de Registro Profissional (CRP / documento de psicanálise) está vazio. Esse dado é obrigatório para a emissão de contratos válidos. Preencha com o seu número de registro real antes de gerar qualquer contrato.
+                O campo de Registro Profissional (documento de psicanálise) está vazio. Esse dado é obrigatório para a emissão de contratos válidos. Preencha com o seu número de registro real antes de gerar qualquer contrato.
               </p>
             </div>
           </div>
@@ -199,7 +199,7 @@ export default function AdminConfiguracoesPage() {
               <input
                 id="cfg-crp"
                 type="text"
-                placeholder="Informe seu registro profissional real (CRP, CBO ou documento de psicanálise)"
+                placeholder="Informe seu registro profissional real (número do documento ou da associação de psicanálise)"
                 value={profile.crp}
                 onChange={(e) => setProfile({ ...profile, crp: e.target.value })}
                 className={`w-full h-11 px-4 rounded-full border text-xs sm:text-sm text-[#241a1c] focus:bg-white focus:outline-none transition ${
@@ -209,7 +209,7 @@ export default function AdminConfiguracoesPage() {
                 }`}
               />
               <p className="text-[11px] text-[#9c8b8e] mt-1 pl-1">
-                Preencha com o número de registro fornecido pelo seu conselho / entidade profissional. Não invente nem use placeholders.
+                Preencha com o número de registro fornecido pela sua associação ou entidade de psicanálise. Não invente nem use placeholders.
               </p>
             </div>
 

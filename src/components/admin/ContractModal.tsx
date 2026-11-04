@@ -606,7 +606,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                 Contrato de Prestação de Serviços
               </p>
               <p className="contrato-subtitulo text-sm text-[#6f5f62] mt-1">
-                Atendimento Psicanalítico e Psicoterapeútico Individual
+                Atendimento Psicanalítico Individual
               </p>
             </div>
 
@@ -666,7 +666,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                 </p>
                 <p>
                   O presente instrumento tem por objeto a prestação de serviços de atendimento
-                  psicanalítico e psicoterapeútico individual, com encontros na periodicidade
+                  psicanalítico individual, com encontros na periodicidade
                   de <strong>{form.frequency}</strong>, com duração média de{" "}
                   <strong>{form.durationMinutes} (
                   {form.durationMinutes === 50 ? "cinquenta" :

@@ -18,7 +18,7 @@ const lora = Lora({
 export const metadata: Metadata = {
   title: "Joane Souza Oliveira de Andrade | Psicanálise Clínica",
   description:
-    "Espaço ético e acolhedor de escuta psicanalítica, anamnese virtual e acompanhamento terapêutico com a Dra. Joane Souza Oliveira de Andrade.",
+    "Um espaço acolhedor de escuta psicanalítica, com ficha online e acompanhamento com a Dra. Joane Souza Oliveira de Andrade.",
 };
 
 export default function RootLayout({

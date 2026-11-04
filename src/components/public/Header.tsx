@@ -15,7 +15,7 @@ export const PublicHeader = () => {
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-[#5d0c1d]">
-                Psicóloga & Psicanalista
+                Psicanálise clínica
               </span>
             </div>
             <span className="font-serif text-xl sm:text-2xl font-semibold tracking-tight text-[#5d0c1d] block leading-none">

@@ -46,7 +46,7 @@ export const PublicFooter = () => {
         </div>
 
         <div className="border-t border-[#ebd6ce] pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#9c8b8e] gap-4">
-          <p>© {new Date().getFullYear()} Dra. Joane Souza Oliveira de Andrade • Psicologia & Psicanálise. Todos os direitos reservados.</p>
+          <p>© {new Date().getFullYear()} Dra. Joane Souza Oliveira de Andrade • Psicanálise Clínica. Todos os direitos reservados.</p>
           <div className="flex items-center gap-1">
             <span>Desenvolvido com carinho</span>
             <Heart className="w-3.5 h-3.5 text-[#5d0c1d] fill-current inline" />

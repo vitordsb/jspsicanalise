@@ -160,7 +160,7 @@ export function DocumentoContrato({ contrato }: { contrato: ContratoImpressao })
           <img src="/logotipo-cabecalho.png" alt="" aria-hidden="true" className="doc-logo" />
           <p className="doc-titulo">Contrato de Prestação de Serviços</p>
           <p className="doc-subtitulo">
-            Atendimento psicanalítico e psicoterapêutico individual
+            Atendimento psicanalítico individual
           </p>
         </div>
 
@@ -196,7 +196,7 @@ export function DocumentoContrato({ contrato }: { contrato: ContratoImpressao })
           <p className="clausula-titulo">Cláusula primeira - do objeto</p>
           <p>
             O presente instrumento tem por objeto a prestação de serviços de atendimento
-            psicanalítico e psicoterapêutico individual, na periodicidade{" "}
+            psicanalítico individual, na periodicidade{" "}
             <strong>{c.frequency}</strong>, com duração de{" "}
             <strong>{porExtenso(c.durationMinutes)} minutos</strong> por sessão, na
             modalidade <strong>{c.modalidade === "online" ? "online" : c.modalidade === "presencial" ? "presencial" : "híbrida"}</strong>.

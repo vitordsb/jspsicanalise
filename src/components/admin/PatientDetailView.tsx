@@ -162,7 +162,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
   };
 
   const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(
-    `Olá ${patient.fullName.split(" ")[0]}, tudo bem? Sou a Dra. Joane Souza Oliveira de Andrade, psicóloga/psicanalista. Recebi sua ficha de anamnese e gostaria de conversar com você!`
+    `Olá ${patient.fullName.split(" ")[0]}, tudo bem? Sou a Dra. Joane Souza Oliveira de Andrade, psicanalista. Recebi sua ficha de anamnese e gostaria de conversar com você!`
   )}`;
 
   return (
