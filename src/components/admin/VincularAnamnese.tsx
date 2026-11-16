@@ -95,20 +95,20 @@ export function VincularAnamnese({
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <button className="absolute inset-0 bg-black/40" onClick={aoFechar} aria-label="Fechar" />
 
-      <div className="relative bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl border border-[#f0ded8] shadow-xl flex flex-col max-h-[85vh]">
-        <div className="p-5 border-b border-[#f3e4e0] shrink-0 flex items-start justify-between gap-3">
+      <div className="relative bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl border border-outline-variant shadow-xl flex flex-col max-h-[85vh]">
+        <div className="p-5 border-b border-outline-variant shrink-0 flex items-start justify-between gap-3">
           <div>
-            <h3 className="font-serif text-base font-bold text-[#5d0c1d] flex items-center gap-2">
+            <h3 className="font-serif text-base font-bold text-primary flex items-center gap-2">
               <Link2 className="w-4.5 h-4.5" />
               Vincular a uma anamnese
             </h3>
-            <p className="text-xs text-[#6f5f62] mt-1">
+            <p className="text-xs text-on-surface-variant mt-1">
               Fichas de <strong>{nomePaciente}</strong> ainda sem contrato.
             </p>
           </div>
           <button
             onClick={aoFechar}
-            className="p-1.5 rounded-full text-[#6f5f62] hover:bg-[#fbf3ef] shrink-0"
+            className="p-1.5 rounded-full text-on-surface-variant hover:bg-surface-low shrink-0"
             aria-label="Fechar"
           >
             <X className="w-4 h-4" />
@@ -119,9 +119,9 @@ export function VincularAnamnese({
           {carregando ? (
             <EsqueletoCartoes itens={2} altura="h-20" />
           ) : anamneses.length === 0 ? (
-            <div className="text-center text-xs text-[#6f5f62] space-y-2 py-6">
-              <AlertTriangle className="w-6 h-6 mx-auto text-[#ccb38d]" />
-              <p className="font-semibold text-[#241a1c]">
+            <div className="text-center text-xs text-on-surface-variant space-y-2 py-6">
+              <AlertTriangle className="w-6 h-6 mx-auto text-tertiary" />
+              <p className="font-semibold text-on-surface">
                 Nenhuma anamnese disponível para vincular.
               </p>
               <p className="max-w-xs mx-auto leading-relaxed">
@@ -138,19 +138,19 @@ export function VincularAnamnese({
                   <button
                     onClick={() => vincular(a.id)}
                     disabled={salvandoId !== ""}
-                    className="w-full text-left p-4 rounded-2xl border border-[#f0ded8] bg-[#fbf3ef] hover:bg-[#f8dad2] hover:border-[#5d0c1d] disabled:opacity-60 transition"
+                    className="w-full text-left p-4 rounded-2xl border border-outline-variant bg-surface-low hover:bg-primary-container hover:border-primary disabled:opacity-60 transition"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-[#241a1c] flex items-center gap-1.5">
-                          <FileText className="w-3.5 h-3.5 shrink-0 text-[#5d0c1d]" />
+                        <p className="text-sm font-semibold text-on-surface flex items-center gap-1.5">
+                          <FileText className="w-3.5 h-3.5 shrink-0 text-primary" />
                           <span className="truncate">{a.titulo}</span>
                         </p>
-                        <p className="text-[11px] text-[#9c8b8e] mt-0.5">
+                        <p className="text-[12px] text-on-surface-subtle mt-0.5">
                           Enviada em {formatDateTime(a.enviadaEm)} · {ROTULO_STATUS[a.status] ?? a.status}
                         </p>
                         {a.resumo && (
-                          <p className="text-xs text-[#6f5f62] mt-1.5 line-clamp-2">
+                          <p className="text-xs text-on-surface-variant mt-1.5 line-clamp-2">
                             {a.resumo}
                           </p>
                         )}

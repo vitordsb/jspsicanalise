@@ -160,21 +160,21 @@ export default function AdminContratosPage() {
         {/* Cabecalho da pagina */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[1px] text-[#5d0c1d] bg-[#f8dad2] px-3.5 py-1 rounded-full mb-2">
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[1px] text-primary bg-primary-container px-3.5 py-1 rounded-full mb-2">
               <FileSignature className="w-3.5 h-3.5" />
               <span>Contratos de Prestacao de Servicos</span>
             </div>
-            <h1 className="font-serif text-2xl sm:text-4xl font-bold text-[#5d0c1d]">
+            <h1 className="font-serif text-2xl sm:text-4xl font-bold text-primary">
               Contratos
             </h1>
-            <p className="text-xs sm:text-sm text-[#6f5f62] mt-1">
+            <p className="text-xs sm:text-sm text-on-surface-variant mt-1">
               Gerencie, revise e acompanhe todos os contratos dos pacientes.
             </p>
           </div>
 
           <button
             onClick={handleOpenNew}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs sm:text-sm font-semibold shadow-xs transition"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary hover:bg-secondary text-white text-xs sm:text-sm font-semibold shadow-xs transition"
           >
             <Plus className="w-4 h-4" />
             <span>Novo Contrato</span>
@@ -185,13 +185,13 @@ export default function AdminContratosPage() {
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           {/* Busca */}
           <div className="relative max-w-xs w-full">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9c8b8e]" />
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-subtle" />
             <input
               type="text"
               placeholder="Buscar por paciente ou titulo..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-10 pl-10 pr-4 rounded-full border border-[#f0ded8] bg-white text-xs text-[#241a1c] placeholder-[#9c8b8e] focus:outline-none focus:border-[#5d0c1d]"
+              className="w-full h-10 pl-10 pr-4 rounded-lg border border-outline bg-white text-xs text-on-surface placeholder-on-surface-subtle focus:outline-none focus:border-primary"
             />
           </div>
 
@@ -206,8 +206,8 @@ export default function AdminContratosPage() {
                 }}
                 className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition ${
                   statusFilter === opt.value
-                    ? "bg-[#5d0c1d] text-white"
-                    : "bg-white border border-[#f0ded8] text-[#6f5f62] hover:bg-[#fbf3ef]"
+                    ? "bg-primary text-white"
+                    : "bg-white border border-outline-variant text-on-surface-variant hover:bg-surface-low"
                 }`}
               >
                 {opt.label}
@@ -222,20 +222,20 @@ export default function AdminContratosPage() {
           <div className={`flex-1 min-w-0 ${selectedId ? "hidden sm:block sm:w-96 sm:shrink-0 sm:flex-none" : ""}`}>
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-[#5d0c1d]" />
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
             ) : filtered.length === 0 ? (
-              <div className="bg-white rounded-3xl border border-[#f0ded8] p-12 text-center space-y-3 shadow-xs">
-                <FileText className="w-12 h-12 mx-auto text-[#ccb38d]" />
-                <h3 className="font-serif text-xl font-bold text-[#5d0c1d]">
+              <div className="bg-white rounded-3xl border border-outline-variant p-12 text-center space-y-3 shadow-xs">
+                <FileText className="w-12 h-12 mx-auto text-tertiary" />
+                <h3 className="font-serif text-xl font-bold text-primary">
                   Nenhum contrato encontrado
                 </h3>
-                <p className="text-xs text-[#6f5f62] max-w-sm mx-auto">
+                <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
                   Gere contratos diretamente da ficha do paciente ou clicando em "Novo Contrato".
                 </p>
                 <button
                   onClick={handleOpenNew}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#f8dad2] text-[#5d0c1d] text-xs font-bold hover:bg-[#f3cbc1] transition"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary-container text-primary text-xs font-bold hover:bg-primary-container-high transition"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Novo Contrato</span>
@@ -250,23 +250,23 @@ export default function AdminContratosPage() {
                       onClick={() => handleSelectContract(c.id)}
                       className={`w-full text-left bg-white rounded-3xl border p-5 shadow-xs transition ${
                         selectedId === c.id
-                          ? "border-[#5d0c1d] ring-1 ring-[#5d0c1d]"
-                          : "border-[#f0ded8] hover:border-[#f3cbc1]"
+                          ? "border-primary ring-1 ring-primary"
+                          : "border-outline-variant hover:border-primary-container-high"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div className="min-w-0">
-                          <p className="font-serif font-bold text-sm text-[#5d0c1d] truncate">
+                          <p className="font-serif font-bold text-sm text-primary truncate">
                             {c.patientFullName || c.patient?.fullName || "Paciente"}
                           </p>
-                          <p className="text-xs text-[#9c8b8e]">
+                          <p className="text-xs text-on-surface-subtle">
                             CPF: {formatCPF(c.patientCpf || c.patient?.cpf || "")}
                           </p>
                         </div>
                         <ContractStatusBadge status={c.status} />
                       </div>
 
-                      <div className="text-xs text-[#362c2d] space-y-0.5">
+                      <div className="text-xs text-on-surface space-y-0.5">
                         <p>
                           <span className="font-semibold">{formatCurrency(
                             c.sessionPriceCents > 0
@@ -275,7 +275,7 @@ export default function AdminContratosPage() {
                           )}</span>
                           {" - "}{c.frequency}
                         </p>
-                        <p className="text-[#9c8b8e]">Criado {formatDateTime(c.createdAt)}</p>
+                        <p className="text-on-surface-subtle">Criado {formatDateTime(c.createdAt)}</p>
                       </div>
                     </button>
                   ))}
@@ -283,7 +283,7 @@ export default function AdminContratosPage() {
 
                 {/* Paginacao */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-4 text-xs text-[#6f5f62]">
+                  <div className="flex items-center justify-between mt-4 text-xs text-on-surface-variant">
                     <span>
                       {total} contrato{total !== 1 ? "s" : ""} - pagina {page} de {totalPages}
                     </span>
@@ -291,14 +291,14 @@ export default function AdminContratosPage() {
                       <button
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                         disabled={page <= 1}
-                        className="p-2 rounded-full border border-[#f0ded8] bg-white hover:bg-[#fbf3ef] disabled:opacity-40 transition"
+                        className="p-2 rounded-full border border-outline-variant bg-white hover:bg-surface-low disabled:opacity-40 transition"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                         disabled={page >= totalPages}
-                        className="p-2 rounded-full border border-[#f0ded8] bg-white hover:bg-[#fbf3ef] disabled:opacity-40 transition"
+                        className="p-2 rounded-full border border-outline-variant bg-white hover:bg-surface-low disabled:opacity-40 transition"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>
@@ -312,16 +312,16 @@ export default function AdminContratosPage() {
           {/* PAINEL DE DETALHE */}
           {selectedId && (
             <div className="flex-1 min-w-0">
-              <div className="bg-white rounded-3xl border border-[#f0ded8] p-6 shadow-xs">
+              <div className="bg-white rounded-3xl border border-outline-variant p-6 shadow-xs">
                 {/* Botao fechar no mobile */}
                 <div className="flex items-center justify-between mb-4 sm:hidden">
-                  <h3 className="font-serif font-bold text-[#5d0c1d]">Detalhe</h3>
+                  <h3 className="font-serif font-bold text-primary">Detalhe</h3>
                   <button
                     onClick={() => {
                       setSelectedId(null);
                       setSelectedContract(null);
                     }}
-                    className="p-1.5 rounded-full hover:bg-[#f8dad2] text-[#5d0c1d] transition"
+                    className="p-1.5 rounded-full hover:bg-primary-container text-primary transition"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -329,7 +329,7 @@ export default function AdminContratosPage() {
 
                 {loadingDetail ? (
                   <div className="flex items-center justify-center py-16">
-                    <Loader2 className="w-6 h-6 animate-spin text-[#5d0c1d]" />
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
                   </div>
                 ) : selectedContract ? (
                   <ContractDetailPanel

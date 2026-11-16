@@ -67,10 +67,10 @@ function ocupaHorario(a: Agendamento | undefined | null): boolean {
 }
 
 const COR_STATUS: Record<string, string> = {
-  agendado: "bg-[#5d0c1d] text-white",
-  realizado: "bg-[#e7f4ec] text-[#245f3c] border border-[#c7e6d2]",
-  cancelado: "bg-[#f0edea] text-[#9c8b8e] line-through",
-  falta: "bg-[#fff0f3] text-[#aa2d47] border border-[#f3cbc1]",
+  agendado: "bg-primary text-white",
+  realizado: "bg-success-container text-success border border-success-outline",
+  cancelado: "bg-surface-low text-on-surface-subtle line-through",
+  falta: "bg-secondary-container text-secondary border border-primary-container-high",
 };
 
 const ROTULO_STATUS: Record<string, string> = {
@@ -251,7 +251,7 @@ export function CalendarioSemanal() {
   };
 
   if (carregando) return <TelaCarregando mensagem="Carregando a agenda..." />;
-  if (!dados) return <p className="p-8 text-sm text-[#6f5f62]">{erro || "Nada encontrado."}</p>;
+  if (!dados) return <p className="p-8 text-sm text-on-surface-variant">{erro || "Nada encontrado."}</p>;
 
   const duracao = selecionado?.duracaoMinutos ?? 50;
 
@@ -304,27 +304,27 @@ export function CalendarioSemanal() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => irParaSemana(-1)}
-            className="p-2 rounded-full border border-[#eae2d7] text-[#5d0c1d] hover:bg-[#fbf3ef] transition"
+            className="p-2 rounded-full border border-outline-variant text-primary hover:bg-surface-low transition"
             aria-label="Semana anterior"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => { setSemana(null); setSelecionado(null); setMovendo(false); }}
-            className="px-4 py-2 rounded-full border border-[#eae2d7] text-[#5d0c1d] text-xs font-semibold hover:bg-[#fbf3ef] transition"
+            className="px-4 py-2 rounded-full border border-outline-variant text-primary text-xs font-semibold hover:bg-surface-low transition"
           >
             Hoje
           </button>
           <button
             onClick={() => irParaSemana(1)}
-            className="p-2 rounded-full border border-[#eae2d7] text-[#5d0c1d] hover:bg-[#fbf3ef] transition"
+            className="p-2 rounded-full border border-outline-variant text-primary hover:bg-surface-low transition"
             aria-label="Próxima semana"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
-        <p className="font-serif text-sm font-bold text-[#5d0c1d]">
+        <p className="font-serif text-sm font-bold text-primary">
           {primeiroDia.rotulo} a {ultimoDia.rotulo}
         </p>
       </div>
@@ -332,20 +332,20 @@ export function CalendarioSemanal() {
       <BarraProgresso ativa={atualizando} />
 
       {erro && (
-        <div className="bg-[#fff0f3] border border-[#f3cbc1] text-[#aa2d47] p-3.5 rounded-2xl text-xs flex items-start gap-2">
+        <div className="bg-secondary-container border border-primary-container-high text-secondary p-3.5 rounded-2xl text-xs flex items-start gap-2">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{erro}</span>
         </div>
       )}
       {aviso && (
-        <div className="bg-[#fffbeb] border border-[#fde68a] text-[#78350f] p-3.5 rounded-2xl text-xs flex items-start gap-2">
+        <div className="bg-warning-container border border-warning-outline text-on-warning-container p-3.5 rounded-2xl text-xs flex items-start gap-2">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{aviso}</span>
         </div>
       )}
 
       {movendo && selecionado && (
-        <div className="bg-[#5d0c1d] text-white p-4 rounded-2xl text-xs space-y-2 shadow-lg">
+        <div className="bg-primary text-white p-4 rounded-2xl text-xs space-y-2 shadow-lg">
           <div className="flex items-center gap-2 flex-wrap">
             <MoveRight className="w-4 h-4 shrink-0" />
             <span className="flex-1 min-w-[200px]">
@@ -369,7 +369,7 @@ export function CalendarioSemanal() {
       )}
 
       {horas.length === 0 ? (
-        <div className="bg-[#fffbeb] border border-[#fde68a] rounded-3xl p-5 text-xs text-[#78350f]">
+        <div className="bg-warning-container border border-warning-outline rounded-3xl p-5 text-xs text-on-warning-container">
           Nenhum horário de atendimento configurado. Defina suas faixas em
           Configurações para o calendário aparecer.
         </div>
@@ -383,13 +383,13 @@ export function CalendarioSemanal() {
                 <div
                   key={d.data}
                   className={`text-center py-1.5 rounded-xl ${
-                    d.ehHoje ? "bg-[#f8dad2] text-[#5d0c1d]" : "text-[#6f5f62]"
+                    d.ehHoje ? "bg-primary-container text-primary" : "text-on-surface-variant"
                   }`}
                 >
-                  <p className="text-[10px] font-bold uppercase tracking-wide">
+                  <p className="text-[11px] font-bold uppercase tracking-wide">
                     {d.nomeDia.slice(0, 3)}
                   </p>
-                  <p className="text-[11px]">{d.rotulo}</p>
+                  <p className="text-[12px]">{d.rotulo}</p>
                 </div>
               ))}
             </div>
@@ -397,7 +397,7 @@ export function CalendarioSemanal() {
             {/* LINHAS DE HORA */}
             {horas.map((hora) => (
               <div key={hora} className="grid grid-cols-[58px_repeat(7,1fr)] gap-1 mb-1">
-                <div className="text-[11px] text-[#9c8b8e] text-right pr-1.5 pt-2">
+                <div className="text-[12px] text-on-surface-subtle text-right pr-1.5 pt-2">
                   {hora}
                 </div>
 
@@ -435,9 +435,9 @@ export function CalendarioSemanal() {
                               ? `Ocupado por ${ag.patient.fullName}`
                               : `${ag.patient.fullName} - ${ROTULO_STATUS[ag.status] ?? ag.status}`
                         }
-                        className={`min-h-[52px] rounded-xl px-1.5 py-1.5 text-[11px] font-semibold text-left transition ${
+                        className={`min-h-[52px] rounded-xl px-1.5 py-1.5 text-[12px] font-semibold text-left transition ${
                           COR_STATUS[ag.status] ?? COR_STATUS.agendado
-                        } ${ativo ? "ring-2 ring-[#aa2d47] ring-offset-1" : "hover:opacity-90"} ${
+                        } ${ativo ? "ring-2 ring-secondary ring-offset-1" : "hover:opacity-90"} ${
                           bloqueia ? "opacity-30 cursor-not-allowed" : ""
                         }`}
                       >
@@ -476,16 +476,16 @@ export function CalendarioSemanal() {
                       }
                       className={`group min-h-[52px] rounded-xl transition flex items-center justify-center ${
                         movendo
-                          ? "bg-[#f8dad2] border-2 border-[#5d0c1d] ring-2 ring-[#5d0c1d]/25 animate-pulse hover:animate-none hover:bg-[#5d0c1d]"
+                          ? "bg-primary-container border-2 border-primary ring-2 ring-primary/25 animate-pulse hover:animate-none hover:bg-primary"
                           : trabalha
-                            ? "bg-[#fbf3ef] border border-[#f0ded8] hover:bg-[#f8dad2] hover:border-[#5d0c1d]"
-                            : "bg-[#f7f5f4] border border-dashed border-[#eae2d7] hover:bg-[#f8dad2] hover:border-[#5d0c1d]"
+                            ? "bg-white border border-outline-variant hover:bg-primary-container hover:border-primary"
+                            : "bg-surface-low border border-dashed border-outline/50 hover:bg-primary-container hover:border-primary"
                       } cursor-pointer`}
                     >
                       {movendo ? (
-                        <MoveRight className="w-4 h-4 text-[#5d0c1d] group-hover:text-white transition" />
+                        <MoveRight className="w-4 h-4 text-primary group-hover:text-white transition" />
                       ) : (
-                        <Plus className="w-3.5 h-3.5 text-[#5d0c1d] opacity-0 group-hover:opacity-60 transition" />
+                        <Plus className="w-3.5 h-3.5 text-primary opacity-0 group-hover:opacity-60 transition" />
                       )}
                     </button>
                   );
@@ -499,7 +499,7 @@ export function CalendarioSemanal() {
       {escondidas > 0 && (
         <button
           onClick={() => setMostrarVazias((v) => !v)}
-          className="text-[11px] font-semibold text-[#5d0c1d] hover:underline"
+          className="text-[12px] font-semibold text-primary hover:underline"
         >
           {mostrarVazias
             ? "Ocultar horários fora do expediente"
@@ -509,33 +509,33 @@ export function CalendarioSemanal() {
 
       {/* LEGENDA */}
       {movendo ? (
-        <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#6f5f62]">
+        <div className="flex flex-wrap items-center gap-3 text-[12px] text-on-surface-variant">
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-[#f8dad2] border-2 border-[#5d0c1d]" /> Pode mover para cá
+            <span className="w-3 h-3 rounded bg-primary-container border-2 border-primary" /> Pode mover para cá
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-[#5d0c1d] opacity-30" /> Ocupado
+            <span className="w-3 h-3 rounded bg-primary opacity-30" /> Ocupado
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-[#5d0c1d] ring-2 ring-[#aa2d47]" /> Horário atual
+            <span className="w-3 h-3 rounded bg-primary ring-2 ring-secondary" /> Horário atual
           </span>
         </div>
       ) : (
-      <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#6f5f62]">
+      <div className="flex flex-wrap items-center gap-3 text-[12px] text-on-surface-variant">
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-[#5d0c1d]" /> Agendado
+          <span className="w-3 h-3 rounded bg-primary" /> Agendado
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-[#e7f4ec] border border-[#c7e6d2]" /> Realizado
+          <span className="w-3 h-3 rounded bg-success-container border border-success-outline" /> Realizado
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-[#fff0f3] border border-[#f3cbc1]" /> Falta
+          <span className="w-3 h-3 rounded bg-secondary-container border border-primary-container-high" /> Falta
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-[#fbf3ef] border border-[#f0ded8]" /> Livre
+          <span className="w-3 h-3 rounded bg-white border border-outline-variant" /> Livre
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-[#f7f5f4] border border-dashed border-[#eae2d7]" /> Fora do expediente
+          <span className="w-3 h-3 rounded bg-surface-low border border-dashed border-outline/50" /> Fora do expediente
         </span>
       </div>
       )}
@@ -617,18 +617,18 @@ function DetalheConsulta({
 }) {
   const a = agendamento;
   return (
-    <div className="bg-white border border-[#f0ded8] rounded-3xl p-5 space-y-4">
+    <div className="bg-white border border-outline-variant rounded-3xl p-5 space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-serif font-bold text-sm text-[#241a1c]">{a.patient.fullName}</p>
-          <p className="text-xs text-[#6f5f62] mt-0.5 first-letter:uppercase">{formatarDataHora(a.inicioEm)}</p>
-          <p className="text-[11px] text-[#9c8b8e] mt-0.5">
+          <p className="font-serif font-bold text-sm text-on-surface">{a.patient.fullName}</p>
+          <p className="text-xs text-on-surface-variant mt-0.5 first-letter:uppercase">{formatarDataHora(a.inicioEm)}</p>
+          <p className="text-[12px] text-on-surface-subtle mt-0.5">
             {a.duracaoMinutos} minutos - CPF {formatCPF(a.patient.cpf)} - {ROTULO_STATUS[a.status] ?? a.status}
           </p>
         </div>
         <button
           onClick={aoFechar}
-          className="p-1.5 rounded-full text-[#6f5f62] hover:bg-[#fbf3ef] shrink-0"
+          className="p-1.5 rounded-full text-on-surface-variant hover:bg-surface-low shrink-0"
           aria-label="Fechar"
         >
           <X className="w-4 h-4" />
@@ -645,7 +645,7 @@ function DetalheConsulta({
         <button
           onClick={aoMover}
           disabled={salvando}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] disabled:opacity-70 text-white text-xs font-semibold transition"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary hover:bg-secondary disabled:opacity-70 text-white text-xs font-semibold transition"
         >
           <BotaoConteudo carregando={salvando} rotuloCarregando="Aguarde...">
             <MoveRight className="w-4 h-4" />
@@ -657,7 +657,7 @@ function DetalheConsulta({
           <button
             onClick={() => aoMudarStatus("realizado")}
             disabled={salvando}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#c7e6d2] bg-[#e7f4ec] text-[#245f3c] text-xs font-semibold hover:bg-[#d5ecdf] transition"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-success-outline bg-success-container text-success text-xs font-semibold hover:bg-success-outline transition"
           >
             <Check className="w-4 h-4" />
             <span>Realizada</span>
@@ -668,7 +668,7 @@ function DetalheConsulta({
           <button
             onClick={() => aoMudarStatus("falta")}
             disabled={salvando}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#f3cbc1] bg-[#fff0f3] text-[#aa2d47] text-xs font-semibold hover:bg-[#ffe4ea] transition"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-primary-container-high bg-secondary-container text-secondary text-xs font-semibold hover:bg-secondary-container-high transition"
           >
             <CircleSlash className="w-4 h-4" />
             <span>Faltou</span>
@@ -679,7 +679,7 @@ function DetalheConsulta({
           <button
             onClick={() => aoMudarStatus("cancelado")}
             disabled={salvando}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#eae2d7] text-[#6f5f62] text-xs font-semibold hover:bg-[#fbf3ef] transition"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant text-xs font-semibold hover:bg-surface-low transition"
           >
             <X className="w-4 h-4" />
             <span>Cancelar</span>
@@ -691,7 +691,7 @@ function DetalheConsulta({
             href={`https://wa.me/55${a.patient.phone.replace(/\D/g, "")}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#e7f4ec] text-[#245f3c] text-xs font-semibold hover:bg-[#d5ecdf] transition"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-success-container text-success text-xs font-semibold hover:bg-success-outline transition"
           >
             <MessageSquareText className="w-4 h-4" />
             <span>Avisar no WhatsApp</span>
@@ -701,14 +701,14 @@ function DetalheConsulta({
         <button
           onClick={aoExcluir}
           disabled={salvando}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-[#aa2d47] text-xs font-semibold hover:bg-[#fff0f3] transition ml-auto"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-secondary text-xs font-semibold hover:bg-secondary-container transition ml-auto"
         >
           <Trash2 className="w-4 h-4" />
           <span>Excluir</span>
         </button>
       </div>
 
-      <p className="text-[11px] text-[#9c8b8e]">
+      <p className="text-[12px] text-on-surface-subtle">
         Ao remanejar ou cancelar, o paciente recebe um e-mail com o novo horário.
       </p>
     </div>
@@ -741,15 +741,15 @@ function AvisoDeAnamnese({
   return (
     <div
       className={`rounded-2xl border p-3.5 flex flex-wrap items-center gap-3 ${
-        urgente ? "bg-[#fff0f3] border-[#f3cbc1]" : "bg-[#fbf3ef] border-[#f0ded8]"
+        urgente ? "bg-secondary-container border-primary-container-high" : "bg-surface-low border-outline-variant"
       }`}
     >
-      <FileText className={`w-4 h-4 shrink-0 ${urgente ? "text-[#aa2d47]" : "text-[#9c8b8e]"}`} />
+      <FileText className={`w-4 h-4 shrink-0 ${urgente ? "text-secondary" : "text-on-surface-subtle"}`} />
       <div className="min-w-0 flex-1">
-        <p className={`text-xs font-semibold ${urgente ? "text-[#aa2d47]" : "text-[#241a1c]"}`}>
+        <p className={`text-xs font-semibold ${urgente ? "text-secondary" : "text-on-surface"}`}>
           {urgente ? "Faltam menos de 2 horas e a anamnese não foi preenchida" : "Anamnese ainda não preenchida"}
         </p>
-        <p className="text-[11px] text-[#6f5f62] mt-0.5">
+        <p className="text-[12px] text-on-surface-variant mt-0.5">
           {pedida
             ? `Você pediu por e-mail em ${pedida}.`
             : "A consulta está marcada. Se quiser, peça a ficha por e-mail."}
@@ -758,7 +758,7 @@ function AvisoDeAnamnese({
       <button
         onClick={aoPedir}
         disabled={pedindo}
-        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#5d0c1d] text-[#5d0c1d] hover:bg-[#5d0c1d] hover:text-white disabled:opacity-60 text-xs font-semibold transition"
+        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary hover:text-white disabled:opacity-60 text-xs font-semibold transition"
       >
         <BotaoConteudo carregando={pedindo} rotuloCarregando="Enviando..." claro={false}>
           <Send className="w-3.5 h-3.5" />

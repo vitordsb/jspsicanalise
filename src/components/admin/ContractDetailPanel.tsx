@@ -267,7 +267,7 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
   if (editando) {
     return (
       <div className="space-y-4">
-        <h3 className="font-serif text-lg font-bold text-[#5d0c1d]">Editar contrato</h3>
+        <h3 className="font-serif text-lg font-bold text-primary">Editar contrato</h3>
         <ContractEditForm
           contract={contract as unknown as Record<string, unknown>}
           onCancel={() => setEditando(false)}
@@ -285,8 +285,8 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
       {/* Cabecalho do contrato */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h3 className="font-serif text-lg font-bold text-[#5d0c1d]">{contract.title}</h3>
-          <p className="text-xs text-[#6f5f62] mt-0.5">
+          <h3 className="font-serif text-lg font-bold text-primary">{contract.title}</h3>
+          <p className="text-xs text-on-surface-variant mt-0.5">
             Paciente: <strong>{contract.patientFullName || contract.patient?.fullName}</strong>
             {" - "}CPF: {formatCPF(contract.patientCpf || contract.patient?.cpf || "")}
           </p>
@@ -311,7 +311,7 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
           href={`/admin/contratos/${contract.id}/imprimir`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-semibold transition"
+          className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary hover:bg-secondary text-white text-xs font-semibold transition"
         >
           <Printer className="w-4 h-4" />
           <span>Abrir contrato para impressão</span>
@@ -322,7 +322,7 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
         {!contract.submissionId && (
           <button
             onClick={() => setVinculando(true)}
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-[#eae2d7] text-[#5d0c1d] text-xs font-semibold hover:bg-[#fbf3ef] transition"
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-outline-variant text-primary text-xs font-semibold hover:bg-surface-low transition"
           >
             <Link2 className="w-4 h-4" />
             <span>Vincular a uma anamnese</span>
@@ -332,7 +332,7 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
         {podeEditar && !assinadoEletronicamente && (
           <button
             onClick={() => setEditando(true)}
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-[#eae2d7] text-[#5d0c1d] text-xs font-semibold hover:bg-[#fbf3ef] transition"
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-outline-variant text-primary text-xs font-semibold hover:bg-surface-low transition"
           >
             <Pencil className="w-4 h-4" />
             <span>Editar dados</span>
@@ -357,29 +357,29 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
 
       {/* Dados do contrato */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-        <div className="bg-[#fbf3ef] rounded-2xl p-3 border border-[#f0ded8]">
-          <p className="text-[#9c8b8e] mb-0.5">Valor da sessao</p>
-          <p className="font-bold text-[#241a1c]">{formatCurrency(sessionPriceBRL)}</p>
+        <div className="bg-surface-low rounded-2xl p-3 border border-outline-variant">
+          <p className="text-on-surface-subtle mb-0.5">Valor da sessao</p>
+          <p className="font-bold text-on-surface">{formatCurrency(sessionPriceBRL)}</p>
         </div>
-        <div className="bg-[#fbf3ef] rounded-2xl p-3 border border-[#f0ded8]">
-          <p className="text-[#9c8b8e] mb-0.5">Duracao</p>
-          <p className="font-bold text-[#241a1c]">{contract.durationMinutes} min</p>
+        <div className="bg-surface-low rounded-2xl p-3 border border-outline-variant">
+          <p className="text-on-surface-subtle mb-0.5">Duracao</p>
+          <p className="font-bold text-on-surface">{contract.durationMinutes} min</p>
         </div>
-        <div className="bg-[#fbf3ef] rounded-2xl p-3 border border-[#f0ded8]">
-          <p className="text-[#9c8b8e] mb-0.5">Periodicidade</p>
-          <p className="font-bold text-[#241a1c]">{contract.frequency}</p>
+        <div className="bg-surface-low rounded-2xl p-3 border border-outline-variant">
+          <p className="text-on-surface-subtle mb-0.5">Periodicidade</p>
+          <p className="font-bold text-on-surface">{contract.frequency}</p>
         </div>
-        <div className="bg-[#fbf3ef] rounded-2xl p-3 border border-[#f0ded8]">
-          <p className="text-[#9c8b8e] mb-0.5">Pagamento</p>
-          <p className="font-bold text-[#241a1c]">{contract.paymentMethod}</p>
+        <div className="bg-surface-low rounded-2xl p-3 border border-outline-variant">
+          <p className="text-on-surface-subtle mb-0.5">Pagamento</p>
+          <p className="font-bold text-on-surface">{contract.paymentMethod}</p>
         </div>
-        <div className="bg-[#fbf3ef] rounded-2xl p-3 border border-[#f0ded8]">
-          <p className="text-[#9c8b8e] mb-0.5">Vencimento</p>
-          <p className="font-bold text-[#241a1c]">Dia {contract.paymentDueDay}</p>
+        <div className="bg-surface-low rounded-2xl p-3 border border-outline-variant">
+          <p className="text-on-surface-subtle mb-0.5">Vencimento</p>
+          <p className="font-bold text-on-surface">Dia {contract.paymentDueDay}</p>
         </div>
-        <div className="bg-[#fbf3ef] rounded-2xl p-3 border border-[#f0ded8]">
-          <p className="text-[#9c8b8e] mb-0.5">Criado em</p>
-          <p className="font-bold text-[#241a1c]">{formatDate(contract.createdAt)}</p>
+        <div className="bg-surface-low rounded-2xl p-3 border border-outline-variant">
+          <p className="text-on-surface-subtle mb-0.5">Criado em</p>
+          <p className="font-bold text-on-surface">{formatDate(contract.createdAt)}</p>
         </div>
       </div>
 
@@ -412,17 +412,17 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
 
       {/* UPLOAD DO PDF ASSINADO */}
       {canUpload && (
-        <div className="border border-[#f0ded8] rounded-3xl p-5 space-y-4 bg-[#fbf3ef]">
+        <div className="border border-outline-variant rounded-3xl p-5 space-y-4 bg-surface-low">
           <div className="flex items-center gap-2">
-            <Upload className="w-5 h-5 text-[#5d0c1d]" />
-            <h4 className="font-serif font-bold text-[#5d0c1d]">Enviar PDF Assinado</h4>
+            <Upload className="w-5 h-5 text-primary" />
+            <h4 className="font-serif font-bold text-primary">Enviar PDF Assinado</h4>
           </div>
-          <p className="text-xs text-[#6f5f62]">
+          <p className="text-xs text-on-surface-variant">
             Envie o PDF escaneado com a assinatura do paciente. Apenas arquivos PDF ate 10 MB sao aceitos.
           </p>
 
           <div className="flex items-center gap-3 flex-wrap">
-            <label className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#f0ded8] bg-white text-xs font-semibold text-[#5d0c1d] hover:bg-[#f8dad2] cursor-pointer transition">
+            <label className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-outline-variant bg-white text-xs font-semibold text-primary hover:bg-primary-container cursor-pointer transition">
               <FileText className="w-4 h-4" />
               <span>{selectedFile ? selectedFile.name : "Selecionar PDF..."}</span>
               <input
@@ -437,7 +437,7 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
             {selectedFile && uploadState !== "uploading" && (
               <button
                 onClick={handleUpload}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-semibold transition"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary hover:bg-secondary text-white text-xs font-semibold transition"
               >
                 <Upload className="w-4 h-4" />
                 <span>Enviar</span>
@@ -448,13 +448,13 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
           {/* Barra de progresso */}
           {uploadState === "uploading" && (
             <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs text-[#6f5f62]">
+              <div className="flex items-center justify-between text-xs text-on-surface-variant">
                 <span>Enviando...</span>
                 <span>{uploadProgress}%</span>
               </div>
-              <div className="h-2 bg-[#f0ded8] rounded-full overflow-hidden">
+              <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#5d0c1d] transition-all duration-200 rounded-full"
+                  className="h-full bg-primary transition-all duration-200 rounded-full"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -483,9 +483,9 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
 
       {/* APROVAR / RECUSAR */}
       {canApproveOrRefuse && (
-        <div className="border border-[#f0ded8] rounded-3xl p-5 space-y-4 bg-[#fbf3ef]">
-          <h4 className="font-serif font-bold text-[#5d0c1d]">Revisão do contrato assinado</h4>
-          <p className="text-xs text-[#6f5f62]">
+        <div className="border border-outline-variant rounded-3xl p-5 space-y-4 bg-surface-low">
+          <h4 className="font-serif font-bold text-primary">Revisão do contrato assinado</h4>
+          <p className="text-xs text-on-surface-variant">
             {assinadoEletronicamente
               ? "O paciente assinou eletronicamente. Confira a assinatura acima e aprove para encerrar o fluxo."
               : "O paciente enviou o PDF assinado. Revise o documento antes de aprovar ou recusar."}
@@ -499,7 +499,7 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
               <button
                 onClick={handleDownloadSigned}
                 disabled={fetchingUrl}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#f0ded8] bg-white text-xs font-semibold text-[#5d0c1d] hover:bg-[#f8dad2] transition"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-outline-variant bg-white text-xs font-semibold text-primary hover:bg-primary-container transition"
               >
                 {fetchingUrl ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -540,7 +540,7 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
           {/* Formulario de recusa */}
           {showRefuseForm && (
             <div className="space-y-3 pt-2">
-              <label className="block text-xs font-semibold text-[#241a1c]">
+              <label className="block text-xs font-semibold text-on-surface">
                 Motivo da recusa <span className="text-red-600">*</span>
               </label>
               <textarea
@@ -551,7 +551,7 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
                   setRefuseError("");
                 }}
                 placeholder="Descreva o motivo (minimo 5 caracteres)..."
-                className="w-full p-3 rounded-2xl border border-red-200 bg-white text-xs text-[#241a1c] focus:outline-none focus:border-red-500 resize-y"
+                className="w-full p-3 rounded-2xl border border-red-200 bg-white text-xs text-on-surface focus:outline-none focus:border-red-500 resize-y"
               />
               {refuseError && (
                 <p className="text-xs text-red-700 flex items-center gap-1">
@@ -582,7 +582,7 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
           <button
             onClick={handleDownloadSigned}
             disabled={fetchingUrl}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#f0ded8] bg-white text-xs font-semibold text-[#5d0c1d] hover:bg-[#f8dad2] transition"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-outline-variant bg-white text-xs font-semibold text-primary hover:bg-primary-container transition"
           >
             {fetchingUrl ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -600,7 +600,7 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
       {/* HISTORICO DE TRANSICOES */}
       {contract.events && contract.events.length > 0 && (
         <div className="space-y-3">
-          <h4 className="font-serif font-bold text-[#5d0c1d] text-sm">Historico de Transicoes</h4>
+          <h4 className="font-serif font-bold text-primary text-sm">Historico de Transicoes</h4>
           <div className="space-y-2">
             {contract.events.map((ev: ContractEvent) => {
               const fromLabel = STATUS_LABELS[ev.fromStatus as ContractStatus] ?? ev.fromStatus;
@@ -608,19 +608,19 @@ export function ContractDetailPanel({ contract, onRefresh }: ContractDetailPanel
               return (
                 <div
                   key={ev.id}
-                  className="flex items-start gap-3 p-3 bg-[#fbf3ef] rounded-2xl border border-[#f0ded8] text-xs"
+                  className="flex items-start gap-3 p-3 bg-surface-low rounded-2xl border border-outline-variant text-xs"
                 >
-                  <Clock className="w-3.5 h-3.5 text-[#9c8b8e] shrink-0 mt-0.5" />
+                  <Clock className="w-3.5 h-3.5 text-on-surface-subtle shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap font-medium text-[#362c2d]">
+                    <div className="flex items-center gap-1.5 flex-wrap font-medium text-on-surface">
                       <span>{fromLabel}</span>
-                      <ArrowRight className="w-3 h-3 text-[#9c8b8e] shrink-0" />
+                      <ArrowRight className="w-3 h-3 text-on-surface-subtle shrink-0" />
                       <span>{toLabel}</span>
                     </div>
                     {ev.note && (
-                      <p className="text-[#6f5f62] mt-0.5 break-words">{ev.note}</p>
+                      <p className="text-on-surface-variant mt-0.5 break-words">{ev.note}</p>
                     )}
-                    <p className="text-[#9c8b8e] mt-0.5">{formatDateTime(ev.createdAt)}</p>
+                    <p className="text-on-surface-subtle mt-0.5">{formatDateTime(ev.createdAt)}</p>
                   </div>
                 </div>
               );

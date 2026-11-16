@@ -174,7 +174,7 @@ export function AssinarContrato({
           checked={aceite}
           onChange={(e) => setAceite(e.target.checked)}
           disabled={!liberado || salvando}
-          style={{ marginTop: 3, flexShrink: 0, width: 16, height: 16, accentColor: "#5d0c1d" }}
+          style={{ marginTop: 3, flexShrink: 0, width: 16, height: 16, accentColor: "var(--color-primary)" }}
         />
         <span style={{ ...texto, fontSize: 12.5 }}>
           Declaro que li o contrato acima na íntegra, que concordo com todas as suas
@@ -214,70 +214,70 @@ export function AssinarContrato({
 // impresso, que nao tem as classes do Tailwind da aplicacao.
 const caixa: React.CSSProperties = {
   maxWidth: 560, margin: "22px auto 60px auto", background: "#fff",
-  border: "1px solid #f0ded8", borderRadius: 20, padding: 24,
+  border: "1px solid var(--color-surface-container-high)", borderRadius: 20, padding: 24,
   fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
   display: "flex", flexDirection: "column", gap: 14,
   boxShadow: "0 2px 18px rgba(0,0,0,0.06)",
 };
 const titulo: React.CSSProperties = {
-  margin: 0, fontSize: 17, fontWeight: 700, color: "#5d0c1d",
+  margin: 0, fontSize: 17, fontWeight: 700, color: "var(--color-primary)",
   fontFamily: "Georgia, serif",
 };
 const texto: React.CSSProperties = {
-  margin: 0, fontSize: 13, lineHeight: 1.55, color: "#4a3f41",
+  margin: 0, fontSize: 13, lineHeight: 1.55, color: "var(--color-on-surface-variant)",
 };
 const rotulo: React.CSSProperties = {
   display: "flex", flexDirection: "column", gap: 5,
-  fontSize: 12, fontWeight: 600, color: "#5d0c1d",
+  fontSize: 12, fontWeight: 600, color: "var(--color-primary)",
 };
 const campo: React.CSSProperties = {
-  padding: "11px 13px", borderRadius: 12, border: "1px solid #e6d8d3",
-  fontSize: 14, fontWeight: 400, color: "#241a1c", outline: "none",
+  padding: "11px 13px", borderRadius: 12, border: "1px solid var(--color-outline-variant)",
+  fontSize: 14, fontWeight: 400, color: "var(--color-on-surface)", outline: "none",
   fontFamily: "inherit", background: "#fff",
 };
 const linhaAceite: React.CSSProperties = {
   display: "flex", gap: 9, alignItems: "flex-start", cursor: "pointer",
-  background: "#fbf3ef", padding: 13, borderRadius: 14,
-  border: "1px solid #f0ded8",
+  background: "var(--color-surface-low)", padding: 13, borderRadius: 14,
+  border: "1px solid var(--color-surface-container-high)",
 };
 const botaoPrimario: React.CSSProperties = {
   display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
   padding: "13px 22px", borderRadius: 999, border: "none",
-  background: "#5d0c1d", color: "#fff", fontSize: 14, fontWeight: 700,
+  background: "var(--color-primary)", color: "#fff", fontSize: 14, fontWeight: 700,
   cursor: "pointer", fontFamily: "inherit",
 };
 const botaoLink: React.CSSProperties = {
   display: "inline-flex", alignItems: "center", gap: 5, background: "none",
-  border: "none", color: "#5d0c1d", fontSize: 12, fontWeight: 600,
+  border: "none", color: "var(--color-primary)", fontSize: 12, fontWeight: 600,
   cursor: "pointer", padding: 0, marginTop: 8, fontFamily: "inherit",
 };
 const avisoAmarelo: React.CSSProperties = {
-  display: "flex", gap: 7, alignItems: "flex-start", background: "#fffbeb",
-  border: "1px solid #fde68a", color: "#78350f", padding: 11,
+  display: "flex", gap: 7, alignItems: "flex-start", background: "var(--color-warning-container)",
+  border: "1px solid var(--color-warning-outline)", color: "var(--color-on-warning-container)", padding: 11,
   borderRadius: 12, fontSize: 12.5, lineHeight: 1.5,
 };
 const avisoVermelho: React.CSSProperties = {
-  display: "flex", gap: 7, alignItems: "flex-start", background: "#fff0f3",
-  border: "1px solid #f3cbc1", color: "#aa2d47", padding: 11,
+  display: "flex", gap: 7, alignItems: "flex-start", background: "var(--color-secondary-container)",
+  border: "1px solid var(--color-primary-container-high)", color: "var(--color-secondary)", padding: 11,
   borderRadius: 12, fontSize: 12.5, lineHeight: 1.5,
 };
 const circuloOk: React.CSSProperties = {
-  width: 52, height: 52, borderRadius: "50%", background: "#245f3c",
+  width: 52, height: 52, borderRadius: "50%", background: "var(--color-success)",
   display: "inline-flex", alignItems: "center", justifyContent: "center",
 };
 const blocoCodigo: React.CSSProperties = {
-  background: "#fbf3ef", border: "1px solid #f0ded8", borderRadius: 14,
+  background: "var(--color-surface-low)", border: "1px solid var(--color-surface-container-high)", borderRadius: 14,
   padding: 16, textAlign: "center",
 };
 const rotuloPequeno: React.CSSProperties = {
   margin: 0, fontSize: 10.5, textTransform: "uppercase", letterSpacing: "0.08em",
-  color: "#9c8b8e", fontWeight: 700,
+  color: "var(--color-on-surface-subtle)", fontWeight: 700,
 };
 const valorCodigo: React.CSSProperties = {
-  margin: "6px 0 0 0", fontSize: 22, fontWeight: 700, color: "#5d0c1d",
+  margin: "6px 0 0 0", fontSize: 22, fontWeight: 700, color: "var(--color-primary)",
   fontFamily: "'Courier New', monospace", letterSpacing: "0.12em",
 };
 const rodapeSeguranca: React.CSSProperties = {
   display: "flex", gap: 6, alignItems: "flex-start", margin: 0,
-  fontSize: 11, lineHeight: 1.5, color: "#9c8b8e",
+  fontSize: 11, lineHeight: 1.5, color: "var(--color-on-surface-subtle)",
 };

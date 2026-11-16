@@ -28,7 +28,7 @@ export function AcordeaoFAQ({ itens }: { itens: Pergunta[] }) {
           <div
             key={item.pergunta}
             className={`bg-white rounded-2xl border transition ${
-              ativo ? "border-[#ccb38d] shadow-sm" : "border-[#f0ded8]"
+              ativo ? "border-tertiary shadow-sm" : "border-outline-variant"
             }`}
           >
             <button
@@ -36,11 +36,11 @@ export function AcordeaoFAQ({ itens }: { itens: Pergunta[] }) {
               aria-expanded={ativo}
               className="w-full flex items-center justify-between gap-4 text-left px-5 sm:px-6 py-4 sm:py-5"
             >
-              <span className="font-serif font-bold text-sm sm:text-base text-[#5d0c1d]">
+              <span className="font-serif font-bold text-sm sm:text-base text-primary">
                 {item.pergunta}
               </span>
               <ChevronDown
-                className={`w-4 h-4 shrink-0 text-[#aa2d47] transition-transform duration-200 ${
+                className={`w-4 h-4 shrink-0 text-secondary transition-transform duration-200 ${
                   ativo ? "rotate-180" : ""
                 }`}
               />
@@ -51,7 +51,7 @@ export function AcordeaoFAQ({ itens }: { itens: Pergunta[] }) {
               }`}
             >
               <div className="overflow-hidden">
-                <p className="px-5 sm:px-6 pb-4 sm:pb-5 text-xs sm:text-sm text-[#6f5f62] leading-relaxed">
+                <p className="px-5 sm:px-6 pb-4 sm:pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed">
                   {item.resposta}
                 </p>
               </div>

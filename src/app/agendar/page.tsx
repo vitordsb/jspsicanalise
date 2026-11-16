@@ -24,7 +24,7 @@ import { CalendarioPaciente, type Vaga } from "@/components/paciente/CalendarioP
 type Passo = "horario" | "dados" | "enviado";
 
 const CAMPO =
-  "w-full h-12 px-4 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-sm text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none";
+  "w-full h-12 px-4 rounded-lg border border-outline bg-surface-container text-sm text-on-surface focus:bg-white focus:border-primary focus:outline-none";
 
 export default function AgendarPage() {
   const [passo, setPasso] = useState<Passo>("horario");
@@ -128,24 +128,24 @@ export default function AgendarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fff6f4] px-4 py-8 sm:py-12">
+    <div className="min-h-screen bg-surface px-4 py-8 sm:py-12">
       <div className="w-full max-w-2xl mx-auto">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6f5f62] hover:text-[#5d0c1d] transition mb-6"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary transition mb-6"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Voltar ao início</span>
         </Link>
 
         <div className="text-center mb-7">
-          <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-[#5d0c1d] to-[#aa2d47] flex items-center justify-center text-white shadow-md shadow-[#5d0c1d]/20 mb-3">
+          <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white shadow-md shadow-primary/20 mb-3">
             <HeartHandshake className="w-7 h-7" />
           </div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#5d0c1d]">
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-primary">
             Agende sua consulta
           </h1>
-          <p className="text-sm text-[#6f5f62] mt-1.5 leading-relaxed max-w-md mx-auto">
+          <p className="text-sm text-on-surface-variant mt-1.5 leading-relaxed max-w-md mx-auto">
             Escolha um horário com a Dra. Joane. Não precisa preencher a ficha de
             anamnese agora: ela pode ser feita depois.
           </p>
@@ -155,7 +155,7 @@ export default function AgendarPage() {
           <div
             ref={avisoRef}
             role="alert"
-            className="bg-[#fff0f3] border border-[#f3cbc1] text-[#aa2d47] p-3.5 rounded-2xl text-xs flex items-start gap-2 mb-5"
+            className="bg-secondary-container border border-primary-container-high text-secondary p-3.5 rounded-2xl text-xs flex items-start gap-2 mb-5"
           >
             <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{erro}</span>
@@ -167,12 +167,12 @@ export default function AgendarPage() {
             {carregando ? (
               <EsqueletoCartoes />
             ) : semJanelas || vagas.length === 0 ? (
-              <div className="bg-white rounded-3xl border border-[#f0ded8] p-6 text-center">
-                <CalendarClock className="w-8 h-8 mx-auto text-[#ccb38d] mb-2" />
-                <p className="text-sm font-semibold text-[#241a1c]">
+              <div className="bg-white rounded-3xl border border-outline-variant p-6 text-center">
+                <CalendarClock className="w-8 h-8 mx-auto text-tertiary mb-2" />
+                <p className="text-sm font-semibold text-on-surface">
                   Não há horários livres no momento.
                 </p>
-                <p className="text-xs text-[#6f5f62] mt-1 leading-relaxed">
+                <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
                   Fale com a Dra. Joane pelo WhatsApp para combinar um horário.
                 </p>
               </div>
@@ -197,30 +197,30 @@ export default function AgendarPage() {
         {passo === "dados" && (
           <form
             onSubmit={enviar}
-            className="bg-white rounded-3xl border border-[#f0ded8] p-6 sm:p-7 shadow-xs space-y-5"
+            className="bg-white rounded-3xl border border-outline-variant p-6 sm:p-7 shadow-xs space-y-5"
             noValidate
           >
-            <div className="bg-[#fbf3ef] rounded-2xl p-3.5 flex items-start justify-between gap-3">
+            <div className="bg-surface-low rounded-2xl p-3.5 flex items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.08em] text-[#9c8b8e]">Horário escolhido</p>
-                <p className="text-sm font-semibold text-[#5d0c1d] first-letter:uppercase">
+                <p className="text-[12px] uppercase tracking-[0.08em] text-on-surface-subtle">Horário escolhido</p>
+                <p className="text-sm font-semibold text-primary first-letter:uppercase">
                   {formatarDataHora(escolhida)}
                 </p>
-                <p className="text-[11px] text-[#6f5f62] mt-0.5">
+                <p className="text-[12px] text-on-surface-variant mt-0.5">
                   {duracao} minutos. Horário de Brasília.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => { setPasso("horario"); setErro(""); }}
-                className="text-xs font-semibold text-[#5d0c1d] underline underline-offset-2 shrink-0"
+                className="text-xs font-semibold text-primary underline underline-offset-2 shrink-0"
               >
                 Trocar
               </button>
             </div>
 
             <div>
-              <label htmlFor="ag-nome" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+              <label htmlFor="ag-nome" className="block text-xs font-semibold text-on-surface mb-1.5">
                 Nome completo
               </label>
               <input
@@ -233,7 +233,7 @@ export default function AgendarPage() {
             </div>
 
             <div>
-              <label htmlFor="ag-email" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+              <label htmlFor="ag-email" className="block text-xs font-semibold text-on-surface mb-1.5">
                 E-mail
               </label>
               <input
@@ -245,14 +245,14 @@ export default function AgendarPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className={CAMPO}
               />
-              <p className="text-[11px] text-[#9c8b8e] mt-1.5 ml-2">
+              <p className="text-[12px] text-on-surface-subtle mt-1.5 ml-2">
                 É para ele que enviamos o link de confirmação.
               </p>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-5">
               <div>
-                <label htmlFor="ag-tel" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+                <label htmlFor="ag-tel" className="block text-xs font-semibold text-on-surface mb-1.5">
                   Telefone com DDD
                 </label>
                 <input
@@ -267,7 +267,7 @@ export default function AgendarPage() {
                 />
               </div>
               <div>
-                <label htmlFor="ag-cpf" className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+                <label htmlFor="ag-cpf" className="block text-xs font-semibold text-on-surface mb-1.5">
                   CPF
                 </label>
                 <input
@@ -297,7 +297,7 @@ export default function AgendarPage() {
             <button
               type="submit"
               disabled={enviando}
-              className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] disabled:opacity-70 disabled:cursor-not-allowed text-white text-sm font-bold shadow-md shadow-[#5d0c1d]/25 transition"
+              className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-full bg-primary hover:bg-secondary disabled:opacity-70 disabled:cursor-not-allowed text-white text-sm font-bold shadow-md shadow-primary/25 transition"
             >
               <BotaoConteudo carregando={enviando} rotuloCarregando="Enviando...">
                 <Send className="w-4 h-4" />
@@ -305,8 +305,8 @@ export default function AgendarPage() {
               </BotaoConteudo>
             </button>
 
-            <div className="border-t border-[#f3e4e0] pt-4 flex items-start gap-2 text-[11px] text-[#6f5f62] leading-relaxed">
-              <Lock className="w-4 h-4 shrink-0 mt-0.5 text-[#ccb38d]" />
+            <div className="border-t border-outline-variant pt-4 flex items-start gap-2 text-[12px] text-on-surface-variant leading-relaxed">
+              <Lock className="w-4 h-4 shrink-0 mt-0.5 text-tertiary" />
               <p>
                 Usamos seus dados apenas para marcar a consulta e entrar em contato,
                 com sigilo profissional e proteção da LGPD. Se você não confirmar
@@ -319,23 +319,23 @@ export default function AgendarPage() {
         {passo === "enviado" && (
           <section
             aria-live="polite"
-            className="bg-white rounded-3xl border border-[#f0ded8] p-7 text-center shadow-xs"
+            className="bg-white rounded-3xl border border-outline-variant p-7 text-center shadow-xs"
           >
-            <div className="w-14 h-14 mx-auto rounded-full bg-[#e7f4ec] text-[#245f3c] flex items-center justify-center mb-3">
+            <div className="w-14 h-14 mx-auto rounded-full bg-success-container text-success flex items-center justify-center mb-3">
               <MailCheck className="w-7 h-7" />
             </div>
-            <h2 className="font-serif text-xl font-bold text-[#5d0c1d]">Falta só um passo</h2>
-            <p className="text-sm text-[#6f5f62] mt-2 leading-relaxed">
+            <h2 className="font-serif text-xl font-bold text-primary">Falta só um passo</h2>
+            <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">
               Enviamos um e-mail para você com o botão de confirmação. A consulta só
               fica marcada depois que você clicar nele.
             </p>
-            <p className="text-sm font-semibold text-[#241a1c] mt-4 first-letter:uppercase">
+            <p className="text-sm font-semibold text-on-surface mt-4 first-letter:uppercase">
               {formatarDataHora(escolhida)}
             </p>
-            <p className="text-xs text-[#6f5f62] mt-1">
+            <p className="text-xs text-on-surface-variant mt-1">
               O horário fica reservado por {validade} minutos.
             </p>
-            <p className="text-[11px] text-[#9c8b8e] mt-5 leading-relaxed">
+            <p className="text-[12px] text-on-surface-subtle mt-5 leading-relaxed">
               Não chegou? Olhe a caixa de spam. Se continuar sem aparecer, volte e
               tente de novo ou fale com a Dra. Joane pelo WhatsApp.
             </p>

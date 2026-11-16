@@ -33,7 +33,7 @@ export function Spinner({
 }) {
   const cor = claro
     ? "border-white/30 border-t-white"
-    : "border-[#f0ded8] border-t-[#5d0c1d]";
+    : "border-outline-variant border-t-primary";
   return (
     <span
       role="status"
@@ -52,7 +52,7 @@ export function TelaCarregando({ mensagem = "Carregando..." }: { mensagem?: stri
       className="flex-1 flex flex-col items-center justify-center gap-4 py-20 px-6 text-center"
     >
       <Spinner tamanho="lg" />
-      <p className="text-sm text-[#6f5f62]">{mensagem}</p>
+      <p className="text-sm text-on-surface-variant">{mensagem}</p>
     </div>
   );
 }
@@ -62,7 +62,7 @@ export function Esqueleto({ className = "" }: { className?: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`bg-[#f0ded8]/60 rounded-xl animate-pulse ${className}`}
+      className={`bg-surface-container-high/60 rounded-xl animate-pulse ${className}`}
     />
   );
 }
@@ -162,9 +162,9 @@ export function BarraProgresso({ ativa }: { ativa: boolean }) {
     <div
       role="status"
       aria-label="Atualizando"
-      className="h-0.5 w-full bg-[#f8dad2] overflow-hidden shrink-0"
+      className="h-0.5 w-full bg-primary-container overflow-hidden shrink-0"
     >
-      <div className="h-full w-1/3 bg-[#5d0c1d] animate-barra-indeterminada" />
+      <div className="h-full w-1/3 bg-primary animate-barra-indeterminada" />
     </div>
   );
 }

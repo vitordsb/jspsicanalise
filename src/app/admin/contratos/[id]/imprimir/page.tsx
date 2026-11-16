@@ -69,14 +69,14 @@ export default function ImprimirContratoPage({
         <button
           onClick={() => router.back()}
           style={{
-            padding: "9px 16px", borderRadius: 999, border: "1px solid #d8cfcb",
-            background: "#fff", cursor: "pointer", fontSize: 13, color: "#5d0c1d",
+            padding: "9px 16px", borderRadius: 999, border: "1px solid var(--color-outline)",
+            background: "#fff", cursor: "pointer", fontSize: 13, color: "var(--color-primary)",
           }}
         >
           Voltar
         </button>
         {pendencias.length > 0 && (
-          <span style={{ fontSize: 12, color: "#8a6d3b", flex: 1, textAlign: "center" }}>
+          <span style={{ fontSize: 12, color: "var(--color-tertiary-dark)", flex: 1, textAlign: "center" }}>
             Não preenchido no painel, então fica de fora do documento: {pendencias.join(", ")}.
           </span>
         )}
@@ -84,7 +84,7 @@ export default function ImprimirContratoPage({
           onClick={() => window.print()}
           style={{
             padding: "9px 20px", borderRadius: 999, border: "none",
-            background: "#5d0c1d", color: "#fff", cursor: "pointer",
+            background: "var(--color-primary)", color: "#fff", cursor: "pointer",
             fontSize: 13, fontWeight: 600,
           }}
         >

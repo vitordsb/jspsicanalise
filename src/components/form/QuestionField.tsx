@@ -33,14 +33,14 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
   return (
     <div className="space-y-2">
       <div className="flex items-baseline justify-between">
-        <label htmlFor={id} className="block text-sm font-semibold text-[#221a1b]">
+        <label htmlFor={id} className="block text-sm font-semibold text-on-surface">
           {label}
-          {required && <span className="text-[#5d0c1d] ml-1 font-bold">*</span>}
+          {required && <span className="text-primary ml-1 font-bold">*</span>}
         </label>
       </div>
 
       {helpText && (
-        <p className="text-xs text-[#665a5c] italic pl-1">{helpText}</p>
+        <p className="text-xs text-on-surface-variant italic pl-1">{helpText}</p>
       )}
 
       {/* TEXT */}
@@ -52,7 +52,7 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
           placeholder={placeholder || "Digite sua resposta..."}
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full h-12 px-4 rounded-xl border border-[#d8d0c8] bg-white text-[#221a1b] placeholder-[#9c9092] text-sm focus:outline-none focus:border-[#5d0c1d] focus:ring-2 focus:ring-[#5d0c1d]/10 transition shadow-2xs"
+          className="w-full h-12 px-4 rounded-xl border border-outline bg-white text-on-surface placeholder-on-surface-subtle text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition shadow-2xs"
         />
       )}
 
@@ -65,7 +65,7 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
           placeholder={placeholder || "Escreva detalhadamente..."}
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full p-4 rounded-2xl border border-[#d8d0c8] bg-white text-[#221a1b] placeholder-[#9c9092] text-sm focus:outline-none focus:border-[#5d0c1d] focus:ring-2 focus:ring-[#5d0c1d]/10 transition resize-y shadow-2xs"
+          className="w-full p-4 rounded-2xl border border-outline bg-white text-on-surface placeholder-on-surface-subtle text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition resize-y shadow-2xs"
         />
       )}
 
@@ -78,7 +78,7 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
           placeholder={placeholder || "0"}
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full h-12 px-4 rounded-xl border border-[#d8d0c8] bg-white text-[#221a1b] placeholder-[#9c9092] text-sm focus:outline-none focus:border-[#5d0c1d] focus:ring-2 focus:ring-[#5d0c1d]/10 transition shadow-2xs"
+          className="w-full h-12 px-4 rounded-xl border border-outline bg-white text-on-surface placeholder-on-surface-subtle text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition shadow-2xs"
         />
       )}
 
@@ -92,7 +92,7 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
           maxLength={10}
           value={value || ""}
           onChange={(e) => onChange(formatDateInput(e.target.value))}
-          className="w-full h-12 px-4 rounded-xl border border-[#d8d0c8] bg-white text-[#221a1b] placeholder-[#9c9092] text-sm focus:outline-none focus:border-[#5d0c1d] focus:ring-2 focus:ring-[#5d0c1d]/10 transition shadow-2xs"
+          className="w-full h-12 px-4 rounded-xl border border-outline bg-white text-on-surface placeholder-on-surface-subtle text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition shadow-2xs"
         />
       )}
 
@@ -103,7 +103,7 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
           disabled={disabled}
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full h-12 px-4 rounded-xl border border-[#d8d0c8] bg-white text-[#221a1b] text-sm focus:outline-none focus:border-[#5d0c1d] focus:ring-2 focus:ring-[#5d0c1d]/10 transition shadow-2xs"
+          className="w-full h-12 px-4 rounded-xl border border-outline bg-white text-on-surface text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition shadow-2xs"
         >
           <option value="">Selecione uma opção...</option>
           {options.map((opt, i) => (
@@ -124,8 +124,8 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
                 key={i}
                 className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition text-sm ${
                   isChecked
-                    ? "border-[#5d0c1d] bg-[#fbf5f2] text-[#5d0c1d] font-semibold shadow-xs"
-                    : "border-[#e0d8d0] bg-white hover:border-[#5d0c1d] text-[#332628]"
+                    ? "border-primary bg-surface-low text-primary font-semibold shadow-xs"
+                    : "border-outline bg-white hover:border-primary text-on-surface"
                 }`}
               >
                 <input
@@ -135,7 +135,7 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
                   checked={isChecked}
                   disabled={disabled}
                   onChange={() => onChange(opt)}
-                  className="w-4 h-4 text-[#5d0c1d] focus:ring-[#5d0c1d] accent-[#5d0c1d]"
+                  className="w-4 h-4 text-primary focus:ring-primary accent-primary"
                 />
                 <span>{opt}</span>
               </label>
@@ -154,8 +154,8 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
                 key={i}
                 className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition text-sm ${
                   isChecked
-                    ? "border-[#5d0c1d] bg-[#fbf5f2] text-[#5d0c1d] font-semibold shadow-xs"
-                    : "border-[#e0d8d0] bg-white hover:border-[#5d0c1d] text-[#332628]"
+                    ? "border-primary bg-surface-low text-primary font-semibold shadow-xs"
+                    : "border-outline bg-white hover:border-primary text-on-surface"
                 }`}
               >
                 <input
@@ -163,7 +163,7 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
                   checked={isChecked}
                   disabled={disabled}
                   onChange={() => handleCheckboxChange(opt)}
-                  className="mt-0.5 w-4 h-4 rounded text-[#5d0c1d] focus:ring-[#5d0c1d] accent-[#5d0c1d]"
+                  className="mt-0.5 w-4 h-4 rounded text-primary focus:ring-primary accent-primary"
                 />
                 <span className="leading-snug">{opt}</span>
               </label>
@@ -186,8 +186,8 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
                   onClick={() => onChange(String(num))}
                   className={`h-11 rounded-xl font-bold text-sm transition flex flex-col items-center justify-center ${
                     isSelected
-                      ? "bg-[#5d0c1d] text-white shadow-md scale-105"
-                      : "bg-white border border-[#d8d0c8] text-[#221a1b] hover:border-[#5d0c1d] hover:bg-[#fbf5f2]"
+                      ? "bg-primary text-white shadow-md scale-105"
+                      : "bg-white border border-outline text-on-surface hover:border-primary hover:bg-surface-low"
                   }`}
                 >
                   <span>{num}</span>
@@ -195,7 +195,7 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
               );
             })}
           </div>
-          <div className="flex justify-between text-xs text-[#665a5c] mt-1.5 px-2">
+          <div className="flex justify-between text-xs text-on-surface-variant mt-1.5 px-2">
             <span>Leve / Mínimo</span>
             <span>Moderado</span>
             <span>Intenso / Severo</span>
@@ -204,7 +204,7 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
       )}
 
       {error && (
-        <p className="text-xs text-[#991b1b] font-medium bg-[#fee2e2] border border-[#fca5a5] p-2 rounded-lg mt-1">
+        <p className="text-xs text-error font-medium bg-error-container border border-error-outline p-2 rounded-lg mt-1">
           {error}
         </p>
       )}

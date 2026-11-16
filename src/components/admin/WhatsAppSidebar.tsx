@@ -56,11 +56,11 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
   // Helper para cores suaves de avatar
   const getAvatarBg = (name: string) => {
     const colors = [
-      "bg-[#f8dad2] text-[#5d0c1d]",
-      "bg-[#fdece8] text-[#8b1c31]",
-      "bg-[#f7efe5] text-[#5d0c1d]",
-      "bg-[#edf8fe] text-[#2c6172]",
-      "bg-[#faeae4] text-[#aa2d47]",
+      "bg-primary-container text-primary",
+      "bg-primary-container-low text-primary-hover",
+      "bg-surface-container text-primary",
+      "bg-info-container text-info",
+      "bg-primary-container-low text-secondary",
     ];
     let hash = 0;
     for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
@@ -78,26 +78,26 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
     switch (status) {
       case "pending":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#f8dad2] text-[#5d0c1d] border border-[#f0ded8] flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#5d0c1d] animate-pulse" />
+          <span className="px-2.5 py-0.5 rounded-full text-[12px] font-bold bg-primary-container text-primary border border-outline-variant flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             Novo
           </span>
         );
       case "in_review":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#edf8fe] text-[#1e5b7a] border border-[#cbe4f7]">
+          <span className="px-2.5 py-0.5 rounded-full text-[12px] font-semibold bg-info-container text-info border border-info-outline">
             Em Análise
           </span>
         );
       case "approved":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#e7f4ec] text-[#245f3c] border border-[#c7e6d2]">
+          <span className="px-2.5 py-0.5 rounded-full text-[12px] font-semibold bg-success-container text-success border border-success-outline">
             Aprovado
           </span>
         );
       case "archived":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#f0edea] text-[#6f5f62]">
+          <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-surface-low text-on-surface-variant">
             Arquivado
           </span>
         );
@@ -107,18 +107,18 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
   };
 
   return (
-    <div className="w-full md:w-96 lg:w-[410px] bg-white border-r border-[#f0ded8] flex flex-col h-[calc(100vh-56px)] md:h-screen shrink-0">
+    <div className="w-full md:w-96 lg:w-[410px] bg-white border-r border-outline-variant flex flex-col h-[calc(100vh-56px)] md:h-screen shrink-0">
       {/* HEADER DA LISTA DE CONVERSAS */}
-      <div className="p-3.5 bg-[#fbf3ef] border-b border-[#f0ded8] flex items-center justify-between">
+      <div className="p-3.5 bg-surface-low border-b border-outline-variant flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-[#5d0c1d] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+          <div className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shadow-xs">
             JA
           </div>
           <div>
-            <h2 className="font-serif text-sm font-bold text-[#5d0c1d] leading-tight">
+            <h2 className="font-serif text-sm font-bold text-primary leading-tight">
               Pacientes & Anamneses
             </h2>
-            <p className="text-[11px] text-[#6f5f62]">
+            <p className="text-[12px] text-on-surface-variant">
               {total > 0 ? `${total} registro${total === 1 ? "" : "s"}` : `${submissions.length} registro${submissions.length === 1 ? "" : "s"}`}
             </p>
           </div>
@@ -127,22 +127,22 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
         <button
           onClick={onRefresh}
           title="Atualizar lista"
-          className="p-2 rounded-full text-[#5d0c1d] hover:bg-[#f8dad2] transition"
+          className="p-2 rounded-full text-primary hover:bg-primary-container transition"
         >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-[#5d0c1d]" : ""}`} />
+          <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-primary" : ""}`} />
         </button>
       </div>
 
       {/* CAMPO DE PESQUISA ESTILO WHATSAPP */}
-      <div className="p-3 border-b border-[#f3e4e0] bg-white">
+      <div className="p-3 border-b border-outline-variant bg-white">
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9c8b8e]" />
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-subtle" />
           <input
             type="text"
             placeholder="Pesquisar paciente por nome, CPF ou queixa..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full h-10 pl-10 pr-4 rounded-full bg-[#f7efe5] border border-transparent focus:border-[#5d0c1d] focus:bg-white text-xs sm:text-sm text-[#241a1c] placeholder-[#9c8b8e] focus:outline-none transition"
+            className="w-full h-10 pl-10 pr-4 rounded-full bg-surface-container border border-transparent focus:border-primary focus:bg-white text-xs sm:text-sm text-on-surface placeholder-on-surface-subtle focus:outline-none transition"
           />
         </div>
 
@@ -156,8 +156,8 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
                 onClick={() => onFilterChange(tab.key)}
                 className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition ${
                   isActive
-                    ? "bg-[#5d0c1d] text-white shadow-xs"
-                    : "bg-[#fbf3ef] text-[#6f5f62] hover:bg-[#f8dad2] hover:text-[#5d0c1d]"
+                    ? "bg-primary text-white shadow-xs"
+                    : "bg-surface-low text-on-surface-variant hover:bg-primary-container hover:text-primary"
                 }`}
               >
                 {tab.label}
@@ -172,16 +172,16 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
       <BarraProgresso ativa={isLoading && submissions.length > 0} />
 
       {/* LISTA DE PACIENTES */}
-      <div className="overflow-y-auto divide-y divide-[#fbf3ef]" style={{ flex: 1, minHeight: 0 }}>
+      <div className="overflow-y-auto divide-y divide-outline-variant" style={{ flex: 1, minHeight: 0 }}>
         {isLoading && submissions.length === 0 ? (
           // Enquanto carrega pela primeira vez, mostra o esqueleto da lista.
           // Antes aparecia "Nenhum paciente encontrado", o que fazia parecer
           // que a Joane nao tinha paciente nenhum.
           <EsqueletoListaPacientes itens={7} />
         ) : submissions.length === 0 ? (
-          <div className="p-8 text-center text-xs text-[#9c8b8e] space-y-2">
-            <User className="w-8 h-8 mx-auto text-[#ccb38d]" />
-            <p className="font-serif font-bold text-sm text-[#5d0c1d]">Nenhum paciente encontrado</p>
+          <div className="p-8 text-center text-xs text-on-surface-subtle space-y-2">
+            <User className="w-8 h-8 mx-auto text-tertiary" />
+            <p className="font-serif font-bold text-sm text-primary">Nenhum paciente encontrado</p>
             <p>Tente ajustar os termos da busca ou os filtros acima.</p>
           </div>
         ) : (
@@ -207,8 +207,8 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
                       ? "bg-red-50 border-l-4 border-red-600"
                       : "bg-red-50/60 border-l-4 border-red-400 hover:bg-red-50"
                     : isSelected
-                    ? "bg-[#f8dad2]/50 border-l-4 border-[#5d0c1d]"
-                    : "hover:bg-[#fbf3ef] bg-white"
+                    ? "bg-primary-container/50 border-l-4 border-primary"
+                    : "hover:bg-surface-low bg-white"
                 }`}
               >
                 {/* AVATAR */}
@@ -229,26 +229,26 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
                   <div className="flex items-baseline justify-between gap-1 mb-0.5">
                     <h3
                       className={`text-sm font-semibold truncate ${
-                        isRisk ? "text-red-800 font-bold" : isPending ? "text-[#5d0c1d] font-bold" : "text-[#241a1c]"
+                        isRisk ? "text-red-800 font-bold" : isPending ? "text-primary font-bold" : "text-on-surface"
                       }`}
                     >
                       {sub.patient.fullName}
                     </h3>
-                    <span className="text-[11px] text-[#9c8b8e] shrink-0">
+                    <span className="text-[12px] text-on-surface-subtle shrink-0">
                       {formatDate(sub.createdAt)}
                     </span>
                   </div>
 
                   {/* Alerta de risco */}
                   {isRisk && (
-                    <p className="text-[11px] font-bold text-red-700 flex items-center gap-1 mb-1">
+                    <p className="text-[12px] font-bold text-red-700 flex items-center gap-1 mb-1">
                       <AlertTriangle className="w-3 h-3 shrink-0" aria-hidden="true" />
                       <span>Atencao: sinalizacao de risco</span>
                     </p>
                   )}
 
                   {/* PREVIEW DA QUEIXA / MENSAGEM */}
-                  <p className="text-xs text-[#6f5f62] line-clamp-1 mb-1.5 font-normal">
+                  <p className="text-xs text-on-surface-variant line-clamp-1 mb-1.5 font-normal">
                     {String(sub.answers["q_motivo"] ||
                       sub.answers["motivo"] ||
                       sub.answers["queixa"] ||
@@ -256,7 +256,7 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
                   </p>
 
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] text-[#9c8b8e] truncate">
+                    <span className="text-[12px] text-on-surface-subtle truncate">
                       CPF: {formatCPF(sub.patient.cpf)}
                     </span>
                     {getStatusBadge(sub.status)}
@@ -270,24 +270,24 @@ export const WhatsAppSidebar: React.FC<WhatsAppSidebarProps> = ({
 
       {/* CONTROLES DE PAGINACAO */}
       {totalPages > 1 && onPageChange && (
-        <div className="shrink-0 border-t border-[#f0ded8] bg-[#fbf3ef] px-3.5 py-2 flex items-center justify-between gap-2">
+        <div className="shrink-0 border-t border-outline-variant bg-surface-low px-3.5 py-2 flex items-center justify-between gap-2">
           <button
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1 || isLoading}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-[#f0ded8] bg-white text-xs font-semibold text-[#5d0c1d] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#f8dad2] transition"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-outline-variant bg-white text-xs font-semibold text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary-container transition"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
             <span>Anterior</span>
           </button>
 
-          <span className="text-[11px] font-medium text-[#6f5f62]">
+          <span className="text-[12px] font-medium text-on-surface-variant">
             Pag. {page} de {totalPages}
           </span>
 
           <button
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages || isLoading}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-[#f0ded8] bg-white text-xs font-semibold text-[#5d0c1d] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#f8dad2] transition"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-outline-variant bg-white text-xs font-semibold text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary-container transition"
           >
             <span>Proxima</span>
             <ChevronRight className="w-3.5 h-3.5" />

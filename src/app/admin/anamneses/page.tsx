@@ -240,14 +240,14 @@ export default function AdminAnamnesesPage() {
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[1px] text-[#5d0c1d] bg-[#f8dad2] px-3.5 py-1 rounded-full mb-2">
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[1px] text-primary bg-primary-container px-3.5 py-1 rounded-full mb-2">
               <Layers className="w-3.5 h-3.5" />
               <span>Gerenciamento de Questionários</span>
             </div>
-            <h1 className="font-serif text-2xl sm:text-4xl font-bold text-[#5d0c1d]">
+            <h1 className="font-serif text-2xl sm:text-4xl font-bold text-primary">
               Modelos de Anamnese
             </h1>
-            <p className="text-xs sm:text-sm text-[#6f5f62] mt-1">
+            <p className="text-xs sm:text-sm text-on-surface-variant mt-1">
               Crie, edite e versione os formulários de anamnese que seus pacientes preenchem online.
             </p>
           </div>
@@ -255,7 +255,7 @@ export default function AdminAnamnesesPage() {
           {!editingTemplate && (
             <button
               onClick={handleStartCreate}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs sm:text-sm font-semibold shadow-xs transition"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary hover:bg-secondary text-white text-xs sm:text-sm font-semibold shadow-xs transition"
             >
               <Plus className="w-4 h-4" />
               <span>Criar Novo Modelo</span>
@@ -268,8 +268,8 @@ export default function AdminAnamnesesPage() {
           <div
             className={`p-4 rounded-2xl mb-6 text-xs sm:text-sm flex items-center justify-between gap-3 ${
               message.type === "success"
-                ? "bg-[#e7f4ec] border border-[#c7e6d2] text-[#245f3c]"
-                : "bg-[#fff0f3] border border-[#f8dad2] text-[#5d0c1d]"
+                ? "bg-success-container border border-success-outline text-success"
+                : "bg-secondary-container border border-primary-container text-primary"
             }`}
           >
             <span>{message.text}</span>
@@ -281,13 +281,13 @@ export default function AdminAnamnesesPage() {
 
         {/* MODO FORM BUILDER (CRIAR / EDITAR) */}
         {editingTemplate ? (
-          <div className="bg-white rounded-3xl border border-[#f0ded8] p-6 sm:p-8 shadow-xs space-y-6">
-            <div className="flex items-center justify-between border-b border-[#f3e4e0] pb-4">
+          <div className="bg-white rounded-3xl border border-outline-variant p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="flex items-center justify-between border-b border-outline-variant pb-4">
               <div>
-                <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#5d0c1d]">
+                <h2 className="font-serif text-xl sm:text-2xl font-bold text-primary">
                   {editingTemplate.id ? "Editar Modelo de Anamnese" : "Criar Novo Modelo de Anamnese"}
                 </h2>
-                <p className="text-xs text-[#6f5f62]">
+                <p className="text-xs text-on-surface-variant">
                   Configure o título, seções e perguntas do questionário.
                 </p>
               </div>
@@ -298,14 +298,14 @@ export default function AdminAnamnesesPage() {
                     setEditingTemplate(null);
                     setIsCreating(false);
                   }}
-                  className="px-4 py-2 rounded-full border border-[#f0ded8] text-xs font-semibold text-[#6f5f62] hover:bg-[#fbf3ef] transition"
+                  className="px-4 py-2 rounded-full border border-outline-variant text-xs font-semibold text-on-surface-variant hover:bg-surface-low transition"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleSaveTemplate}
                   disabled={saving}
-                  className="px-6 py-2.5 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-semibold shadow-xs transition"
+                  className="px-6 py-2.5 rounded-full bg-primary hover:bg-secondary text-white text-xs font-semibold shadow-xs transition"
                 >
                   {saving ? "Salvando..." : "Salvar Modelo"}
                 </button>
@@ -313,28 +313,28 @@ export default function AdminAnamnesesPage() {
             </div>
 
             {/* DADOS BÁSICOS DO TEMPLATE */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#fbf3ef] p-6 rounded-3xl border border-[#f0ded8]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-surface-low p-6 rounded-3xl border border-outline-variant">
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-[#241a1c] mb-1.5">
-                  Título do Modelo <span className="text-[#5d0c1d]">*</span>
+                <label className="block text-xs font-semibold text-on-surface mb-1.5">
+                  Título do Modelo <span className="text-primary">*</span>
                 </label>
                 <input
                   type="text"
                   value={editingTemplate.title}
                   onChange={(e) => setEditingTemplate({ ...editingTemplate, title: e.target.value })}
-                  className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-white text-xs sm:text-sm text-[#241a1c] focus:border-[#5d0c1d] focus:outline-none"
+                  className="w-full h-11 px-4 rounded-lg border border-outline bg-white text-xs sm:text-sm text-on-surface focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-[#241a1c] mb-1.5">
+                <label className="block text-xs font-semibold text-on-surface mb-1.5">
                   Descrição / Instruções para o Paciente
                 </label>
                 <input
                   type="text"
                   value={editingTemplate.description}
                   onChange={(e) => setEditingTemplate({ ...editingTemplate, description: e.target.value })}
-                  className="w-full h-11 px-4 rounded-full border border-[#eae2d7] bg-white text-xs sm:text-sm text-[#241a1c] focus:border-[#5d0c1d] focus:outline-none"
+                  className="w-full h-11 px-4 rounded-lg border border-outline bg-white text-xs sm:text-sm text-on-surface focus:border-primary focus:outline-none"
                 />
               </div>
 
@@ -344,9 +344,9 @@ export default function AdminAnamnesesPage() {
                   id="isActiveToggle"
                   checked={editingTemplate.isActive}
                   onChange={(e) => setEditingTemplate({ ...editingTemplate, isActive: e.target.checked })}
-                  className="w-4 h-4 text-[#5d0c1d] focus:ring-[#5d0c1d] accent-[#5d0c1d]"
+                  className="w-4 h-4 text-primary focus:ring-primary accent-primary"
                 />
-                <label htmlFor="isActiveToggle" className="text-xs font-semibold text-[#5d0c1d] cursor-pointer">
+                <label htmlFor="isActiveToggle" className="text-xs font-semibold text-primary cursor-pointer">
                   Definir como modelo ativo no link público (/preencher-anamnese)
                 </label>
               </div>
@@ -355,12 +355,12 @@ export default function AdminAnamnesesPage() {
             {/* SEÇÕES & PERGUNTAS BUILDER */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="font-serif text-lg font-bold text-[#5d0c1d]">
+                <h3 className="font-serif text-lg font-bold text-primary">
                   Seções do Formulário ({editingTemplate.sections?.length || 0})
                 </h3>
                 <button
                   onClick={addSection}
-                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#f8dad2] text-[#5d0c1d] text-xs font-semibold hover:bg-[#f3cbc1] transition"
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary-container text-primary text-xs font-semibold hover:bg-primary-container-high transition"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Adicionar Seção</span>
@@ -370,31 +370,31 @@ export default function AdminAnamnesesPage() {
               {editingTemplate.sections.map((section: FormSection, sIdx: number) => (
                 <div
                   key={section.id || sIdx}
-                  className="border border-[#f0ded8] rounded-3xl p-6 bg-white space-y-4 shadow-xs"
+                  className="border border-outline-variant rounded-3xl p-6 bg-white space-y-4 shadow-xs"
                 >
                   {/* HEADER DA SEÇÃO */}
-                  <div className="flex items-start justify-between gap-3 border-b border-[#f3e4e0] pb-3">
+                  <div className="flex items-start justify-between gap-3 border-b border-outline-variant pb-3">
                     <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <input
                         type="text"
                         placeholder="Título da Seção (ex: 1. Queixa Principal)"
                         value={section.title}
                         onChange={(e) => updateSection(sIdx, "title", e.target.value)}
-                        className="px-3.5 py-2 rounded-full border border-[#eae2d7] text-xs font-bold text-[#5d0c1d] bg-[#fbf3ef]"
+                        className="px-3.5 py-2 rounded-full border border-outline-variant text-xs font-bold text-primary bg-surface-low"
                       />
                       <input
                         type="text"
                         placeholder="Descrição da Seção (opcional)"
                         value={section.description || ""}
                         onChange={(e) => updateSection(sIdx, "description", e.target.value)}
-                        className="px-3.5 py-2 rounded-full border border-[#eae2d7] text-xs text-[#6f5f62] bg-[#fbf3ef]"
+                        className="px-3.5 py-2 rounded-full border border-outline-variant text-xs text-on-surface-variant bg-surface-low"
                       />
                     </div>
 
                     <button
                       onClick={() => removeSection(sIdx)}
                       title="Excluir Seção"
-                      className="p-2 text-[#9c8b8e] hover:text-[#aa2d47] hover:bg-[#fff0f3] rounded-full transition"
+                      className="p-2 text-on-surface-subtle hover:text-secondary hover:bg-secondary-container rounded-full transition"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -402,14 +402,14 @@ export default function AdminAnamnesesPage() {
 
                   {/* PERGUNTAS DA SEÇÃO */}
                   <div className="space-y-3 pl-2">
-                    <div className="text-xs font-bold text-[#5d0c1d] uppercase tracking-wider">
+                    <div className="text-xs font-bold text-primary uppercase tracking-wider">
                       Perguntas desta Seção ({section.questions?.length || 0})
                     </div>
 
                     {section.questions.map((q: QuestionItem, qIdx: number) => (
                       <div
                         key={q.id || qIdx}
-                        className="p-4 rounded-2xl bg-[#fbf3ef] border border-[#f0ded8] space-y-2"
+                        className="p-4 rounded-2xl bg-surface-low border border-outline-variant space-y-2"
                       >
                         <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
                           <div className="sm:col-span-6">
@@ -418,7 +418,7 @@ export default function AdminAnamnesesPage() {
                               placeholder="Texto da Pergunta"
                               value={q.label}
                               onChange={(e) => updateQuestion(sIdx, qIdx, "label", e.target.value)}
-                              className="w-full h-10 px-3.5 rounded-full border border-[#eae2d7] bg-white text-xs font-semibold text-[#241a1c]"
+                              className="w-full h-10 px-3.5 rounded-lg border border-outline bg-white text-xs font-semibold text-on-surface"
                             />
                           </div>
 
@@ -428,7 +428,7 @@ export default function AdminAnamnesesPage() {
                               onChange={(e) =>
                                 updateQuestion(sIdx, qIdx, "type", e.target.value as QuestionType)
                               }
-                              className="w-full h-10 px-3 rounded-full border border-[#eae2d7] bg-white text-xs text-[#241a1c]"
+                              className="w-full h-10 px-3 rounded-lg border border-outline bg-white text-xs text-on-surface"
                             >
                               <option value="text">Texto Curto</option>
                               <option value="textarea">Texto Longo</option>
@@ -447,11 +447,11 @@ export default function AdminAnamnesesPage() {
                               id={`req_${sIdx}_${qIdx}`}
                               checked={q.required || false}
                               onChange={(e) => updateQuestion(sIdx, qIdx, "required", e.target.checked)}
-                              className="w-3.5 h-3.5 text-[#5d0c1d] accent-[#5d0c1d]"
+                              className="w-3.5 h-3.5 text-primary accent-primary"
                             />
                             <label
                               htmlFor={`req_${sIdx}_${qIdx}`}
-                              className="text-[11px] font-semibold text-[#5d0c1d] cursor-pointer"
+                              className="text-[12px] font-semibold text-primary cursor-pointer"
                             >
                               Obrigatória
                             </label>
@@ -460,7 +460,7 @@ export default function AdminAnamnesesPage() {
                           <div className="sm:col-span-1 text-right">
                             <button
                               onClick={() => removeQuestion(sIdx, qIdx)}
-                              className="p-1.5 text-[#9c8b8e] hover:text-[#aa2d47] rounded-full transition"
+                              className="p-1.5 text-on-surface-subtle hover:text-secondary rounded-full transition"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -469,7 +469,7 @@ export default function AdminAnamnesesPage() {
 
                         {(q.type === "radio" || q.type === "checkbox" || q.type === "select") && (
                           <div className="pt-1 text-xs">
-                            <label className="block text-[11px] font-semibold text-[#6f5f62] mb-1 pl-2">
+                            <label className="block text-[12px] font-semibold text-on-surface-variant mb-1 pl-2">
                               Opções de Resposta (separadas por vírgula):
                             </label>
                             <input
@@ -484,7 +484,7 @@ export default function AdminAnamnesesPage() {
                                   e.target.value.split(",").map((s) => s.trim()).filter(Boolean)
                                 )
                               }
-                              className="w-full h-9 px-3.5 rounded-full border border-[#eae2d7] bg-white text-xs text-[#241a1c]"
+                              className="w-full h-9 px-3.5 rounded-lg border border-outline bg-white text-xs text-on-surface"
                             />
                           </div>
                         )}
@@ -493,7 +493,7 @@ export default function AdminAnamnesesPage() {
 
                     <button
                       onClick={() => addQuestion(sIdx)}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-[#5d0c1d] hover:underline pt-1"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline pt-1"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Adicionar pergunta nesta seção</span>
@@ -504,20 +504,20 @@ export default function AdminAnamnesesPage() {
             </div>
 
             {/* BOTÃO SALVAR RODAPÉ */}
-            <div className="pt-4 border-t border-[#f3e4e0] flex justify-end gap-3">
+            <div className="pt-4 border-t border-outline-variant flex justify-end gap-3">
               <button
                 onClick={() => {
                   setEditingTemplate(null);
                   setIsCreating(false);
                 }}
-                className="px-5 py-2.5 rounded-full border border-[#f0ded8] text-xs font-semibold text-[#6f5f62]"
+                className="px-5 py-2.5 rounded-full border border-outline-variant text-xs font-semibold text-on-surface-variant"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSaveTemplate}
                 disabled={saving}
-                className="px-7 py-3 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-bold shadow-xs transition"
+                className="px-7 py-3 rounded-full bg-primary hover:bg-secondary text-white text-xs font-bold shadow-xs transition"
               >
                 {saving ? "Salvando..." : "Salvar Modelo"}
               </button>
@@ -541,48 +541,48 @@ export default function AdminAnamnesesPage() {
                 <div
                   key={tpl.id}
                   className={`bg-white rounded-3xl border p-7 flex flex-col justify-between shadow-xs transition ${
-                    tpl.isActive ? "border-[#5d0c1d] ring-2 ring-[#5d0c1d]/15" : "border-[#f0ded8]"
+                    tpl.isActive ? "border-primary ring-2 ring-primary/15" : "border-outline-variant"
                   }`}
                 >
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1">
-                        <h3 className="font-serif text-xl font-bold text-[#5d0c1d] leading-snug">
+                        <h3 className="font-serif text-xl font-bold text-primary leading-snug">
                           {tpl.title}
                         </h3>
-                        <span className="text-[11px] text-[#9c8b8e] block">
+                        <span className="text-[12px] text-on-surface-subtle block">
                           Versão {tpl.version} • Criado em {formatDate(tpl.createdAt)}
                         </span>
                       </div>
 
                       {tpl.isActive ? (
-                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#e7f4ec] text-[#245f3c] border border-[#c7e6d2] shrink-0 flex items-center gap-1">
+                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-success-container text-success border border-success-outline shrink-0 flex items-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           Ativa
                         </span>
                       ) : (
-                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#f0edea] text-[#6f5f62] shrink-0">
+                        <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-surface-low text-on-surface-variant shrink-0">
                           Inativa
                         </span>
                       )}
                     </div>
 
-                    <p className="text-xs text-[#6f5f62] line-clamp-2">
+                    <p className="text-xs text-on-surface-variant line-clamp-2">
                       {tpl.description || "Sem descrição"}
                     </p>
 
-                    <div className="pt-2 flex items-center gap-4 text-xs text-[#5d0c1d] border-t border-[#f3e4e0] font-semibold">
+                    <div className="pt-2 flex items-center gap-4 text-xs text-primary border-t border-outline-variant font-semibold">
                       <span><strong>{sectionsCount}</strong> seções</span>
                       <span><strong>{submissionCount}</strong> respostas recebidas</span>
                     </div>
                   </div>
 
                   {/* AÇÕES */}
-                  <div className="pt-5 mt-4 border-t border-[#f3e4e0] flex flex-wrap items-center justify-between gap-2">
+                  <div className="pt-5 mt-4 border-t border-outline-variant flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => setEditingTemplate(tpl)}
-                        className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full border border-[#f0ded8] text-xs font-semibold text-[#5d0c1d] hover:bg-[#fbf3ef] transition"
+                        className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full border border-outline-variant text-xs font-semibold text-primary hover:bg-surface-low transition"
                       >
                         <Edit className="w-3.5 h-3.5" />
                         <span>Editar</span>
@@ -590,7 +590,7 @@ export default function AdminAnamnesesPage() {
 
                       <button
                         onClick={() => handleDuplicate(tpl.id)}
-                        className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full border border-[#f0ded8] text-xs font-semibold text-[#5d0c1d] hover:bg-[#fbf3ef] transition"
+                        className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full border border-outline-variant text-xs font-semibold text-primary hover:bg-surface-low transition"
                         title="Duplicar modelo para criar nova versão"
                       >
                         <Copy className="w-3.5 h-3.5" />
@@ -599,7 +599,7 @@ export default function AdminAnamnesesPage() {
 
                       <button
                         onClick={() => handleDelete(tpl.id)}
-                        className="p-2 text-[#9c8b8e] hover:text-[#aa2d47] rounded-full hover:bg-[#fff0f3] transition"
+                        className="p-2 text-on-surface-subtle hover:text-secondary rounded-full hover:bg-secondary-container transition"
                         title="Excluir ou desativar"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -609,7 +609,7 @@ export default function AdminAnamnesesPage() {
                     {!tpl.isActive && (
                       <button
                         onClick={() => handleSetActive(tpl.id)}
-                        className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-[#f8dad2] hover:bg-[#f3cbc1] text-[#5d0c1d] text-xs font-bold transition"
+                        className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-primary-container hover:bg-primary-container-high text-primary text-xs font-bold transition"
                       >
                         <Check className="w-3.5 h-3.5" />
                         <span>Tornar Ativa</span>

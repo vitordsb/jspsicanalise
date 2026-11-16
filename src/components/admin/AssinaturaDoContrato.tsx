@@ -73,28 +73,28 @@ export function AssinaturaDoContrato({
   return (
     <section
       className={`rounded-3xl border p-5 space-y-3 ${
-        alterado ? "bg-[#fff0f3] border-[#f3cbc1]" : "bg-[#e7f4ec] border-[#c7e6d2]"
+        alterado ? "bg-secondary-container border-primary-container-high" : "bg-success-container border-success-outline"
       }`}
     >
       <div className="flex items-start gap-3">
         {alterado ? (
-          <ShieldAlert className="w-5 h-5 text-[#aa2d47] shrink-0 mt-0.5" />
+          <ShieldAlert className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
         ) : (
-          <ShieldCheck className="w-5 h-5 text-[#245f3c] shrink-0 mt-0.5" />
+          <ShieldCheck className="w-5 h-5 text-success shrink-0 mt-0.5" />
         )}
         <div className="flex-1 min-w-0">
-          <h3 className={`font-serif text-sm font-bold ${alterado ? "text-[#aa2d47]" : "text-[#245f3c]"}`}>
+          <h3 className={`font-serif text-sm font-bold ${alterado ? "text-secondary" : "text-success"}`}>
             {alterado ? "Documento alterado após a assinatura" : "Assinado eletronicamente"}
           </h3>
-          <p className={`text-xs mt-1 ${alterado ? "text-[#aa2d47]" : "text-[#245f3c]"}`}>
+          <p className={`text-xs mt-1 ${alterado ? "text-secondary" : "text-success"}`}>
             <strong>{assinadoPor || "Paciente"}</strong>
             {cpfDoAssinante ? `, CPF ${formatCPF(cpfDoAssinante)}` : ""}
           </p>
-          <p className="text-[11px] text-[#245f3c]/80 mt-0.5 first-letter:uppercase">
+          <p className="text-[12px] text-success/80 mt-0.5 first-letter:uppercase">
             {formatarDataHora(assinadoEm)}
           </p>
           {emitidoEm && (
-            <p className="text-[11px] text-[#245f3c]/70 mt-1.5 first-letter:uppercase">
+            <p className="text-[12px] text-success/70 mt-1.5 first-letter:uppercase">
               Emitido por {emitidoPor || "você"} em {formatarDataHora(emitidoEm)}
             </p>
           )}
@@ -104,10 +104,10 @@ export function AssinaturaDoContrato({
       {codigoVerificacao && (
         <div className="bg-white/70 rounded-2xl px-4 py-3 flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-wider text-[#9c8b8e] font-bold">
+            <p className="text-[11px] uppercase tracking-wider text-on-surface-subtle font-bold">
               Código de verificação
             </p>
-            <p className="font-mono text-base font-bold text-[#5d0c1d] tracking-wider truncate">
+            <p className="font-mono text-base font-bold text-primary tracking-wider truncate">
               {codigoVerificacao}
             </p>
           </div>
@@ -116,7 +116,7 @@ export function AssinaturaDoContrato({
               navigator.clipboard?.writeText(codigoVerificacao);
               toast.sucesso("Código copiado.");
             }}
-            className="p-2 rounded-full text-[#5d0c1d] hover:bg-[#fbf3ef] shrink-0"
+            className="p-2 rounded-full text-primary hover:bg-surface-low shrink-0"
             aria-label="Copiar código"
           >
             <Copy className="w-4 h-4" />
@@ -128,7 +128,7 @@ export function AssinaturaDoContrato({
         <button
           onClick={conferir}
           disabled={conferindo}
-          className="px-4 py-2 rounded-full bg-[#245f3c] text-white text-xs font-semibold hover:bg-[#1c4b30] disabled:opacity-60 inline-flex items-center gap-1.5"
+          className="px-4 py-2 rounded-full bg-success text-white text-xs font-semibold hover:bg-success-dark disabled:opacity-60 inline-flex items-center gap-1.5"
         >
           {conferindo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
           {conferindo ? "Conferindo..." : "Conferir autenticidade"}
@@ -137,7 +137,7 @@ export function AssinaturaDoContrato({
         {v && (
           <button
             onClick={() => setAberto((a) => !a)}
-            className="text-xs font-semibold text-[#245f3c] hover:underline inline-flex items-center gap-1"
+            className="text-xs font-semibold text-success hover:underline inline-flex items-center gap-1"
           >
             {aberto ? "Ocultar detalhes" : "Ver detalhes"}
             <ChevronDown className={`w-3.5 h-3.5 transition ${aberto ? "rotate-180" : ""}`} />
@@ -146,7 +146,7 @@ export function AssinaturaDoContrato({
       </div>
 
       {v && aberto && (
-        <div className="bg-white/70 rounded-2xl p-4 space-y-2 text-[11px] text-[#4a3f41]">
+        <div className="bg-white/70 rounded-2xl p-4 space-y-2 text-[12px] text-on-surface-variant">
           <Linha rotulo="Texto assinado confere com o registro" ok={v.textoIntacto} />
           <Linha rotulo="Campos do contrato continuam iguais" ok={v.camposIntactos} />
           {v.ip && <p><strong>IP:</strong> {v.ip}</p>}
@@ -154,12 +154,12 @@ export function AssinaturaDoContrato({
             <p className="break-all"><strong>Navegador:</strong> {v.navegador}</p>
           )}
           {v.hash && (
-            <p className="break-all font-mono text-[10px] text-[#9c8b8e]">
-              <strong className="font-sans text-[11px] text-[#4a3f41]">SHA-256:</strong> {v.hash}
+            <p className="break-all font-mono text-[11px] text-on-surface-subtle">
+              <strong className="font-sans text-[12px] text-on-surface-variant">SHA-256:</strong> {v.hash}
             </p>
           )}
           {alterado && (
-            <p className="text-[#aa2d47] font-semibold pt-1">
+            <p className="text-secondary font-semibold pt-1">
               O conteúdo mudou depois da assinatura. Não use este documento como prova
               do que foi acordado: emita um novo contrato.
             </p>
@@ -173,7 +173,7 @@ export function AssinaturaDoContrato({
 function Linha({ rotulo, ok }: { rotulo: string; ok: boolean }) {
   return (
     <p className="flex items-center gap-1.5">
-      <span className={ok ? "text-[#245f3c]" : "text-[#aa2d47]"}>{ok ? "✓" : "✕"}</span>
+      <span className={ok ? "text-success" : "text-secondary"}>{ok ? "✓" : "✕"}</span>
       <span>{rotulo}</span>
     </p>
   );

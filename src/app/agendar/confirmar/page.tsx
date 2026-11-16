@@ -32,10 +32,10 @@ interface Confirmada {
 
 function Moldura({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#fff6f4] px-4 py-10">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-surface px-4 py-10">
       <div className="w-full max-w-md">
         <div className="text-center mb-7">
-          <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-[#5d0c1d] to-[#aa2d47] flex items-center justify-center text-white shadow-md shadow-[#5d0c1d]/20 mb-3">
+          <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white shadow-md shadow-primary/20 mb-3">
             <HeartHandshake className="w-7 h-7" />
           </div>
         </div>
@@ -108,27 +108,27 @@ function Confirmacao() {
       <Moldura>
         <section
           aria-live="polite"
-          className="bg-white rounded-3xl border border-[#f0ded8] p-7 text-center shadow-xs"
+          className="bg-white rounded-3xl border border-outline-variant p-7 text-center shadow-xs"
         >
-          <div className="w-14 h-14 mx-auto rounded-full bg-[#e7f4ec] text-[#245f3c] flex items-center justify-center mb-3">
+          <div className="w-14 h-14 mx-auto rounded-full bg-success-container text-success flex items-center justify-center mb-3">
             <CheckCircle2 className="w-7 h-7" />
           </div>
-          <h1 className="font-serif text-xl font-bold text-[#5d0c1d]">Consulta confirmada</h1>
-          <p className="text-sm font-semibold text-[#241a1c] mt-3 first-letter:uppercase">{pronta.quando}</p>
-          <p className="text-xs text-[#6f5f62] mt-1">
+          <h1 className="font-serif text-xl font-bold text-primary">Consulta confirmada</h1>
+          <p className="text-sm font-semibold text-on-surface mt-3 first-letter:uppercase">{pronta.quando}</p>
+          <p className="text-xs text-on-surface-variant mt-1">
             {pronta.duracaoMinutos} minutos. Horário de Brasília. Também enviamos
             esses dados por e-mail.
           </p>
 
           {pronta.tokenAcesso && (
-            <div className="mt-5 bg-[#fbf3ef] border border-[#f0ded8] rounded-2xl p-4">
-              <p className="text-[11px] uppercase tracking-[0.08em] text-[#9c8b8e]">
+            <div className="mt-5 bg-surface-low border border-outline-variant rounded-2xl p-4">
+              <p className="text-[12px] uppercase tracking-[0.08em] text-on-surface-subtle">
                 Seu código de acesso
               </p>
-              <p className="font-mono text-2xl font-bold tracking-[0.18em] text-[#5d0c1d] mt-1">
+              <p className="font-mono text-2xl font-bold tracking-[0.18em] text-primary mt-1">
                 {pronta.tokenAcesso.slice(0, 4)} {pronta.tokenAcesso.slice(4)}
               </p>
-              <p className="text-[11px] text-[#6f5f62] mt-2 leading-relaxed">
+              <p className="text-[12px] text-on-surface-variant mt-2 leading-relaxed">
                 Com seu CPF, ele abre a sua área para ver ou remarcar a consulta.
                 Anote: ele também foi para o seu e-mail.
               </p>
@@ -140,12 +140,12 @@ function Confirmacao() {
               <>
                 <Link
                   href="/preencher-anamnese"
-                  className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-sm font-bold shadow-md shadow-[#5d0c1d]/25 transition"
+                  className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-full bg-primary hover:bg-secondary text-white text-sm font-bold shadow-md shadow-primary/25 transition"
                 >
                   <FileText className="w-4 h-4" />
                   <span>Preencher a anamnese</span>
                 </Link>
-                <p className="text-[11px] text-[#6f5f62] leading-relaxed">
+                <p className="text-[12px] text-on-surface-variant leading-relaxed">
                   Opcional agora, mas a Dra. Joane pede que esteja preenchida antes da
                   consulta. Leva poucos minutos.
                 </p>
@@ -155,8 +155,8 @@ function Confirmacao() {
               href={pronta.autenticado ? "/area-do-paciente" : "/area-do-paciente/entrar"}
               className={`w-full inline-flex items-center justify-center gap-2 h-12 rounded-full text-sm font-bold transition ${
                 pronta.precisaAnamnese
-                  ? "border border-[#e6d8d3] text-[#5d0c1d] hover:bg-[#fbf3ef]"
-                  : "bg-[#5d0c1d] hover:bg-[#aa2d47] text-white shadow-md shadow-[#5d0c1d]/25"
+                  ? "border border-outline-variant text-primary hover:bg-surface-low"
+                  : "bg-primary hover:bg-secondary text-white shadow-md shadow-primary/25"
               }`}
             >
               <LogIn className="w-4 h-4" />
@@ -173,18 +173,18 @@ function Confirmacao() {
       <Moldura>
         <section
           role="alert"
-          className="bg-white rounded-3xl border border-[#f0ded8] p-7 text-center shadow-xs"
+          className="bg-white rounded-3xl border border-outline-variant p-7 text-center shadow-xs"
         >
-          <div className="w-14 h-14 mx-auto rounded-full bg-[#fff0f3] text-[#aa2d47] flex items-center justify-center mb-3">
+          <div className="w-14 h-14 mx-auto rounded-full bg-secondary-container text-secondary flex items-center justify-center mb-3">
             <AlertTriangle className="w-7 h-7" />
           </div>
-          <h1 className="font-serif text-xl font-bold text-[#5d0c1d]">Não foi possível confirmar</h1>
-          <p className="text-sm text-[#6f5f62] mt-2 leading-relaxed">
+          <h1 className="font-serif text-xl font-bold text-primary">Não foi possível confirmar</h1>
+          <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">
             {invalido || "Este link venceu ou já foi usado."}
           </p>
           <Link
             href="/agendar"
-            className="mt-6 w-full inline-flex items-center justify-center gap-2 h-12 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-sm font-bold transition"
+            className="mt-6 w-full inline-flex items-center justify-center gap-2 h-12 rounded-full bg-primary hover:bg-secondary text-white text-sm font-bold transition"
           >
             <CalendarCheck className="w-4 h-4" />
             <span>Escolher um horário</span>
@@ -196,18 +196,18 @@ function Confirmacao() {
 
   return (
     <Moldura>
-      <section className="bg-white rounded-3xl border border-[#f0ded8] p-7 text-center shadow-xs">
-        <h1 className="font-serif text-xl font-bold text-[#5d0c1d]">
+      <section className="bg-white rounded-3xl border border-outline-variant p-7 text-center shadow-xs">
+        <h1 className="font-serif text-xl font-bold text-primary">
           {resumo.nome ? `${resumo.nome}, confirme sua consulta` : "Confirme sua consulta"}
         </h1>
-        <p className="text-sm text-[#6f5f62] mt-2">Com a Dra. Joane Souza Oliveira de Andrade.</p>
-        <p className="text-sm font-semibold text-[#241a1c] mt-4 first-letter:uppercase">{resumo.quando}</p>
-        <p className="text-xs text-[#6f5f62] mt-1">{resumo.duracaoMinutos} minutos. Horário de Brasília.</p>
+        <p className="text-sm text-on-surface-variant mt-2">Com a Dra. Joane Souza Oliveira de Andrade.</p>
+        <p className="text-sm font-semibold text-on-surface mt-4 first-letter:uppercase">{resumo.quando}</p>
+        <p className="text-xs text-on-surface-variant mt-1">{resumo.duracaoMinutos} minutos. Horário de Brasília.</p>
 
         {erro && (
           <div
             role="alert"
-            className="bg-[#fff0f3] border border-[#f3cbc1] text-[#aa2d47] p-3 rounded-2xl text-xs flex items-start gap-2 mt-4 text-left"
+            className="bg-secondary-container border border-primary-container-high text-secondary p-3 rounded-2xl text-xs flex items-start gap-2 mt-4 text-left"
           >
             <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{erro}</span>
@@ -217,14 +217,14 @@ function Confirmacao() {
         <button
           onClick={confirmar}
           disabled={confirmando}
-          className="mt-6 w-full inline-flex items-center justify-center gap-2 h-12 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] disabled:opacity-70 disabled:cursor-not-allowed text-white text-sm font-bold shadow-md shadow-[#5d0c1d]/25 transition"
+          className="mt-6 w-full inline-flex items-center justify-center gap-2 h-12 rounded-full bg-primary hover:bg-secondary disabled:opacity-70 disabled:cursor-not-allowed text-white text-sm font-bold shadow-md shadow-primary/25 transition"
         >
           <BotaoConteudo carregando={confirmando} rotuloCarregando="Confirmando...">
             <CheckCircle2 className="w-4 h-4" />
             <span>Confirmar minha consulta</span>
           </BotaoConteudo>
         </button>
-        <p className="text-[11px] text-[#9c8b8e] mt-4 leading-relaxed">
+        <p className="text-[12px] text-on-surface-subtle mt-4 leading-relaxed">
           Não foi você que pediu? É só fechar esta página: nada será marcado.
         </p>
       </section>

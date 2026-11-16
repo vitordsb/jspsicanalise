@@ -1,29 +1,91 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --color-primary: #5d0c1d;
-    --color-quaternary: #8b1c31;
-    --color-secondary: #f0ded8;
-    --color-secondary-light: #fbf7f5;
-    --color-tertiary: #c4a984;
-    --color-background: #f8f7f5;
-    --color-card: #ffffff;
-    --color-input: #ffffff;
-    --color-input-border: #ded8d2;
-    --color-text-main: #221a1b;
-    --color-text-muted: #5f5456;
-    --color-text-subtle: #8e8284;
-  }
+/*
+ * Design system: Material Design 3, com a paleta vinho e creme da marca.
+ *
+ * Os papeis de cor seguem a nomenclatura do M3 (primary, surface, outline,
+ * on-*, *-container). Use sempre o papel, nunca o hex: bg-primary,
+ * text-on-surface-variant, border-outline-variant. Documentacao em DESIGN.md.
+ */
+@theme {
+  /* Marca */
+  --color-primary: #5d0c1d;
+  --color-on-primary: #ffffff;
+  --color-primary-hover: #8b1c31;
+  --color-primary-container: #f8dad2;
+  --color-primary-container-high: #f3cbc1;
+  --color-primary-container-low: #fdece8;
+  --color-secondary: #aa2d47;
+  --color-secondary-container: #fff0f3;
+  --color-secondary-container-high: #ffe4ea;
+  --color-tertiary: #ccb38d;
+  --color-tertiary-dark: #8a6d3b;
 
+  /* Superficies */
+  --color-surface: #fff6f4;
+  --color-surface-low: #fbf3ef;
+  --color-surface-container: #f7efe5;
+  --color-surface-container-high: #f0ded8;
+
+  /* Texto e contornos. on-surface-subtle foi escurecido (era #9c8b8e) para
+     passar o contraste AA em texto pequeno. outline serve a campos de
+     formulario (3:1); outline-variant, a divisores e bordas de cartao. */
+  --color-on-surface: #241a1c;
+  --color-on-surface-variant: #64565a;
+  --color-on-surface-subtle: #7b6d70;
+  --color-outline: #9c8b8e;
+  --color-outline-variant: #f0ded8;
+
+  /* Estados */
+  --color-error: #991b1b;
+  --color-error-container: #fee2e2;
+  --color-error-outline: #fca5a5;
+  --color-success: #245f3c;
+  --color-success-dark: #1c4b30;
+  --color-success-container: #e7f4ec;
+  --color-success-outline: #c7e6d2;
+  --color-warning: #92400e;
+  --color-on-warning-container: #78350f;
+  --color-warning-container: #fffbeb;
+  --color-warning-container-high: #fef3c7;
+  --color-warning-outline: #fde68a;
+  --color-warning-accent: #f59e0b;
+  --color-info: #1e5b7a;
+  --color-info-container: #edf8fe;
+  --color-info-outline: #cbe4f7;
+  --color-violet: #5b3a8e;
+  --color-violet-container: #f3edfb;
+  --color-violet-outline: #ddd0f0;
+  --color-whatsapp: #25d366;
+  --color-whatsapp-hover: #20bd5a;
+
+  /* Escala de texto: um degrau acima do padrao do Tailwind nos tamanhos
+     pequenos, que eram o que mais pesava na leitura (326 usos de text-xs). */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.25rem;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.5rem;
+
+  /* Formas */
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.25rem;
+}
+
+@layer base {
   body {
-    background-color: var(--color-background);
-    color: var(--color-text-main);
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
     font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
   h1, h2, h3, h4, .font-serif {
     font-family: var(--font-serif), Georgia, serif;
+  }
+
+  /* Foco visivel em tudo que recebe teclado (M3: anel de 2px na cor primaria). */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 }
 

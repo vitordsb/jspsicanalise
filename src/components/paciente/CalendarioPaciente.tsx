@@ -134,7 +134,7 @@ export function CalendarioPaciente({
           <button
             onClick={() => setIndice((i) => Math.max(0, i - 1))}
             disabled={!podeVoltar}
-            className="p-2 rounded-full border border-[#eae2d7] text-[#5d0c1d] hover:bg-[#fbf3ef] disabled:opacity-30 disabled:cursor-not-allowed transition"
+            className="p-2 rounded-full border border-outline-variant text-primary hover:bg-surface-low disabled:opacity-30 disabled:cursor-not-allowed transition"
             aria-label="Semana anterior"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -142,18 +142,18 @@ export function CalendarioPaciente({
           <button
             onClick={() => setIndice((i) => Math.min(semanas.length - 1, i + 1))}
             disabled={!podeAvancar}
-            className="p-2 rounded-full border border-[#eae2d7] text-[#5d0c1d] hover:bg-[#fbf3ef] disabled:opacity-30 disabled:cursor-not-allowed transition"
+            className="p-2 rounded-full border border-outline-variant text-primary hover:bg-surface-low disabled:opacity-30 disabled:cursor-not-allowed transition"
             aria-label="Próxima semana"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
           {semanas.length > 1 && (
-            <span className="text-[11px] text-[#9c8b8e]">
+            <span className="text-[12px] text-on-surface-subtle">
               Semana {indice + 1} de {semanas.length}
             </span>
           )}
         </div>
-        <p className="font-serif text-sm font-bold text-[#5d0c1d] flex items-center gap-1.5">
+        <p className="font-serif text-sm font-bold text-primary flex items-center gap-1.5">
           <CalendarDays className="w-4 h-4" />
           {primeiro.rotulo} a {ultimo.rotulo}
         </p>
@@ -166,11 +166,11 @@ export function CalendarioPaciente({
             <div />
             {dias.map((d) => {
               return (
-                <div key={d.data} className="text-center py-1.5 rounded-xl text-[#5d0c1d]">
-                  <p className="text-[10px] font-bold uppercase tracking-wide">
+                <div key={d.data} className="text-center py-1.5 rounded-xl text-primary">
+                  <p className="text-[11px] font-bold uppercase tracking-wide">
                     {d.nomeDia.slice(0, 3)}
                   </p>
-                  <p className="text-[11px]">{d.rotulo}</p>
+                  <p className="text-[12px]">{d.rotulo}</p>
                 </div>
               );
             })}
@@ -178,7 +178,7 @@ export function CalendarioPaciente({
 
           {horas.map((hora) => (
             <div key={hora} className="grid gap-1 mb-1" style={grade}>
-              <div className="text-[11px] text-[#9c8b8e] text-right pr-1.5 pt-2.5">
+              <div className="text-[12px] text-on-surface-subtle text-right pr-1.5 pt-2.5">
                 {hora}
               </div>
               {dias.map((d) => {
@@ -187,7 +187,7 @@ export function CalendarioPaciente({
                   return (
                     <div
                       key={`${d.data}|${hora}`}
-                      className="min-h-[46px] rounded-xl bg-[#faf7f5] border border-dashed border-[#f0e8e4]"
+                      className="min-h-[46px] rounded-xl bg-surface-low border border-dashed border-outline-variant"
                       aria-hidden="true"
                     />
                   );
@@ -199,10 +199,10 @@ export function CalendarioPaciente({
                     onClick={() => setEscolhida(vaga)}
                     disabled={Boolean(salvando)}
                     title={`${d.nomeDia}, ${d.rotulo} às ${hora}`}
-                    className={`min-h-[46px] rounded-xl text-[11px] font-bold transition disabled:opacity-60 ${
+                    className={`min-h-[46px] rounded-xl text-[12px] font-bold transition disabled:opacity-60 ${
                       ativa
-                        ? "bg-[#5d0c1d] text-white ring-2 ring-[#aa2d47] ring-offset-1"
-                        : "bg-[#e7f4ec] text-[#245f3c] border border-[#c7e6d2] hover:bg-[#5d0c1d] hover:text-white hover:border-[#5d0c1d]"
+                        ? "bg-primary text-white ring-2 ring-secondary ring-offset-1"
+                        : "bg-success-container text-success border border-success-outline hover:bg-primary hover:text-white hover:border-primary"
                     }`}
                   >
                     {hora}
@@ -214,12 +214,12 @@ export function CalendarioPaciente({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#6f5f62]">
+      <div className="flex flex-wrap items-center gap-3 text-[12px] text-on-surface-variant">
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-[#e7f4ec] border border-[#c7e6d2]" /> Livre
+          <span className="w-3 h-3 rounded bg-success-container border border-success-outline" /> Livre
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-[#faf7f5] border border-dashed border-[#f0e8e4]" /> Indisponível
+          <span className="w-3 h-3 rounded bg-surface-low border border-dashed border-outline-variant" /> Indisponível
         </span>
         <span>Sessão de {duracaoMinutos} minutos. Horários de Brasília.</span>
       </div>
@@ -234,29 +234,29 @@ export function CalendarioPaciente({
             onClick={() => setEscolhida(null)}
             aria-label="Fechar"
           />
-          <div className="relative bg-white w-full sm:max-w-sm sm:rounded-3xl rounded-t-3xl border border-[#f0ded8] shadow-xl p-6 space-y-4">
+          <div className="relative bg-white w-full sm:max-w-sm sm:rounded-3xl rounded-t-3xl border border-outline-variant shadow-xl p-6 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="font-serif text-base font-bold text-[#5d0c1d]">
+                <h3 className="font-serif text-base font-bold text-primary">
                   {tituloDialogo}
                 </h3>
-                <p className="text-sm text-[#241a1c] mt-2 first-letter:uppercase font-semibold">
+                <p className="text-sm text-on-surface mt-2 first-letter:uppercase font-semibold">
                   {formatarDataHora(escolhida.inicioIso)}
                 </p>
-                <p className="text-xs text-[#6f5f62] mt-1">
+                <p className="text-xs text-on-surface-variant mt-1">
                   Duração de {duracaoMinutos} minutos. Horário de Brasília.
                 </p>
               </div>
               <button
                 onClick={() => setEscolhida(null)}
-                className="p-1.5 rounded-full text-[#6f5f62] hover:bg-[#fbf3ef] shrink-0"
+                className="p-1.5 rounded-full text-on-surface-variant hover:bg-surface-low shrink-0"
                 aria-label="Fechar"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-[#6f5f62] leading-relaxed bg-[#fbf3ef] rounded-2xl p-3">
+            <p className="text-xs text-on-surface-variant leading-relaxed bg-surface-low rounded-2xl p-3">
               {textoDialogo}
             </p>
 
@@ -264,7 +264,7 @@ export function CalendarioPaciente({
               <button
                 onClick={() => { aoMarcar(escolhida.inicioIso); setEscolhida(null); }}
                 disabled={Boolean(salvando)}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-[#5d0c1d] text-white text-sm font-bold hover:bg-[#7d1128] disabled:opacity-60 transition"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-primary text-white text-sm font-bold hover:bg-primary-hover disabled:opacity-60 transition"
               >
                 {salvando ? <Spinner tamanho="sm" /> : <Check className="w-4 h-4" />}
                 <span>{rotuloConfirmar}</span>
@@ -272,7 +272,7 @@ export function CalendarioPaciente({
               <button
                 onClick={() => setEscolhida(null)}
                 disabled={Boolean(salvando)}
-                className="px-5 py-3 rounded-full border border-[#eae2d7] text-[#6f5f62] text-sm font-semibold hover:bg-[#fbf3ef] transition"
+                className="px-5 py-3 rounded-full border border-outline-variant text-on-surface-variant text-sm font-semibold hover:bg-surface-low transition"
               >
                 Voltar
               </button>

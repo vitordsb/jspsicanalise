@@ -95,9 +95,9 @@ export default function ContratoDoPacientePage({
           Voltar
         </button>
 
-        <span style={{ fontSize: 12, color: "#6f5f62", flex: 1, textAlign: "center" }}>
+        <span style={{ fontSize: 12, color: "var(--color-on-surface-variant)", flex: 1, textAlign: "center" }}>
           {assinado ? (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#245f3c", fontWeight: 600 }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--color-success)", fontWeight: 600 }}>
               <ShieldCheck size={14} />
               Assinado em {formatarDataHora(contrato.signedAt!)}
               {contrato.verificationCode ? ` · ${contrato.verificationCode}` : ""}
@@ -153,34 +153,34 @@ export default function ContratoDoPacientePage({
 }
 
 const botaoVoltar: React.CSSProperties = {
-  padding: "9px 16px", borderRadius: 999, border: "1px solid #d8cfcb",
-  background: "#fff", cursor: "pointer", fontSize: 13, color: "#5d0c1d",
+  padding: "9px 16px", borderRadius: 999, border: "1px solid var(--color-outline)",
+  background: "#fff", cursor: "pointer", fontSize: 13, color: "var(--color-primary)",
 };
 const botaoImprimir: React.CSSProperties = {
   padding: "9px 20px", borderRadius: 999, border: "none",
-  background: "#5d0c1d", color: "#fff", cursor: "pointer",
+  background: "var(--color-primary)", color: "#fff", cursor: "pointer",
   fontSize: 13, fontWeight: 600,
 };
 const barraProgresso: React.CSSProperties = {
   position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 40,
-  background: "rgba(255,255,255,0.97)", borderTop: "1px solid #f0ded8",
+  background: "rgba(255,255,255,0.97)", borderTop: "1px solid var(--color-surface-container-high)",
   padding: "10px 16px", display: "flex", alignItems: "center", gap: 14,
   fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
   backdropFilter: "blur(6px)",
 };
 const trilho: React.CSSProperties = {
-  height: 5, background: "#f0ded8", borderRadius: 999, overflow: "hidden",
+  height: 5, background: "var(--color-surface-container-high)", borderRadius: 999, overflow: "hidden",
 };
 const preenchimento: React.CSSProperties = {
-  height: "100%", background: "#5d0c1d", borderRadius: 999,
+  height: "100%", background: "var(--color-primary)", borderRadius: 999,
   transition: "width 120ms linear",
 };
 const legendaProgresso: React.CSSProperties = {
-  margin: "5px 0 0 0", fontSize: 11, color: "#6f5f62",
+  margin: "5px 0 0 0", fontSize: 11, color: "var(--color-on-surface-variant)",
 };
 const botaoIrAoFim: React.CSSProperties = {
   display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0,
-  padding: "9px 16px", borderRadius: 999, border: "1px solid #5d0c1d",
-  background: "#fff", color: "#5d0c1d", fontSize: 12.5, fontWeight: 700,
+  padding: "9px 16px", borderRadius: 999, border: "1px solid var(--color-primary)",
+  background: "#fff", color: "var(--color-primary)", fontSize: 12.5, fontWeight: 700,
   cursor: "pointer", fontFamily: "inherit",
 };

@@ -352,19 +352,19 @@ export const ContractModal: React.FC<ContractModalProps> = ({
 
   return (
     <div className="contract-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-xs overflow-y-auto">
-      <div className="contract-modal-card bg-white rounded-3xl border border-[#f0ded8] w-full max-w-4xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden my-auto">
+      <div className="contract-modal-card bg-white rounded-3xl border border-outline-variant w-full max-w-4xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden my-auto">
 
         {/* CABECALHO DO MODAL - oculto na impressao */}
-        <div className="p-4 sm:p-5 border-b border-[#f3e4e0] flex items-center justify-between bg-[#fbf3ef] no-print shrink-0">
+        <div className="p-4 sm:p-5 border-b border-outline-variant flex items-center justify-between bg-surface-low no-print shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-[#f8dad2] text-[#5d0c1d] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-primary-container text-primary flex items-center justify-center">
               <FileSignature className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-serif text-base sm:text-lg font-bold text-[#5d0c1d] leading-tight">
+              <h2 className="font-serif text-base sm:text-lg font-bold text-primary leading-tight">
                 Gerar Contrato de Prestacao de Servicos
               </h2>
-              <p className="text-xs text-[#6f5f62]">
+              <p className="text-xs text-on-surface-variant">
                 Paciente: <strong>{patient.fullName}</strong> - CPF: {formatCPF(patient.cpf)}
               </p>
             </div>
@@ -374,7 +374,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
             <button
               onClick={handlePrint}
               title="Gerar PDF / Imprimir"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-[#f8dad2] text-[#5d0c1d] border border-[#f0ded8] text-xs font-semibold transition"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-primary-container text-primary border border-outline-variant text-xs font-semibold transition"
             >
               <Printer className="w-4 h-4" />
               <span>Imprimir / PDF</span>
@@ -382,7 +382,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
             <button
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] disabled:opacity-70 disabled:cursor-not-allowed text-white text-xs font-semibold shadow-xs transition"
+              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-primary hover:bg-secondary disabled:opacity-70 disabled:cursor-not-allowed text-white text-xs font-semibold shadow-xs transition"
             >
               <BotaoConteudo carregando={saving} rotuloCarregando="Salvando...">
                 <Save className="w-4 h-4" />
@@ -391,7 +391,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-full text-[#5d0c1d] hover:bg-[#f8dad2] transition"
+              className="p-2 rounded-full text-primary hover:bg-primary-container transition"
             >
               <X className="w-5 h-5" />
             </button>
@@ -403,13 +403,13 @@ export const ContractModal: React.FC<ContractModalProps> = ({
 
           {/* Mensagens - ocultas na impressao */}
           {successMsg && (
-            <div className="bg-[#e7f4ec] border border-[#c7e6d2] text-[#245f3c] p-3.5 rounded-2xl text-xs flex items-center gap-2 no-print font-medium">
+            <div className="bg-success-container border border-success-outline text-success p-3.5 rounded-2xl text-xs flex items-center gap-2 no-print font-medium">
               <CheckCircle className="w-4 h-4 shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
           {errorMsg && (
-            <div className="bg-[#fff0f3] border border-[#f3cbc1] text-[#aa2d47] p-3.5 rounded-2xl text-xs flex items-center gap-2 no-print font-medium">
+            <div className="bg-secondary-container border border-primary-container-high text-secondary p-3.5 rounded-2xl text-xs flex items-center gap-2 no-print font-medium">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
@@ -434,15 +434,15 @@ export const ContractModal: React.FC<ContractModalProps> = ({
           )}
 
           {/* FORMULARIO DE EDICAO - oculto na impressao */}
-          <div className="bg-[#fbf3ef] border border-[#f0ded8] rounded-3xl p-6 space-y-5 no-print">
-            <h3 className="font-serif text-sm font-bold text-[#5d0c1d] uppercase tracking-wider">
+          <div className="bg-surface-low border border-outline-variant rounded-3xl p-6 space-y-5 no-print">
+            <h3 className="font-serif text-sm font-bold text-primary uppercase tracking-wider">
               Clausulas e Valores (Pre-visualizacao)
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Valor da sessao */}
               <div>
-                <label className="block text-xs font-semibold text-[#241a1c] mb-1">
+                <label className="block text-xs font-semibold text-on-surface mb-1">
                   Valor da Sessão (R$)
                 </label>
                 <input
@@ -451,26 +451,26 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                   step={0.01}
                   value={sessionPriceBRL}
                   onChange={(e) => set("sessionPriceCents", Math.round(Number(e.target.value) * 100))}
-                  className="w-full h-11 px-3.5 rounded-full border border-[#eae2d7] bg-white text-xs text-[#241a1c] focus:outline-none focus:border-[#5d0c1d]"
+                  className="w-full h-11 px-3.5 rounded-lg border border-outline bg-white text-xs text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Periodicidade */}
               <div>
-                <label className="block text-xs font-semibold text-[#241a1c] mb-1">
+                <label className="block text-xs font-semibold text-on-surface mb-1">
                   Periodicidade
                 </label>
                 <input
                   type="text"
                   value={form.frequency}
                   onChange={(e) => set("frequency", e.target.value)}
-                  className="w-full h-11 px-3.5 rounded-full border border-[#eae2d7] bg-white text-xs text-[#241a1c] focus:outline-none focus:border-[#5d0c1d]"
+                  className="w-full h-11 px-3.5 rounded-lg border border-outline bg-white text-xs text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Duracao */}
               <div>
-                <label className="block text-xs font-semibold text-[#241a1c] mb-1">
+                <label className="block text-xs font-semibold text-on-surface mb-1">
                   Duração da Sessão (minutos)
                 </label>
                 <input
@@ -479,13 +479,13 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                   max={300}
                   value={form.durationMinutes}
                   onChange={(e) => set("durationMinutes", Number(e.target.value))}
-                  className="w-full h-11 px-3.5 rounded-full border border-[#eae2d7] bg-white text-xs text-[#241a1c] focus:outline-none focus:border-[#5d0c1d]"
+                  className="w-full h-11 px-3.5 rounded-lg border border-outline bg-white text-xs text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Antecedencia de cancelamento */}
               <div>
-                <label className="block text-xs font-semibold text-[#241a1c] mb-1">
+                <label className="block text-xs font-semibold text-on-surface mb-1">
                   Antecedência mínima para cancelar (horas)
                 </label>
                 <input
@@ -494,26 +494,26 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                   max={168}
                   value={form.cancellationHours}
                   onChange={(e) => set("cancellationHours", Number(e.target.value))}
-                  className="w-full h-11 px-3.5 rounded-full border border-[#eae2d7] bg-white text-xs text-[#241a1c] focus:outline-none focus:border-[#5d0c1d]"
+                  className="w-full h-11 px-3.5 rounded-lg border border-outline bg-white text-xs text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Forma de pagamento */}
               <div>
-                <label className="block text-xs font-semibold text-[#241a1c] mb-1">
+                <label className="block text-xs font-semibold text-on-surface mb-1">
                   Forma de Pagamento
                 </label>
                 <input
                   type="text"
                   value={form.paymentMethod}
                   onChange={(e) => set("paymentMethod", e.target.value)}
-                  className="w-full h-11 px-3.5 rounded-full border border-[#eae2d7] bg-white text-xs text-[#241a1c] focus:outline-none focus:border-[#5d0c1d]"
+                  className="w-full h-11 px-3.5 rounded-lg border border-outline bg-white text-xs text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Vencimento */}
               <div>
-                <label className="block text-xs font-semibold text-[#241a1c] mb-1">
+                <label className="block text-xs font-semibold text-on-surface mb-1">
                   Dia de vencimento do mes
                 </label>
                 <input
@@ -522,13 +522,13 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                   max={28}
                   value={form.paymentDueDay}
                   onChange={(e) => set("paymentDueDay", Number(e.target.value))}
-                  className="w-full h-11 px-3.5 rounded-full border border-[#eae2d7] bg-white text-xs text-[#241a1c] focus:outline-none focus:border-[#5d0c1d]"
+                  className="w-full h-11 px-3.5 rounded-lg border border-outline bg-white text-xs text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Aviso rescisao */}
               <div>
-                <label className="block text-xs font-semibold text-[#241a1c] mb-1">
+                <label className="block text-xs font-semibold text-on-surface mb-1">
                   Aviso prévio para rescisão (dias)
                 </label>
                 <input
@@ -537,13 +537,13 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                   max={180}
                   value={form.rescissionNoticeDays}
                   onChange={(e) => set("rescissionNoticeDays", Number(e.target.value))}
-                  className="w-full h-11 px-3.5 rounded-full border border-[#eae2d7] bg-white text-xs text-[#241a1c] focus:outline-none focus:border-[#5d0c1d]"
+                  className="w-full h-11 px-3.5 rounded-lg border border-outline bg-white text-xs text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Foro */}
               <div>
-                <label className="block text-xs font-semibold text-[#241a1c] mb-1">
+                <label className="block text-xs font-semibold text-on-surface mb-1">
                   Foro da comarca (cidade)
                 </label>
                 <input
@@ -551,13 +551,13 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                   value={form.foroCidade}
                   onChange={(e) => set("foroCidade", e.target.value)}
                   placeholder="Ex: São Paulo/SP"
-                  className="w-full h-11 px-3.5 rounded-full border border-[#eae2d7] bg-white text-xs text-[#241a1c] focus:outline-none focus:border-[#5d0c1d]"
+                  className="w-full h-11 px-3.5 rounded-lg border border-outline bg-white text-xs text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Registro profissional */}
               <div>
-                <label className="block text-xs font-semibold text-[#241a1c] mb-1">
+                <label className="block text-xs font-semibold text-on-surface mb-1">
                   Registro profissional da terapeuta
                 </label>
                 <input
@@ -565,13 +565,13 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                   value={form.professionalDocNumber}
                   onChange={(e) => set("professionalDocNumber", e.target.value)}
                   placeholder="Deixar em branco se ainda nao disponivel"
-                  className="w-full h-11 px-3.5 rounded-full border border-[#eae2d7] bg-white text-xs text-[#241a1c] focus:outline-none focus:border-[#5d0c1d]"
+                  className="w-full h-11 px-3.5 rounded-lg border border-outline bg-white text-xs text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Clausulas extras */}
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-[#241a1c] mb-1">
+                <label className="block text-xs font-semibold text-on-surface mb-1">
                   Cláusulas adicionais (opcional)
                 </label>
                 <textarea
@@ -579,7 +579,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
                   value={form.customClauses}
                   onChange={(e) => set("customClauses", e.target.value)}
                   placeholder="Disposições específicas que não constam nas cláusulas padrão..."
-                  className="w-full p-3 rounded-2xl border border-[#eae2d7] bg-white text-xs text-[#241a1c] focus:outline-none focus:border-[#5d0c1d] resize-y"
+                  className="w-full p-3 rounded-2xl border border-outline-variant bg-white text-xs text-on-surface focus:outline-none focus:border-primary resize-y"
                 />
               </div>
             </div>
@@ -589,7 +589,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               DOCUMENTO DO CONTRATO - visivel na tela E na impressao
               A classe contract-print-document ativa o CSS de impressao formal
           ================================================================ */}
-          <div className="contract-print-document bg-white p-8 sm:p-12 border border-[#f0ded8] rounded-3xl shadow-xs text-[#241a1c]">
+          <div className="contract-print-document bg-white p-8 sm:p-12 border border-outline-variant rounded-3xl shadow-xs text-on-surface">
 
             {/* MARCA D'AGUA - visivel apenas na impressao, repetida em cada pagina via position:fixed */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -602,15 +602,15 @@ export const ContractModal: React.FC<ContractModalProps> = ({
 
             {/* CABECALHO DO DOCUMENTO */}
             <div className="text-center mb-8 pb-6 border-b border-[#ddd]">
-              <p className="contrato-titulo font-serif text-xl sm:text-2xl font-bold uppercase tracking-wide text-[#5d0c1d]">
+              <p className="contrato-titulo font-serif text-xl sm:text-2xl font-bold uppercase tracking-wide text-primary">
                 Contrato de Prestação de Serviços
               </p>
-              <p className="contrato-subtitulo text-sm text-[#6f5f62] mt-1">
+              <p className="contrato-subtitulo text-sm text-on-surface-variant mt-1">
                 Atendimento Psicanalítico Individual
               </p>
             </div>
 
-            <div className="space-y-5 text-sm leading-relaxed text-justify text-[#241a1c]">
+            <div className="space-y-5 text-sm leading-relaxed text-justify text-on-surface">
 
               {/* Introducao */}
               <p>
@@ -619,7 +619,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               </p>
 
               {/* BLOCO CONTRATADA */}
-              <div className="bloco-parte pl-4 border-l-2 border-[#5d0c1d] space-y-1 text-sm">
+              <div className="bloco-parte pl-4 border-l-2 border-primary space-y-1 text-sm">
                 <p><strong>CONTRATADA (TERAPEUTA):</strong> {form.therapistName}</p>
                 {form.professionalDocNumber ? (
                   <p><strong>REGISTRO PROFISSIONAL:</strong> {form.professionalDocNumber}</p>
@@ -639,7 +639,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               <p>E, do outro lado:</p>
 
               {/* BLOCO CONTRATANTE */}
-              <div className="bloco-parte pl-4 border-l-2 border-[#5d0c1d] space-y-1 text-sm">
+              <div className="bloco-parte pl-4 border-l-2 border-primary space-y-1 text-sm">
                 <p><strong>CONTRATANTE (PACIENTE):</strong> {patient.fullName}</p>
                 <p><strong>CPF:</strong> {formatCPF(patient.cpf)}</p>
                 {patient.email && <p><strong>E-MAIL:</strong> {patient.email}</p>}
@@ -661,7 +661,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
 
               {/* CLAUSULA 1 */}
               <div className="clausula-bloco">
-                <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
+                <p className="clausula-titulo font-serif font-bold uppercase text-primary text-sm">
                   CLÁUSULA PRIMEIRA - DO OBJETO
                 </p>
                 <p>
@@ -678,7 +678,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
 
               {/* CLAUSULA 2 */}
               <div className="clausula-bloco">
-                <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
+                <p className="clausula-titulo font-serif font-bold uppercase text-primary text-sm">
                   CLÁUSULA SEGUNDA - DOS HONORÁRIOS E PAGAMENTO
                 </p>
                 <p>
@@ -698,7 +698,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
 
               {/* CLAUSULA 3 */}
               <div className="clausula-bloco">
-                <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
+                <p className="clausula-titulo font-serif font-bold uppercase text-primary text-sm">
                   CLÁUSULA TERCEIRA - DAS DESMARCAÇÕES E FALTAS
                 </p>
                 <p>
@@ -715,7 +715,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
 
               {/* CLAUSULA 4 */}
               <div className="clausula-bloco">
-                <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
+                <p className="clausula-titulo font-serif font-bold uppercase text-primary text-sm">
                   CLÁUSULA QUARTA - DO SIGILO PROFISSIONAL
                 </p>
                 <p>
@@ -729,7 +729,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
 
               {/* CLAUSULA 5 */}
               <div className="clausula-bloco">
-                <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
+                <p className="clausula-titulo font-serif font-bold uppercase text-primary text-sm">
                   CLÁUSULA QUINTA - DA VIGÊNCIA E RESCISÃO
                 </p>
                 <p>
@@ -748,7 +748,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               {/* CLAUSULA 6 - apenas se houver clausulas extras */}
               {form.customClauses && form.customClauses.trim() && (
                 <div className="clausula-bloco">
-                  <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
+                  <p className="clausula-titulo font-serif font-bold uppercase text-primary text-sm">
                     CLÁUSULA SEXTA - DISPOSIÇÕES GERAIS
                   </p>
                   <p>{form.customClauses}</p>
@@ -757,7 +757,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
 
               {/* CLAUSULA DO FORO */}
               <div className="clausula-bloco">
-                <p className="clausula-titulo font-serif font-bold uppercase text-[#5d0c1d] text-sm">
+                <p className="clausula-titulo font-serif font-bold uppercase text-primary text-sm">
                   {form.customClauses && form.customClauses.trim()
                     ? "CLÁUSULA SÉTIMA"
                     : "CLÁUSULA SEXTA"} - DO FORO
@@ -830,7 +830,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
 
               {/* RODAPE DO DOCUMENTO */}
               <div className="rodape-documento mt-8 pt-4 border-t border-[#ccc] text-center">
-                <p className="text-[11px] text-[#888]">
+                <p className="text-[12px] text-[#888]">
                   Documento gerado eletronicamente em {formatDateTime(new Date())} via plataforma clínica.
                 </p>
               </div>

@@ -50,19 +50,19 @@ export function useToast(): API {
 
 const ESTILO: Record<Tipo, { caixa: string; icone: React.ElementType; cor: string }> = {
   sucesso: {
-    caixa: "bg-[#e7f4ec] border-[#c7e6d2] text-[#245f3c]",
+    caixa: "bg-success-container border-success-outline text-success",
     icone: CheckCircle2,
-    cor: "text-[#245f3c]",
+    cor: "text-success",
   },
   erro: {
-    caixa: "bg-[#fff0f3] border-[#f3cbc1] text-[#aa2d47]",
+    caixa: "bg-secondary-container border-primary-container-high text-secondary",
     icone: XCircle,
-    cor: "text-[#aa2d47]",
+    cor: "text-secondary",
   },
   aviso: {
-    caixa: "bg-[#fffbeb] border-[#fde68a] text-[#78350f]",
+    caixa: "bg-warning-container border-warning-outline text-on-warning-container",
     icone: AlertTriangle,
-    cor: "text-[#92400e]",
+    cor: "text-warning",
   },
 };
 

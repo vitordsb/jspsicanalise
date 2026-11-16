@@ -64,13 +64,13 @@ export function ProximosAgendamentos({
   const agora = new Date();
 
   return (
-    <aside className="bg-white border border-[#f0ded8] rounded-3xl overflow-hidden flex flex-col">
-      <div className="px-4 py-3 border-b border-[#f3e4e0] bg-[#fbf3ef] shrink-0">
-        <h2 className="font-serif text-sm font-bold text-[#5d0c1d] flex items-center gap-1.5">
+    <aside className="bg-white border border-outline-variant rounded-3xl overflow-hidden flex flex-col">
+      <div className="px-4 py-3 border-b border-outline-variant bg-surface-low shrink-0">
+        <h2 className="font-serif text-sm font-bold text-primary flex items-center gap-1.5">
           <CalendarDays className="w-4 h-4" />
           Próximos agendamentos
         </h2>
-        <p className="text-[11px] text-[#6f5f62] mt-0.5">
+        <p className="text-[12px] text-on-surface-variant mt-0.5">
           {itens.length === 0
             ? "Nenhuma consulta marcada"
             : `${itens.length} consulta${itens.length === 1 ? "" : "s"} pela frente`}
@@ -78,11 +78,11 @@ export function ProximosAgendamentos({
       </div>
 
       {itens.length === 0 ? (
-        <p className="p-4 text-xs text-[#9c8b8e]">
+        <p className="p-4 text-xs text-on-surface-subtle">
           Quando um paciente marcar, a consulta aparece aqui.
         </p>
       ) : (
-        <ul className="divide-y divide-[#fbf3ef] overflow-y-auto flex-1 min-h-0">
+        <ul className="divide-y divide-outline-variant overflow-y-auto flex-1 min-h-0">
           {itens.map((it, i) => {
             const d = new Date(it.inicioEm);
             const diaSemana = new Date(`${chaveDia(d)}T12:00:00.000Z`).getUTCDay();
@@ -92,33 +92,33 @@ export function ProximosAgendamentos({
                 <button
                   onClick={() => aoSelecionar?.(it.id)}
                   className={`w-full text-left px-4 py-3 flex items-start gap-3 transition ${
-                    ativo ? "bg-[#fbf5f2]" : "hover:bg-[#fbf3ef]"
+                    ativo ? "bg-surface-low" : "hover:bg-surface-low"
                   }`}
                 >
                   <div
-                    className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[11px] font-bold ${
+                    className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[12px] font-bold ${
                       i === 0
-                        ? "bg-[#5d0c1d] text-white"
-                        : "bg-[#f8dad2] text-[#5d0c1d]"
+                        ? "bg-primary text-white"
+                        : "bg-primary-container text-primary"
                     }`}
                   >
                     {iniciais(it.patient.fullName)}
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold text-[#241a1c] truncate">
+                    <p className="text-xs font-semibold text-on-surface truncate">
                       {it.patient.fullName}
                     </p>
-                    <p className="text-[11px] text-[#6f5f62] mt-0.5">
+                    <p className="text-[12px] text-on-surface-variant mt-0.5">
                       {NOMES_DIA[diaSemana].slice(0, 3)}, {formatarHora(it.inicioEm)}
-                      <span className="text-[#9c8b8e]"> · {quandoE(it.inicioEm, agora)}</span>
+                      <span className="text-on-surface-subtle"> · {quandoE(it.inicioEm, agora)}</span>
                     </p>
                     {it.patient._count?.submissions === 0 && (
                       <p
-                        className={`text-[10px] font-semibold mt-1 inline-block px-2 py-0.5 rounded-full ${
+                        className={`text-[11px] font-semibold mt-1 inline-block px-2 py-0.5 rounded-full ${
                           faltamMenosDe(it.inicioEm, 2, agora)
-                            ? "bg-[#fff0f3] text-[#aa2d47]"
-                            : "bg-[#f8dad2] text-[#5d0c1d]"
+                            ? "bg-secondary-container text-secondary"
+                            : "bg-primary-container text-primary"
                         }`}
                       >
                         Sem anamnese
@@ -132,7 +132,7 @@ export function ProximosAgendamentos({
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="p-1.5 rounded-full text-[#245f3c] hover:bg-[#e7f4ec] transition shrink-0"
+                      className="p-1.5 rounded-full text-success hover:bg-success-container transition shrink-0"
                       aria-label={`Chamar ${it.patient.fullName} no WhatsApp`}
                     >
                       <MessageSquareText className="w-3.5 h-3.5" />

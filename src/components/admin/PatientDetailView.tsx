@@ -166,25 +166,25 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
   )}`;
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-56px)] md:h-screen bg-[#fbf5f2] overflow-hidden">
+    <div className="flex-1 flex flex-col h-[calc(100vh-56px)] md:h-screen bg-surface-low overflow-hidden">
       {/* WHATSAPP WEB TOP BAR */}
-      <div className="p-3.5 bg-[#fbf3ef] border-b border-[#f0ded8] flex flex-wrap items-center justify-between gap-y-2.5 gap-x-4 shrink-0 no-print">
+      <div className="p-3.5 bg-surface-low border-b border-outline-variant flex flex-wrap items-center justify-between gap-y-2.5 gap-x-4 shrink-0 no-print">
         <div className="flex items-center gap-3 min-w-0 flex-1 basis-full sm:basis-auto">
-          <div className="w-11 h-11 rounded-full bg-[#5d0c1d] text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+          <div className="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
             {patient.fullName.charAt(0)}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className="font-serif text-base font-bold text-[#5d0c1d] truncate">
+              <h2 className="font-serif text-base font-bold text-primary truncate">
                 {patient.fullName}
               </h2>
               {age !== null && (
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#f8dad2] text-[#5d0c1d] font-semibold">
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary-container text-primary font-semibold">
                   {age} anos
                 </span>
               )}
             </div>
-            <p className="text-xs text-[#6f5f62] truncate">
+            <p className="text-xs text-on-surface-variant truncate">
               CPF: {formatCPF(patient.cpf)} • Recebido em {formatDateTime(createdAt)}
             </p>
           </div>
@@ -208,7 +208,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             title="Abrir conversa no WhatsApp"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#e7f4ec] hover:bg-[#d2edd9] text-[#245f3c] text-xs font-semibold border border-[#c7e6d2] transition"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-success-container hover:bg-success-outline text-success text-xs font-semibold border border-success-outline transition"
           >
             <MessageCircle className="w-4 h-4" />
             <span className="hidden sm:inline">WhatsApp</span>
@@ -222,7 +222,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
             onClick={reemitirCodigo}
             disabled={reemitindo}
             title="Emitir novo código de acesso à área do paciente"
-            className="p-2 rounded-full bg-white border border-[#f0ded8] text-[#5d0c1d] hover:bg-[#fbf3ef] disabled:opacity-60 transition"
+            className="p-2 rounded-full bg-white border border-outline-variant text-primary hover:bg-surface-low disabled:opacity-60 transition"
           >
             <KeyRound className="w-4 h-4" />
           </button>
@@ -231,7 +231,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
           <button
             onClick={() => window.print()}
             title="Imprimir Ficha Completa"
-            className="p-2 rounded-full bg-white border border-[#f0ded8] text-[#5d0c1d] hover:bg-[#fbf3ef] transition"
+            className="p-2 rounded-full bg-white border border-outline-variant text-primary hover:bg-surface-low transition"
           >
             <Printer className="w-4 h-4" />
           </button>
@@ -240,7 +240,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
           <select
             value={status}
             onChange={(e) => onStatusChange(e.target.value)}
-            className="text-xs font-semibold px-3 py-2 rounded-full border border-[#f0ded8] bg-white text-[#5d0c1d] focus:ring-2 focus:ring-[#5d0c1d]/20 focus:outline-none cursor-pointer"
+            className="text-xs font-semibold px-3 py-2 rounded-full border border-outline-variant bg-white text-primary focus:ring-2 focus:ring-primary/20 focus:outline-none cursor-pointer"
           >
             <option value="pending">🟡 Novo</option>
             <option value="in_review">🔵 Em Análise</option>
@@ -254,12 +254,12 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
           Aparece uma unica vez, logo apos a emissao. Guardamos so o hash,
           entao nao ha como exibir de novo depois que a Joane fechar a tela. */}
       {codigoNovo && (
-        <div className="bg-[#fffbeb] border-b-2 border-[#fde68a] px-4 sm:px-6 py-3 flex items-start gap-3 shrink-0 no-print">
-          <KeyRound className="w-5 h-5 text-[#92400e] shrink-0 mt-0.5" aria-hidden="true" />
-          <div className="text-xs text-[#78350f] space-y-1 flex-1">
+        <div className="bg-warning-container border-b-2 border-warning-outline px-4 sm:px-6 py-3 flex items-start gap-3 shrink-0 no-print">
+          <KeyRound className="w-5 h-5 text-warning shrink-0 mt-0.5" aria-hidden="true" />
+          <div className="text-xs text-on-warning-container space-y-1 flex-1">
             <p className="font-bold">
               Novo código de acesso:{" "}
-              <span className="text-base tracking-[0.18em] text-[#5d0c1d] select-all">
+              <span className="text-base tracking-[0.18em] text-primary select-all">
                 {codigoNovo}
               </span>
             </p>
@@ -270,7 +270,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
           </div>
           <button
             onClick={() => setCodigoNovo("")}
-            className="text-[#92400e] text-xs font-semibold hover:underline shrink-0"
+            className="text-warning text-xs font-semibold hover:underline shrink-0"
           >
             Fechar
           </button>
@@ -297,13 +297,13 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
       )}
 
       {/* WHATSAPP TABS */}
-      <div className="bg-white border-b border-[#f0ded8] px-4 sm:px-6 flex items-center gap-6 shrink-0 no-print">
+      <div className="bg-white border-b border-outline-variant px-4 sm:px-6 flex items-center gap-6 shrink-0 no-print">
         <button
           onClick={() => setActiveTab("anamnese")}
           className={`py-3.5 text-xs sm:text-sm font-semibold border-b-2 transition flex items-center gap-2 ${
             activeTab === "anamnese"
-              ? "border-[#5d0c1d] text-[#5d0c1d]"
-              : "border-transparent text-[#6f5f62] hover:text-[#5d0c1d]"
+              ? "border-primary text-primary"
+              : "border-transparent text-on-surface-variant hover:text-primary"
           }`}
         >
           <FileText className="w-4 h-4" />
@@ -314,14 +314,14 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
           onClick={() => setActiveTab("anotacoes")}
           className={`py-3.5 text-xs sm:text-sm font-semibold border-b-2 transition flex items-center gap-2 ${
             activeTab === "anotacoes"
-              ? "border-[#5d0c1d] text-[#5d0c1d]"
-              : "border-transparent text-[#6f5f62] hover:text-[#5d0c1d]"
+              ? "border-primary text-primary"
+              : "border-transparent text-on-surface-variant hover:text-primary"
           }`}
         >
           <Sparkles className="w-4 h-4" />
           <span>Anotações Clínicas</span>
           {clinicalNotes && (
-            <span className="w-2 h-2 rounded-full bg-[#5d0c1d]" />
+            <span className="w-2 h-2 rounded-full bg-primary" />
           )}
         </button>
 
@@ -329,8 +329,8 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
           onClick={() => setActiveTab("contratos")}
           className={`py-3.5 text-xs sm:text-sm font-semibold border-b-2 transition flex items-center gap-2 ${
             activeTab === "contratos"
-              ? "border-[#5d0c1d] text-[#5d0c1d]"
-              : "border-transparent text-[#6f5f62] hover:text-[#5d0c1d]"
+              ? "border-primary text-primary"
+              : "border-transparent text-on-surface-variant hover:text-primary"
           }`}
         >
           <FileSignature className="w-4 h-4" />
@@ -349,7 +349,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
         {temRolagem && (
           <button
             onClick={() => rolarPara(perto === "fim" ? "topo" : "fim")}
-            className="no-print sticky top-0 float-right z-20 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-semibold shadow-lg shadow-[#5d0c1d]/20 transition"
+            className="no-print sticky top-0 float-right z-20 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary hover:bg-secondary text-white text-xs font-semibold shadow-lg shadow-primary/20 transition"
           >
             {perto === "fim" ? (
               <>
@@ -370,63 +370,63 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
           {activeTab === "anamnese" && (
             <div className="space-y-6">
               {/* FICHA DE CADASTRO DO PACIENTE */}
-              <div className="bg-white rounded-3xl border border-[#f0ded8] p-6 sm:p-7 shadow-xs print-page">
-                <div className="flex items-center justify-between border-b border-[#f3e4e0] pb-3 mb-4">
-                  <h3 className="font-serif text-lg font-bold text-[#5d0c1d] flex items-center gap-2">
-                    <User className="w-5 h-5 text-[#5d0c1d]" />
+              <div className="bg-white rounded-3xl border border-outline-variant p-6 sm:p-7 shadow-xs print-page">
+                <div className="flex items-center justify-between border-b border-outline-variant pb-3 mb-4">
+                  <h3 className="font-serif text-lg font-bold text-primary flex items-center gap-2">
+                    <User className="w-5 h-5 text-primary" />
                     <span>Ficha de Cadastro do Paciente</span>
                   </h3>
-                  <span className="text-xs text-[#9c8b8e]">
+                  <span className="text-xs text-on-surface-subtle">
                     ID: {patient.id.slice(-6)}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs sm:text-sm">
                   <div>
-                    <span className="text-[#9c8b8e] block">Nome Completo:</span>
-                    <strong className="text-[#241a1c]">{patient.fullName}</strong>
+                    <span className="text-on-surface-subtle block">Nome Completo:</span>
+                    <strong className="text-on-surface">{patient.fullName}</strong>
                   </div>
 
                   <div>
-                    <span className="text-[#9c8b8e] block">CPF:</span>
-                    <strong className="text-[#241a1c]">{formatCPF(patient.cpf)}</strong>
+                    <span className="text-on-surface-subtle block">CPF:</span>
+                    <strong className="text-on-surface">{formatCPF(patient.cpf)}</strong>
                   </div>
 
                   <div>
-                    <span className="text-[#9c8b8e] block">Data de Nascimento:</span>
-                    <strong className="text-[#241a1c]">
+                    <span className="text-on-surface-subtle block">Data de Nascimento:</span>
+                    <strong className="text-on-surface">
                       {formatDate(patient.birthDate)} {age !== null && `(${age} anos)`}
                     </strong>
                   </div>
 
                   <div>
-                    <span className="text-[#9c8b8e] block">Telefone / WhatsApp:</span>
-                    <strong className="text-[#241a1c]">{patient.phone}</strong>
+                    <span className="text-on-surface-subtle block">Telefone / WhatsApp:</span>
+                    <strong className="text-on-surface">{patient.phone}</strong>
                   </div>
 
                   <div>
-                    <span className="text-[#9c8b8e] block">E-mail:</span>
-                    <strong className="text-[#241a1c]">{patient.email}</strong>
+                    <span className="text-on-surface-subtle block">E-mail:</span>
+                    <strong className="text-on-surface">{patient.email}</strong>
                   </div>
 
                   {patient.occupation && (
                     <div>
-                      <span className="text-[#9c8b8e] block">Profissão:</span>
-                      <strong className="text-[#241a1c]">{patient.occupation}</strong>
+                      <span className="text-on-surface-subtle block">Profissão:</span>
+                      <strong className="text-on-surface">{patient.occupation}</strong>
                     </div>
                   )}
 
                   {patient.gender && (
                     <div>
-                      <span className="text-[#9c8b8e] block">Identidade de Gênero:</span>
-                      <strong className="text-[#241a1c]">{patient.gender}</strong>
+                      <span className="text-on-surface-subtle block">Identidade de Gênero:</span>
+                      <strong className="text-on-surface">{patient.gender}</strong>
                     </div>
                   )}
 
                   {patient.maritalStatus && (
                     <div>
-                      <span className="text-[#9c8b8e] block">Estado Civil:</span>
-                      <strong className="text-[#241a1c]">{patient.maritalStatus}</strong>
+                      <span className="text-on-surface-subtle block">Estado Civil:</span>
+                      <strong className="text-on-surface">{patient.maritalStatus}</strong>
                     </div>
                   )}
                 </div>
@@ -436,14 +436,14 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
               {templateSnapshot && Array.isArray(templateSnapshot) && templateSnapshot.map((section: FormSection, idx: number) => (
                 <div
                   key={section.id || idx}
-                  className="bg-white rounded-3xl border border-[#f0ded8] p-6 sm:p-7 shadow-xs space-y-4 print-page"
+                  className="bg-white rounded-3xl border border-outline-variant p-6 sm:p-7 shadow-xs space-y-4 print-page"
                 >
-                  <div className="border-b border-[#f3e4e0] pb-3">
-                    <h4 className="font-serif text-lg font-bold text-[#5d0c1d]">
+                  <div className="border-b border-outline-variant pb-3">
+                    <h4 className="font-serif text-lg font-bold text-primary">
                       {section.title}
                     </h4>
                     {section.description && (
-                      <p className="text-xs text-[#6f5f62] mt-0.5">{section.description}</p>
+                      <p className="text-xs text-on-surface-variant mt-0.5">{section.description}</p>
                     )}
                   </div>
 
@@ -455,20 +455,20 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                       return (
                         <div
                           key={q.id}
-                          className="p-4 rounded-2xl bg-[#fbf3ef] border border-[#f0ded8] space-y-1.5"
+                          className="p-4 rounded-2xl bg-surface-low border border-outline-variant space-y-1.5"
                         >
-                          <p className="text-xs font-semibold text-[#5d0c1d] uppercase tracking-wide">
+                          <p className="text-xs font-semibold text-primary uppercase tracking-wide">
                             {q.label}
                           </p>
 
                           {!hasAnswer ? (
-                            <p className="text-xs italic text-[#9c8b8e]">Não respondido</p>
+                            <p className="text-xs italic text-on-surface-subtle">Não respondido</p>
                           ) : q.type === "checkbox" && Array.isArray(answer) ? (
                             <div className="flex flex-wrap gap-1.5 pt-1">
                               {answer.map((item: string, i: number) => (
                                 <span
                                   key={i}
-                                  className="px-3 py-1 rounded-full text-xs font-semibold bg-[#f8dad2] text-[#5d0c1d]"
+                                  className="px-3 py-1 rounded-full text-xs font-semibold bg-primary-container text-primary"
                                 >
                                   {item}
                                 </span>
@@ -476,19 +476,19 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                             </div>
                           ) : q.type === "scale_1_10" ? (
                             <div className="flex items-center gap-3 pt-1">
-                              <span className="w-8 h-8 rounded-full bg-[#5d0c1d] text-white font-bold text-sm flex items-center justify-center shadow-xs">
+                              <span className="w-8 h-8 rounded-full bg-primary text-white font-bold text-sm flex items-center justify-center shadow-xs">
                                 {answer}
                               </span>
-                              <div className="flex-1 h-2 bg-[#f0ded8] rounded-full overflow-hidden max-w-xs">
+                              <div className="flex-1 h-2 bg-surface-container-high rounded-full overflow-hidden max-w-xs">
                                 <div
-                                  className="h-full bg-[#5d0c1d] rounded-full"
+                                  className="h-full bg-primary rounded-full"
                                   style={{ width: `${(Number(answer) / 10) * 100}%` }}
                                 />
                               </div>
-                              <span className="text-xs text-[#6f5f62]">escala de 1 a 10</span>
+                              <span className="text-xs text-on-surface-variant">escala de 1 a 10</span>
                             </div>
                           ) : (
-                            <p className="text-xs sm:text-sm text-[#241a1c] whitespace-pre-wrap leading-relaxed">
+                            <p className="text-xs sm:text-sm text-on-surface whitespace-pre-wrap leading-relaxed">
                               {String(answer)}
                             </p>
                           )}
@@ -503,14 +503,14 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
 
           {/* TAB 2: ANOTAÇÕES DA PSICANALISTA */}
           {activeTab === "anotacoes" && (
-            <div className="bg-white rounded-3xl border border-[#f0ded8] p-6 sm:p-7 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-[#f3e4e0] pb-3">
+            <div className="bg-white rounded-3xl border border-outline-variant p-6 sm:p-7 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-outline-variant pb-3">
                 <div>
-                  <h3 className="font-serif text-lg font-bold text-[#5d0c1d] flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-[#5d0c1d]" />
+                  <h3 className="font-serif text-lg font-bold text-primary flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-primary" />
                     <span>Anotações & Hipóteses Clínicas</span>
                   </h3>
-                  <p className="text-xs text-[#6f5f62] mt-0.5">
+                  <p className="text-xs text-on-surface-variant mt-0.5">
                     Espaço confidencial exclusivo para suas observações diagnósticas, enquadre e evolução terapêutica.
                   </p>
                 </div>
@@ -518,7 +518,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                 <button
                   onClick={handleSaveNotes}
                   disabled={savingNotes}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] disabled:opacity-70 disabled:cursor-not-allowed text-white text-xs font-semibold shadow-xs transition"
+                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-primary hover:bg-secondary disabled:opacity-70 disabled:cursor-not-allowed text-white text-xs font-semibold shadow-xs transition"
                 >
                   <BotaoConteudo carregando={savingNotes} rotuloCarregando="Salvando...">
                     <Save className="w-4 h-4" />
@@ -528,8 +528,8 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
               </div>
 
               {notesSavedSuccess && (
-                <div className="bg-[#e7f4ec] border border-[#c7e6d2] text-[#245f3c] p-3 rounded-2xl text-xs flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#245f3c]" />
+                <div className="bg-success-container border border-success-outline text-success p-3 rounded-2xl text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-success" />
                   <span>Anotações salvas com sucesso!</span>
                 </div>
               )}
@@ -539,15 +539,15 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                 placeholder="Escreva aqui suas impressões clínicas sobre a queixa do paciente, significantes recorrentes, histórico transferencial, hipóteses diagnósticas e metas do tratamento..."
                 value={clinicalNotes}
                 onChange={(e) => setClinicalNotes(e.target.value)}
-                className="w-full p-4 rounded-2xl border border-[#eae2d7] bg-[#f7efe5] text-sm text-[#241a1c] placeholder-[#9c8b8e] focus:bg-white focus:border-[#5d0c1d] focus:outline-none transition leading-relaxed"
+                className="w-full p-4 rounded-2xl border border-outline-variant bg-surface-container text-sm text-on-surface placeholder-on-surface-subtle focus:bg-white focus:border-primary focus:outline-none transition leading-relaxed"
               />
             </div>
           )}
 
           {/* TAB 3: CONTRATOS */}
           {activeTab === "contratos" && contratoEditando && (
-            <div className="bg-white rounded-3xl border border-[#f0ded8] p-6 sm:p-7 shadow-xs space-y-4">
-              <h3 className="font-serif text-lg font-bold text-[#5d0c1d]">
+            <div className="bg-white rounded-3xl border border-outline-variant p-6 sm:p-7 shadow-xs space-y-4">
+              <h3 className="font-serif text-lg font-bold text-primary">
                 Editar contrato
               </h3>
               <ContractEditForm
@@ -563,14 +563,14 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
           )}
 
           {activeTab === "contratos" && !contratoEditando && (
-            <div className="bg-white rounded-3xl border border-[#f0ded8] p-6 sm:p-7 shadow-xs space-y-6">
-              <div className="flex items-center justify-between border-b border-[#f3e4e0] pb-3">
+            <div className="bg-white rounded-3xl border border-outline-variant p-6 sm:p-7 shadow-xs space-y-6">
+              <div className="flex items-center justify-between border-b border-outline-variant pb-3">
                 <div>
-                  <h3 className="font-serif text-lg font-bold text-[#5d0c1d] flex items-center gap-2">
-                    <FileSignature className="w-5 h-5 text-[#5d0c1d]" />
+                  <h3 className="font-serif text-lg font-bold text-primary flex items-center gap-2">
+                    <FileSignature className="w-5 h-5 text-primary" />
                     <span>Contratos do Paciente</span>
                   </h3>
-                  <p className="text-xs text-[#6f5f62]">
+                  <p className="text-xs text-on-surface-variant">
                     Gere e visualize contratos de prestação de serviços baseados nos dados da anamnese.
                   </p>
                 </div>
@@ -578,7 +578,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                 {submission.contracts && submission.contracts.length > 0 && (
                 <button
                   onClick={() => setIsContractModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs font-semibold shadow-xs transition"
+                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-primary hover:bg-secondary text-white text-xs font-semibold shadow-xs transition"
                 >
                   <FileSignature className="w-4 h-4" />
                   <span>Gerar Novo Contrato</span>
@@ -587,12 +587,12 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
               </div>
 
               {(!submission.contracts || submission.contracts.length === 0) ? (
-                <div className="p-8 text-center text-xs text-[#9c8b8e] bg-[#fbf3ef] rounded-2xl border border-dashed border-[#f0ded8] space-y-3">
-                  <FileText className="w-8 h-8 mx-auto text-[#ccb38d]" />
-                  <p className="font-serif font-bold text-sm text-[#5d0c1d]">Nenhum contrato gerado para este paciente ainda.</p>
+                <div className="p-8 text-center text-xs text-on-surface-subtle bg-surface-low rounded-2xl border border-dashed border-outline-variant space-y-3">
+                  <FileText className="w-8 h-8 mx-auto text-tertiary" />
+                  <p className="font-serif font-bold text-sm text-primary">Nenhum contrato gerado para este paciente ainda.</p>
                   <button
                     onClick={() => setIsContractModalOpen(true)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#f8dad2] text-[#5d0c1d] font-semibold text-xs hover:bg-[#f3cbc1] transition"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary-container text-primary font-semibold text-xs hover:bg-primary-container-high transition"
                   >
                     Gerar Contrato Agora &rarr;
                   </button>
@@ -602,14 +602,14 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                   {submission.contracts.map((contract) => (
                     <div
                       key={contract.id}
-                      className="p-4 rounded-2xl bg-[#fbf3ef] border border-[#f0ded8] flex items-center justify-between gap-4"
+                      className="p-4 rounded-2xl bg-surface-low border border-outline-variant flex items-center justify-between gap-4"
                     >
                       <div className="space-y-1">
-                        <h4 className="font-serif font-bold text-sm text-[#5d0c1d]">{contract.title}</h4>
-                        <p className="text-xs text-[#6f5f62]">
+                        <h4 className="font-serif font-bold text-sm text-primary">{contract.title}</h4>
+                        <p className="text-xs text-on-surface-variant">
                           Sessao: R$ {(contract.sessionPriceCents / 100).toFixed(2)} - {contract.frequency} - {contract.durationMinutes} min
                         </p>
-                        <p className="text-[11px] text-[#9c8b8e]">
+                        <p className="text-[12px] text-on-surface-subtle">
                           Criado em {formatDateTime(contract.createdAt)}
                         </p>
                       </div>
@@ -624,7 +624,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                           href={`/admin/contratos/${contract.id}/imprimir`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white border border-[#f0ded8] text-xs font-semibold text-[#5d0c1d] hover:bg-[#f8dad2] transition"
+                          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white border border-outline-variant text-xs font-semibold text-primary hover:bg-primary-container transition"
                         >
                           <Printer className="w-3.5 h-3.5" />
                           <span>Imprimir</span>
@@ -637,7 +637,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                             <button
                               onClick={() => abrirEdicaoContrato(contract.id)}
                               disabled={carregandoContrato === contract.id}
-                              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white border border-[#f0ded8] text-xs font-semibold text-[#5d0c1d] hover:bg-[#f8dad2] disabled:opacity-60 transition"
+                              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white border border-outline-variant text-xs font-semibold text-primary hover:bg-primary-container disabled:opacity-60 transition"
                             >
                               <BotaoConteudo
                                 carregando={carregandoContrato === contract.id}
@@ -652,7 +652,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
                             <button
                               onClick={() => excluirContrato(contract.id)}
                               disabled={excluindoContrato === contract.id}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-[#aa2d47] hover:bg-[#fff0f3] disabled:opacity-60 transition"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-secondary hover:bg-secondary-container disabled:opacity-60 transition"
                             >
                               <BotaoConteudo
                                 carregando={excluindoContrato === contract.id}

@@ -82,15 +82,15 @@ export function AdminSidebar() {
   const Conteudo = ({ comRotulo }: { comRotulo: boolean }) => (
     <>
       <div className={`flex items-center gap-2.5 px-3 h-16 shrink-0 ${comRotulo ? "" : "justify-center"}`}>
-        <div className="w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-[#5d0c1d] to-[#aa2d47] flex items-center justify-center text-white">
+        <div className="w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white">
           <HeartHandshake className="w-4.5 h-4.5" />
         </div>
         {comRotulo && (
           <div className="min-w-0">
-            <p className="font-serif text-xs font-bold text-[#5d0c1d] leading-tight truncate">
+            <p className="font-serif text-xs font-bold text-primary leading-tight truncate">
               Joane S. O. de Andrade
             </p>
-            <p className="text-[10px] text-[#9c8b8e] truncate">Painel clínico</p>
+            <p className="text-[11px] text-on-surface-subtle truncate">Painel clínico</p>
           </div>
         )}
       </div>
@@ -108,8 +108,8 @@ export function AdminSidebar() {
               aria-current={on ? "page" : undefined}
               className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-xs font-semibold transition ${
                 on
-                  ? "bg-[#5d0c1d] text-white shadow-xs"
-                  : "text-[#6f5f62] hover:bg-[#fbf3ef] hover:text-[#5d0c1d]"
+                  ? "bg-primary text-white shadow-xs"
+                  : "text-on-surface-variant hover:bg-surface-low hover:text-primary"
               } ${comRotulo ? "" : "justify-center"}`}
             >
               <Icone className="w-4.5 h-4.5 shrink-0" />
@@ -119,13 +119,13 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      <div className="px-2 pb-3 pt-2 border-t border-[#f3e4e0] space-y-1">
+      <div className="px-2 pb-3 pt-2 border-t border-outline-variant space-y-1">
         <a
           href="/preencher-anamnese"
           target="_blank"
           rel="noopener noreferrer"
           title={comRotulo ? undefined : "Ver formulário público"}
-          className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-xs font-semibold text-[#6f5f62] hover:bg-[#fbf3ef] hover:text-[#5d0c1d] transition ${
+          className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-xs font-semibold text-on-surface-variant hover:bg-surface-low hover:text-primary transition ${
             comRotulo ? "" : "justify-center"
           }`}
         >
@@ -136,7 +136,7 @@ export function AdminSidebar() {
         <button
           onClick={sair}
           title={comRotulo ? undefined : "Sair"}
-          className={`w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-xs font-semibold text-[#aa2d47] hover:bg-[#fff0f3] transition ${
+          className={`w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-xs font-semibold text-secondary hover:bg-secondary-container transition ${
             comRotulo ? "" : "justify-center"
           }`}
         >
@@ -150,15 +150,15 @@ export function AdminSidebar() {
   return (
     <>
       {/* Barra fina do topo, apenas em telas pequenas */}
-      <div className="md:hidden sticky top-0 z-30 h-14 bg-white border-b border-[#f0ded8] flex items-center gap-2 px-3 no-print">
+      <div className="md:hidden sticky top-0 z-30 h-14 bg-white border-b border-outline-variant flex items-center gap-2 px-3 no-print">
         <button
           onClick={() => setGaveta(true)}
-          className="p-2 rounded-full text-[#5d0c1d] hover:bg-[#fbf3ef] transition"
+          className="p-2 rounded-full text-primary hover:bg-surface-low transition"
           aria-label="Abrir menu"
         >
           <Menu className="w-5 h-5" />
         </button>
-        <span className="font-serif text-sm font-bold text-[#5d0c1d] truncate">
+        <span className="font-serif text-sm font-bold text-primary truncate">
           {ITENS.find((i) => ativo(i.href))?.curto ?? "Painel"}
         </span>
       </div>
@@ -171,10 +171,10 @@ export function AdminSidebar() {
             onClick={() => setGaveta(false)}
             aria-label="Fechar menu"
           />
-          <div className="absolute left-0 top-0 bottom-0 w-64 bg-white border-r border-[#f0ded8] flex flex-col">
+          <div className="absolute left-0 top-0 bottom-0 w-64 bg-white border-r border-outline-variant flex flex-col">
             <button
               onClick={() => setGaveta(false)}
-              className="absolute right-2 top-3 p-2 rounded-full text-[#6f5f62] hover:bg-[#fbf3ef]"
+              className="absolute right-2 top-3 p-2 rounded-full text-on-surface-variant hover:bg-surface-low"
               aria-label="Fechar menu"
             >
               <X className="w-4 h-4" />
@@ -186,12 +186,12 @@ export function AdminSidebar() {
 
       {/* Trilho fixo em telas medias e grandes */}
       <aside
-        className={`hidden md:flex ${largura} shrink-0 flex-col bg-white border-r border-[#f0ded8] h-screen sticky top-0 transition-[width] duration-200 no-print`}
+        className={`hidden md:flex ${largura} shrink-0 flex-col bg-white border-r border-outline-variant h-screen sticky top-0 transition-[width] duration-200 no-print`}
       >
         <Conteudo comRotulo={expandida} />
         <button
           onClick={alternar}
-          className="mx-2 mb-3 flex items-center justify-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold text-[#9c8b8e] hover:bg-[#fbf3ef] hover:text-[#5d0c1d] transition"
+          className="mx-2 mb-3 flex items-center justify-center gap-2 rounded-2xl px-3 py-2 text-[12px] font-semibold text-on-surface-subtle hover:bg-surface-low hover:text-primary transition"
           aria-label={expandida ? "Recolher menu" : "Expandir menu"}
         >
           {expandida ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}

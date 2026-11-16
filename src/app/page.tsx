@@ -4,9 +4,9 @@ import {
   HeartHandshake,
   Sparkles,
   FileText,
+  Heart,
   CalendarCheck,
   Lock,
-  ArrowRight,
   Brain,
   Quote,
   Waves,
@@ -18,6 +18,8 @@ import {
   LogIn,
 } from "lucide-react";
 import { AcordeaoFAQ } from "@/components/landing/AcordeaoFAQ";
+import { Button } from "@/components/ui/Button";
+import { Chip } from "@/components/ui/Chip";
 
 /** Numero real da Joane. Unica fonte: o botao flutuante e a faixa final leem daqui. */
 const WHATSAPP_NUMERO = "5511922875398";
@@ -102,14 +104,30 @@ const PERGUNTAS_FREQUENTES = [
   },
 ] as const;
 
+
+const PASSOS = [
+  {
+    titulo: "Escolha do horário",
+    texto: "Você vê os horários livres da Dra. Joane e escolhe o que combina com a sua rotina. Não precisa de cadastro.",
+  },
+  {
+    titulo: "Confirmação e ficha",
+    texto: "Você confirma a consulta pelo link que chega no e-mail e preenche uma ficha, para a Dra. Joane se preparar para te receber.",
+  },
+  {
+    titulo: "Início das sessões",
+    texto: "No dia combinado, online ou presencial, a gente começa o seu processo.",
+  },
+] as const;
+
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#fff6f4]">
-      {/* NAVEGACAO */}
-      <header className="sticky top-0 z-40 bg-[#fff6f4]/90 backdrop-blur-md border-b border-[#f3e4e0]">
+    <div className="min-h-screen flex flex-col bg-surface">
+      {/* BARRA SUPERIOR */}
+      <header className="sticky top-0 z-40 bg-surface/90 backdrop-blur-md border-b border-outline-variant">
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-3">
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 shrink-0 min-w-0">
-            <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 ring-2 ring-white shadow-sm shadow-[#5d0c1d]/20">
+          <Link href="/" className="flex items-center gap-3 min-w-0">
+            <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 ring-2 ring-white shadow-sm">
               <Image
                 src="/joane-avatar.jpg"
                 alt="Dra. Joane Souza Oliveira de Andrade"
@@ -120,341 +138,278 @@ export default function HomePage() {
               />
             </div>
             <div className="text-left leading-tight min-w-0">
-              <span className="font-serif text-xs sm:text-base font-bold text-[#5d0c1d] block truncate">
+              <span className="font-serif text-sm sm:text-base font-bold text-primary block truncate">
                 Joane Souza Oliveira de Andrade
               </span>
-              <span className="hidden sm:block text-[11px] text-[#6f5f62]">
-                Psicanálise clínica e pós-graduação em psicologia
+              <span className="hidden sm:block text-xs text-on-surface-variant">
+                Psicanálise clínica
               </span>
             </div>
           </Link>
 
-          <div className="hidden md:flex items-center gap-7 text-sm font-semibold text-[#5d0c1d] shrink-0">
+          <div className="hidden lg:flex items-center gap-1 shrink-0">
             {LINKS_DE_NAVEGACAO.map((l) => (
-              <a key={l.href} href={l.href} className="hover:text-[#aa2d47] transition">
+              <Button key={l.href} href={l.href} variante="text">
                 {l.rotulo}
-              </a>
+              </Button>
             ))}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <Link
-              href="/area-do-paciente/entrar"
-              title="Área do Paciente"
-              className="inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl border border-[#e6d8d3] hover:bg-white text-[#5d0c1d] text-xs sm:text-sm font-semibold transition"
-            >
-              <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Área do Paciente</span>
-            </Link>
-            <Link
-              href="/agendar"
-              className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-xs sm:text-sm font-semibold shadow-sm transition"
-            >
-              <CalendarCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <div className="hidden sm:block">
+              <Button
+                href="/area-do-paciente/entrar"
+                variante="outlined"
+                icone={<LogIn className="w-4 h-4" />}
+              >
+                Área do paciente
+              </Button>
+            </div>
+            <Button href="/agendar" icone={<CalendarCheck className="w-4 h-4" />}>
+              <span className="sm:hidden">Agendar</span>
               <span className="hidden sm:inline">Agendar consulta</span>
-            </Link>
+            </Button>
           </div>
         </nav>
       </header>
 
       <main className="flex-1">
-        {/* HERO SECTION */}
-        <section className="relative overflow-hidden pt-12 pb-16 sm:pt-16 sm:pb-24">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/4 w-[650px] h-[380px] bg-gradient-to-tr from-[#f8dad2]/70 via-[#fdece8]/50 to-[#edf8fe]/40 rounded-full blur-3xl opacity-70 -z-10 pointer-events-none" />
-
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="grid md:grid-cols-2 gap-12 md:gap-10 items-center">
-              {/* TEXTO */}
-              <div className="text-center md:text-left">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#f8dad2] text-[#5d0c1d] text-xs font-semibold uppercase tracking-[1px] mb-6 shadow-xs">
-                  <Sparkles className="w-3.5 h-3.5 text-[#5d0c1d]" />
-                  <span>Psicanálise Clínica</span>
-                </div>
-
-                <h1 className="font-serif text-3xl sm:text-5xl font-bold text-[#5d0c1d] tracking-tight leading-[1.18] mb-6">
-                  Precisa de um espaço para ser{" "}
-                  <span className="italic font-normal text-[#aa2d47]">
-                    escutado de verdade?
-                  </span>
-                </h1>
-
-                <p className="max-w-lg mx-auto md:mx-0 text-base sm:text-lg text-[#6f5f62] leading-relaxed mb-6">
-                  Sou Joane Souza Oliveira de Andrade, psicanalista clínica com pós-graduação em psicologia. Ofereço um
-                  espaço de escuta sem julgamentos, para você entender o que sente e encontrar
-                  novos caminhos.
-                </p>
-
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-8">
-                  {SELOS_DO_HERO.map(({ icone: Icone, rotulo }) => (
-                    <span
-                      key={rotulo}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-[#f0ded8] text-xs font-semibold text-[#5d0c1d]"
-                    >
-                      <Icone className="w-3.5 h-3.5 text-[#aa2d47]" />
-                      {rotulo}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex flex-col items-center md:items-start gap-4">
-                  <Link
-                    href="/agendar"
-                    className="inline-flex items-center justify-center gap-3 px-9 py-4 rounded-2xl bg-[#5d0c1d] hover:bg-[#aa2d47] text-white text-base font-semibold shadow-xl shadow-[#5d0c1d]/25 transition transform active:scale-98"
-                  >
-                    <CalendarCheck className="w-5 h-5" />
-                    <span>Agendar consulta</span>
-                    <ArrowRight className="w-4 h-4 ml-1" />
-                  </Link>
-                  <Link
-                    href="/preencher-anamnese"
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#5d0c1d] hover:text-[#aa2d47] transition"
-                  >
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>Prefere começar pela ficha de anamnese?</span>
-                  </Link>
-                  <Link
-                    href="/area-do-paciente/entrar"
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#5d0c1d] hover:text-[#aa2d47] transition"
-                  >
-                    <LogIn className="w-3.5 h-3.5" />
-                    <span>Já é paciente? Acesse sua área</span>
-                  </Link>
-                </div>
-              </div>
-
-              {/* RETRATO */}
-              <div className="relative mx-auto md:mx-0 w-full max-w-sm">
-                <div
-                  className="absolute -inset-6 bg-gradient-to-br from-[#f8dad2]/80 via-[#fdece8]/60 to-[#edf8fe]/50 rounded-[3rem] blur-xl -z-10"
-                  aria-hidden="true"
+        {/* ABERTURA */}
+        <section className="relative overflow-hidden py-10 sm:py-20">
+          <div
+            className="absolute top-0 right-0 w-[520px] h-[520px] rounded-full bg-primary-container/60 blur-3xl -translate-y-1/3 translate-x-1/4 -z-10 pointer-events-none"
+            aria-hidden="true"
+          />
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-[1.15fr_1fr] gap-8 md:gap-14 items-center">
+            {/* No celular a foto vem antes do texto: e ela que cria a proximidade. */}
+            <div className="order-first md:order-last mx-auto w-full max-w-[168px] sm:max-w-xs md:max-w-sm">
+              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border-4 border-white shadow-xl shadow-primary/15">
+                <Image
+                  src="/joane-retrato.jpg"
+                  alt="Dra. Joane Souza Oliveira de Andrade, psicanalista"
+                  fill
+                  sizes="(min-width: 768px) 384px, 168px"
+                  className="object-cover"
+                  priority
                 />
-                <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl shadow-[#5d0c1d]/15">
-                  <Image
-                    src="/joane-retrato.jpg"
-                    alt="Dra. Joane Souza Oliveira de Andrade, psicanalista"
-                    fill
-                    sizes="(min-width: 768px) 384px, 320px"
-                    className="object-cover"
-                    priority
-                  />
-                </div>
               </div>
+            </div>
+
+            <div className="text-center md:text-left">
+              <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-secondary mb-4">
+                <Sparkles className="w-4 h-4" />
+                Psicanálise clínica
+              </p>
+
+              <h1 className="font-serif text-4xl sm:text-5xl font-bold text-primary tracking-tight leading-[1.15] mb-5">
+                Precisa de um espaço para ser{" "}
+                <span className="italic font-normal text-secondary">escutado de verdade?</span>
+              </h1>
+
+              <p className="max-w-lg mx-auto md:mx-0 text-base sm:text-lg text-on-surface-variant leading-relaxed mb-6">
+                Sou Joane Souza Oliveira de Andrade, psicanalista clínica. Ofereço um espaço de
+                escuta sem julgamentos, para você entender o que sente e encontrar novos caminhos.
+              </p>
+
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-8">
+                {SELOS_DO_HERO.map(({ icone: Icone, rotulo }) => (
+                  <Chip key={rotulo} icone={<Icone className="w-4 h-4 text-secondary" />}>
+                    {rotulo}
+                  </Chip>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-3">
+                <Button
+                  href="/agendar"
+                  tamanho="lg"
+                  icone={<CalendarCheck className="w-5 h-5" />}
+                  className="w-full sm:w-auto"
+                >
+                  Agendar consulta
+                </Button>
+                <Button
+                  href="/area-do-paciente/entrar"
+                  variante="tonal"
+                  tamanho="lg"
+                  icone={<LogIn className="w-5 h-5" />}
+                  className="w-full sm:w-auto"
+                >
+                  Já sou paciente
+                </Button>
+              </div>
+              <Button
+                href="/preencher-anamnese"
+                variante="text"
+                icone={<FileText className="w-4 h-4" />}
+                className="mt-3"
+              >
+                Prefere começar pela ficha de anamnese?
+              </Button>
             </div>
           </div>
         </section>
 
-        {/* HOW IT WORKS SECTION */}
-        <section id="como-funciona" className="scroll-mt-24 py-16 bg-[#fbf3ef] border-y border-[#f0ded8]">
+        {/* COMO FUNCIONA */}
+        <section id="como-funciona" className="scroll-mt-24 py-16 sm:py-20 bg-surface-low">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
             <div className="text-center max-w-2xl mx-auto mb-12">
-              <h2 className="font-serif text-2xl sm:text-4xl font-bold text-[#5d0c1d]">
+              <h2 className="font-serif text-3xl sm:text-4xl font-bold text-primary">
                 Como funciona o início das sessões?
               </h2>
-              <p className="text-sm text-[#6f5f62] mt-2">
+              <p className="text-base text-on-surface-variant mt-3">
                 Três passos simples para a gente começar.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white p-7 rounded-3xl border border-[#f0ded8] shadow-xs relative hover:shadow-md transition">
-                <div className="w-10 h-10 rounded-full bg-[#5d0c1d] text-white font-bold flex items-center justify-center text-sm mb-4">
-                  1
-                </div>
-                <h3 className="font-serif font-bold text-[#5d0c1d] text-lg mb-2">Escolha do horário</h3>
-                <p className="text-xs sm:text-sm text-[#6f5f62] leading-relaxed">
-                  Você vê os horários livres da Dra. Joane e escolhe o que combina com a sua rotina. Não precisa de cadastro.
-                </p>
-              </div>
-
-              <div className="bg-white p-7 rounded-3xl border border-[#f0ded8] shadow-xs relative hover:shadow-md transition">
-                <div className="w-10 h-10 rounded-full bg-[#aa2d47] text-white font-bold flex items-center justify-center text-sm mb-4">
-                  2
-                </div>
-                <h3 className="font-serif font-bold text-[#5d0c1d] text-lg mb-2">Confirmação e ficha</h3>
-                <p className="text-xs sm:text-sm text-[#6f5f62] leading-relaxed">
-                  Você confirma a consulta pelo link que chega no e-mail e preenche uma ficha, para a Dra. Joane se preparar para te receber.
-                </p>
-              </div>
-
-              <div className="bg-white p-7 rounded-3xl border border-[#f0ded8] shadow-xs relative hover:shadow-md transition">
-                <div className="w-10 h-10 rounded-full bg-[#ccb38d] text-[#5d0c1d] font-bold flex items-center justify-center text-sm mb-4">
-                  3
-                </div>
-                <h3 className="font-serif font-bold text-[#5d0c1d] text-lg mb-2">Início das sessões</h3>
-                <p className="text-xs sm:text-sm text-[#6f5f62] leading-relaxed">
-                  No dia combinado, online ou presencial, a gente começa o seu processo.
-                </p>
-              </div>
-            </div>
+            <ol className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 relative">
+              <div
+                className="hidden md:block absolute top-6 left-[16.7%] right-[16.7%] h-px bg-outline-variant"
+                aria-hidden="true"
+              />
+              {PASSOS.map((p, i) => (
+                <li key={p.titulo} className="relative text-center">
+                  <span className="relative z-10 mx-auto mb-4 w-12 h-12 rounded-full bg-primary text-on-primary font-bold text-lg flex items-center justify-center ring-8 ring-surface-low">
+                    {i + 1}
+                  </span>
+                  <h3 className="font-serif font-bold text-primary text-xl mb-2">{p.titulo}</h3>
+                  <p className="text-sm text-on-surface-variant leading-relaxed max-w-xs mx-auto">
+                    {p.texto}
+                  </p>
+                </li>
+              ))}
+            </ol>
 
             <div className="mt-12 text-center">
-              <Link
+              <Button
                 href="/agendar"
-                className="inline-flex items-center gap-2 text-sm font-bold text-[#5d0c1d] hover:text-[#aa2d47] transition underline underline-offset-4"
+                variante="tonal"
+                icone={<CalendarCheck className="w-4 h-4" />}
               >
-                <span>Clique aqui para agendar a sua consulta</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+                Agendar a minha consulta
+              </Button>
             </div>
           </div>
         </section>
 
-        {/* PARA QUEM E A TERAPIA */}
-        <section id="areas" className="scroll-mt-24 py-20 max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="font-serif text-2xl sm:text-4xl font-bold text-[#5d0c1d]">
+        {/* PARA QUEM E ESSE ESPACO */}
+        <section id="areas" className="scroll-mt-24 py-16 sm:py-20 max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-primary">
               Para quem é esse espaço?
             </h2>
-            <p className="text-sm text-[#6f5f62] mt-2">
+            <p className="text-base text-on-surface-variant mt-3">
               Um convite para quem sente que precisa de um lugar seguro para se ouvir, e ser ouvido.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {AREAS_DE_ESCUTA.map(({ icone: Icone, titulo, texto }) => (
-              <div
-                key={titulo}
-                className="flex items-start gap-4 bg-white p-6 rounded-3xl border border-[#f0ded8] shadow-xs hover:shadow-md transition"
-              >
-                <div className="p-3 rounded-full bg-[#f8dad2] text-[#5d0c1d] shrink-0">
-                  <Icone className="w-5 h-5" />
-                </div>
+              <div key={titulo} className="flex items-start gap-4 p-6 rounded-3xl bg-surface-container">
+                <span className="shrink-0 w-12 h-12 rounded-2xl bg-primary-container text-primary flex items-center justify-center">
+                  <Icone className="w-6 h-6" />
+                </span>
                 <div>
-                  <h3 className="font-serif font-bold text-[#5d0c1d] text-base mb-1.5">{titulo}</h3>
-                  <p className="text-xs sm:text-sm text-[#6f5f62] leading-relaxed">{texto}</p>
+                  <h3 className="font-serif font-bold text-primary text-lg mb-1">{titulo}</h3>
+                  <p className="text-sm text-on-surface-variant leading-relaxed">{texto}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ABOUT JOANE */}
-        <section id="sobre" className="scroll-mt-24 pb-20 max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="relative bg-[linear-gradient(125.86deg,#edf8fe_0%,#faeae4_80%)] rounded-[2rem] border border-[#f0ded8] p-8 sm:p-12 shadow-xs overflow-hidden">
-            {/* Aspas decorativas ao fundo, atras do texto */}
+        {/* SOBRE */}
+        <section id="sobre" className="scroll-mt-24 pb-16 sm:pb-20 max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="relative overflow-hidden rounded-3xl bg-primary-container-low border border-outline-variant p-8 sm:p-12 text-center">
             <Quote
-              className="hidden md:block absolute top-10 right-10 w-28 h-28 text-[#5d0c1d]/[0.06] -scale-x-100 pointer-events-none"
-              strokeWidth={1}
+              className="absolute top-6 left-6 w-14 h-14 text-primary/10 rotate-180"
+              aria-hidden="true"
             />
-
-            <div className="relative flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-12">
-              {/* RETRATO */}
-              <div className="relative shrink-0 mx-auto md:mx-0">
-                <div
-                  className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-[#ccb38d] via-[#f0ded8] to-[#f8dad2] rotate-3 -z-10"
-                  aria-hidden="true"
-                />
-                <div className="relative w-52 sm:w-60 md:w-64 aspect-[4/5] rounded-[1.75rem] overflow-hidden border-4 border-white shadow-xl shadow-[#5d0c1d]/15">
-                  <Image
-                    src="/joane-retrato.jpg"
-                    alt="Dra. Joane Souza Oliveira de Andrade, psicanalista"
-                    fill
-                    sizes="(min-width: 768px) 256px, 240px"
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4 text-center md:text-left">
-                <h3 className="font-serif text-3xl sm:text-4xl font-bold text-[#5d0c1d] italic">
-                  Dra. Joane Souza Oliveira de Andrade
-                </h3>
-                <p className="text-xs sm:text-sm font-semibold uppercase tracking-[1px] text-[#aa2d47]">
-                  Psicanálise clínica e pós-graduação em psicologia
-                </p>
-                <p className="text-sm sm:text-base text-[#6f5f62] leading-relaxed">
-                  Trabalho com psicanálise, escutando com carinho o que você sente e nem sempre consegue explicar.
-                  Aqui você tem um lugar seguro para falar o que vier, sem julgamentos, dar um novo sentido às suas dores,
-                  encontrar o que te move e ganhar mais liberdade para viver.
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
-                  {SELOS_DE_ABORDAGEM.map(({ icone: Icone, rotulo }) => (
-                    <div
-                      key={rotulo}
-                      className="flex items-center gap-2 bg-white/80 border border-[#f3e4e0] rounded-2xl px-3 py-2.5"
-                    >
-                      <span className="p-1.5 rounded-full bg-[#f8dad2] text-[#5d0c1d] shrink-0">
-                        <Icone className="w-3.5 h-3.5" />
-                      </span>
-                      <span className="text-[11px] sm:text-xs font-semibold text-[#5d0c1d] text-left">
-                        {rotulo}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <p className="relative text-xs font-semibold uppercase tracking-[0.12em] text-secondary mb-3">
+              Psicanálise clínica
+            </p>
+            <h2 className="relative font-serif text-3xl sm:text-4xl font-bold text-primary italic mb-5">
+              Dra. Joane Souza Oliveira de Andrade
+            </h2>
+            <p className="relative max-w-2xl mx-auto text-base sm:text-lg text-on-surface-variant leading-relaxed">
+              Trabalho com psicanálise, escutando com carinho o que você sente e nem sempre consegue
+              explicar. Aqui você tem um lugar seguro para falar o que vier, sem julgamentos, dar um
+              novo sentido às suas dores, encontrar o que te move e ganhar mais liberdade para viver.
+            </p>
+            <div className="relative flex flex-wrap justify-center gap-2 mt-7">
+              {SELOS_DE_ABORDAGEM.map(({ icone: Icone, rotulo }) => (
+                <Chip key={rotulo} icone={<Icone className="w-4 h-4 text-secondary" />}>
+                  {rotulo}
+                </Chip>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* PERGUNTAS FREQUENTES */}
-        <section id="duvidas" className="scroll-mt-24 py-20 bg-[#fbf3ef] border-y border-[#f0ded8]">
-          <div className="max-w-2xl mx-auto px-4 sm:px-6">
+        {/* DUVIDAS */}
+        <section id="duvidas" className="scroll-mt-24 py-16 sm:py-20 bg-surface-low">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-10">
-              <h2 className="font-serif text-2xl sm:text-4xl font-bold text-[#5d0c1d]">
+              <h2 className="font-serif text-3xl sm:text-4xl font-bold text-primary">
                 Perguntas frequentes
               </h2>
             </div>
-
             <AcordeaoFAQ itens={PERGUNTAS_FREQUENTES.map((p) => ({ pergunta: p.pergunta, resposta: p.resposta }))} />
           </div>
         </section>
 
-        {/* FAIXA FINAL DE CONTATO */}
-        <section id="contato" className="scroll-mt-24 relative overflow-hidden py-20 bg-[#5d0c1d]">
+        {/* CHAMADO FINAL */}
+        <section id="contato" className="scroll-mt-24 relative overflow-hidden py-20 bg-primary">
           <div
-            className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#aa2d47]/30 rounded-full blur-3xl pointer-events-none"
+            className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-secondary/30 rounded-full blur-3xl pointer-events-none"
             aria-hidden="true"
           />
           <div className="relative max-w-2xl mx-auto px-4 sm:px-6 text-center">
-            <h2 className="font-serif text-2xl sm:text-4xl font-bold text-white leading-tight">
+            <Heart className="w-8 h-8 text-primary-container mx-auto mb-4" aria-hidden="true" />
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white leading-tight">
               Estou aqui para te escutar. O primeiro passo pode ser hoje.
             </h2>
-            <p className="text-sm sm:text-base text-white/75 mt-3 mb-9">
+            <p className="text-base text-white/80 mt-3 mb-9">
               Escolha um horário na agenda, ou fale antes pelo WhatsApp, se preferir.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
+              <Button
                 href="/agendar"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-white hover:bg-[#fdece8] text-[#5d0c1d] text-sm sm:text-base font-bold shadow-lg transition"
+                variante="onDark"
+                tamanho="lg"
+                icone={<CalendarCheck className="w-5 h-5" />}
+                className="w-full sm:w-auto"
               >
-                <CalendarCheck className="w-4.5 h-4.5" />
-                <span>Agendar consulta</span>
-              </Link>
-              <a
+                Agendar consulta
+              </Button>
+              <Button
                 href={WHATSAPP_HREF}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl border border-white/40 hover:bg-white/10 text-white text-sm sm:text-base font-semibold transition"
+                variante="onDarkOutlined"
+                tamanho="lg"
+                icone={<MessageCircle className="w-5 h-5" />}
+                className="w-full sm:w-auto"
               >
-                <MessageCircle className="w-4.5 h-4.5" />
-                <span>Conversar no WhatsApp</span>
-              </a>
+                Conversar no WhatsApp
+              </Button>
             </div>
-            <p className="flex items-center justify-center gap-1.5 text-xs text-white/60 mt-8">
-              <CheckCircle2 className="w-3.5 h-3.5" />
+            <p className="flex items-center justify-center gap-1.5 text-sm text-white/70 mt-8">
+              <CheckCircle2 className="w-4 h-4" />
               Seu sigilo e seus dados protegidos em todo o processo.
             </p>
-
-            <Link
-              href="/area-do-paciente/entrar"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-white/85 hover:text-white transition mt-5"
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>Já é paciente? Acesse sua área</span>
-            </Link>
           </div>
         </section>
       </main>
 
       {/* RODAPE */}
-      <footer className="py-7 border-t border-[#f0ded8]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-center sm:text-left">
-          <p className="text-xs text-[#9c8b8e]">
+      <footer className="py-8 pb-28 sm:pb-8 border-t border-outline-variant">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <p className="text-sm text-on-surface-subtle">
             © {new Date().getFullYear()} Joane Souza Oliveira de Andrade. Todos os direitos reservados.
           </p>
-          <p className="text-xs text-[#9c8b8e]">Atendimento sob sigilo profissional e ético.</p>
+          <nav className="flex items-center gap-1" aria-label="Atalhos do rodapé">
+            <Button href="/area-do-paciente/entrar" variante="text">Área do paciente</Button>
+            <Button href="/agendar" variante="text">Agendar</Button>
+          </nav>
         </div>
       </footer>
 
@@ -464,9 +419,9 @@ export default function HomePage() {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Conversar no WhatsApp"
-        className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white flex items-center justify-center shadow-xl shadow-black/20 transition transform hover:scale-105 active:scale-95"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-14 h-14 rounded-2xl bg-whatsapp hover:bg-whatsapp-hover text-white flex items-center justify-center shadow-lg shadow-black/20 transition-colors"
       >
-        <MessageCircle className="w-6.5 h-6.5" strokeWidth={2.25} />
+        <MessageCircle className="w-7 h-7" strokeWidth={2.25} />
       </a>
     </div>
   );

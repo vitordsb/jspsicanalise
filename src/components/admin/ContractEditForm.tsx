@@ -119,19 +119,19 @@ export function ContractEditForm({ contract, onCancel, onSaved }: Props) {
       : null;
 
   const campo =
-    "w-full h-10 px-3.5 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none";
-  const rotulo = "block text-[11px] font-semibold text-[#241a1c] mb-1";
+    "w-full h-10 px-3.5 rounded-lg border border-outline bg-surface-container text-xs text-on-surface focus:bg-white focus:border-primary focus:outline-none";
+  const rotulo = "block text-[12px] font-semibold text-on-surface mb-1";
 
   return (
     <form onSubmit={salvar} className="space-y-5">
       {erro && (
-        <div className="bg-[#fff0f3] border border-[#f3cbc1] text-[#aa2d47] p-3 rounded-2xl text-xs">
+        <div className="bg-secondary-container border border-primary-container-high text-secondary p-3 rounded-2xl text-xs">
           {erro}
         </div>
       )}
 
       <section className="space-y-3">
-        <h4 className="font-serif text-sm font-bold text-[#5d0c1d]">Contratante</h4>
+        <h4 className="font-serif text-sm font-bold text-primary">Contratante</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="sm:col-span-2">
             <label className={rotulo} htmlFor="ed-nome">Nome completo</label>
@@ -171,8 +171,8 @@ export function ContractEditForm({ contract, onCancel, onSaved }: Props) {
         </div>
       </section>
 
-      <section className="space-y-3 border-t border-[#f3e4e0] pt-4">
-        <h4 className="font-serif text-sm font-bold text-[#5d0c1d]">Atendimento</h4>
+      <section className="space-y-3 border-t border-outline-variant pt-4">
+        <h4 className="font-serif text-sm font-bold text-primary">Atendimento</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className={rotulo} htmlFor="ed-mod">Modalidade</label>
@@ -210,8 +210,8 @@ export function ContractEditForm({ contract, onCancel, onSaved }: Props) {
         </div>
       </section>
 
-      <section className="space-y-3 border-t border-[#f3e4e0] pt-4">
-        <h4 className="font-serif text-sm font-bold text-[#5d0c1d]">Honorários</h4>
+      <section className="space-y-3 border-t border-outline-variant pt-4">
+        <h4 className="font-serif text-sm font-bold text-primary">Honorários</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className={rotulo} htmlFor="ed-valor">Valor da sessão (R$)</label>
@@ -219,7 +219,7 @@ export function ContractEditForm({ contract, onCancel, onSaved }: Props) {
               value={f.valorSessao}
               onChange={(e) => set("valorSessao", e.target.value)} />
             {previaMensal && (
-              <p className="text-[11px] text-[#6f5f62] mt-1.5">{previaMensal}</p>
+              <p className="text-[12px] text-on-surface-variant mt-1.5">{previaMensal}</p>
             )}
           </div>
           <div>
@@ -248,8 +248,8 @@ export function ContractEditForm({ contract, onCancel, onSaved }: Props) {
         </div>
       </section>
 
-      <section className="space-y-3 border-t border-[#f3e4e0] pt-4">
-        <h4 className="font-serif text-sm font-bold text-[#5d0c1d]">Prazos e disposições</h4>
+      <section className="space-y-3 border-t border-outline-variant pt-4">
+        <h4 className="font-serif text-sm font-bold text-primary">Prazos e disposições</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className={rotulo} htmlFor="ed-canc">Aviso de cancelamento (horas)</label>
@@ -263,36 +263,36 @@ export function ContractEditForm({ contract, onCancel, onSaved }: Props) {
               value={f.rescissionNoticeDays}
               onChange={(e) => set("rescissionNoticeDays", Number(e.target.value))} />
           </div>
-          <div className="sm:col-span-2 text-[11px] text-[#9c8b8e] bg-[#fbf3ef] border border-[#f0ded8] rounded-2xl p-3">
+          <div className="sm:col-span-2 text-[12px] text-on-surface-subtle bg-surface-low border border-outline-variant rounded-2xl p-3">
             A comarca do foro vem das Configurações e é a mesma para todos os
             contratos, por ser a comarca da profissional e não a do paciente.
           </div>
           <div className="sm:col-span-2 flex items-center gap-2">
             <input id="ed-test" type="checkbox" checked={f.hasWitnesses}
               onChange={(e) => set("hasWitnesses", e.target.checked)}
-              className="w-4 h-4 accent-[#5d0c1d]" />
-            <label htmlFor="ed-test" className="text-xs text-[#241a1c]">
+              className="w-4 h-4 accent-primary" />
+            <label htmlFor="ed-test" className="text-xs text-on-surface">
               Incluir linhas de assinatura para duas testemunhas
             </label>
           </div>
           <div className="sm:col-span-2">
             <label className={rotulo} htmlFor="ed-clausulas">Cláusulas adicionais</label>
             <textarea id="ed-clausulas" rows={4}
-              className="w-full px-3.5 py-2.5 rounded-2xl border border-[#eae2d7] bg-[#f7efe5] text-xs text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-2xl border border-outline-variant bg-surface-container text-xs text-on-surface focus:bg-white focus:border-primary focus:outline-none"
               value={f.customClauses}
               onChange={(e) => set("customClauses", e.target.value)} />
           </div>
         </div>
       </section>
 
-      <div className="flex items-center justify-end gap-2 border-t border-[#f3e4e0] pt-4">
+      <div className="flex items-center justify-end gap-2 border-t border-outline-variant pt-4">
         <button type="button" onClick={onCancel}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#eae2d7] text-[#6f5f62] text-xs font-semibold hover:bg-[#fbf3ef] transition">
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant text-xs font-semibold hover:bg-surface-low transition">
           <X className="w-4 h-4" />
           <span>Cancelar</span>
         </button>
         <button type="submit" disabled={salvando}
-          className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#5d0c1d] hover:bg-[#aa2d47] disabled:opacity-70 disabled:cursor-not-allowed text-white text-xs font-semibold shadow-xs transition">
+          className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-primary hover:bg-secondary disabled:opacity-70 disabled:cursor-not-allowed text-white text-xs font-semibold shadow-xs transition">
           <BotaoConteudo carregando={salvando} rotuloCarregando="Salvando...">
             <Save className="w-4 h-4" />
             <span>Salvar alterações</span>

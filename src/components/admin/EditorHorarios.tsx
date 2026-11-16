@@ -55,12 +55,12 @@ export function EditorHorarios({ valorJson, aoMudar }: Props) {
     atualizar(janelas.map((j, idx) => (idx === i ? { ...j, [campo]: valor } : j)));
 
   const campo =
-    "h-10 px-3 rounded-full border border-[#eae2d7] bg-[#f7efe5] text-xs text-[#241a1c] focus:bg-white focus:border-[#5d0c1d] focus:outline-none";
+    "h-10 px-3 rounded-lg border border-outline bg-surface-container text-xs text-on-surface focus:bg-white focus:border-primary focus:outline-none";
 
   return (
     <div className="space-y-3">
       {janelas.length === 0 && (
-        <p className="text-xs text-[#9c8b8e]">
+        <p className="text-xs text-on-surface-subtle">
           Nenhum horário configurado. Sem isso, o paciente não consegue marcar
           consulta pelo site.
         </p>
@@ -94,7 +94,7 @@ export function EditorHorarios({ valorJson, aoMudar }: Props) {
                   <option key={h} value={h}>{h}</option>
                 ))}
               </select>
-              <span className="text-xs text-[#9c8b8e]">até</span>
+              <span className="text-xs text-on-surface-subtle">até</span>
               <select
                 value={j.fim}
                 onChange={(e) => editar(i, "fim", e.target.value)}
@@ -110,14 +110,14 @@ export function EditorHorarios({ valorJson, aoMudar }: Props) {
               <button
                 type="button"
                 onClick={() => remover(i)}
-                className="p-2 rounded-full text-[#aa2d47] hover:bg-[#fff0f3] transition"
+                className="p-2 rounded-full text-secondary hover:bg-secondary-container transition"
                 aria-label="Remover este horário"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
             {invertida && (
-              <p className="text-[11px] text-[#aa2d47] pl-2">
+              <p className="text-[12px] text-secondary pl-2">
                 O término precisa ser depois do início, senão esse dia não oferece
                 nenhum horário.
               </p>
@@ -129,14 +129,14 @@ export function EditorHorarios({ valorJson, aoMudar }: Props) {
       <button
         type="button"
         onClick={adicionar}
-        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#eae2d7] text-[#5d0c1d] text-xs font-semibold hover:bg-[#fbf3ef] transition"
+        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-outline-variant text-primary text-xs font-semibold hover:bg-surface-low transition"
       >
         <Plus className="w-4 h-4" />
         <span>Adicionar horário</span>
       </button>
 
-      <p className="text-[11px] text-[#9c8b8e] flex items-start gap-1.5 pt-1">
-        <CalendarDays className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#ccb38d]" />
+      <p className="text-[12px] text-on-surface-subtle flex items-start gap-1.5 pt-1">
+        <CalendarDays className="w-3.5 h-3.5 shrink-0 mt-0.5 text-tertiary" />
         <span>
           Horários em formato 24 horas. Cada faixa vira horários de hora em hora:
           das 08:00 às 11:00, com sessão de 50 minutos, o paciente vê 08:00,

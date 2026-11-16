@@ -31,7 +31,7 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${sourceSans.variable} ${lora.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans bg-[#fff6f4] text-[#241a1c]">
+      <body className="min-h-full flex flex-col font-sans bg-surface text-on-surface">
         {children}
       </body>
     </html>

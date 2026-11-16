@@ -179,10 +179,10 @@ function ClientesContent() {
           {selectedSubmission ? (
             <div className="flex-1 flex flex-col h-full overflow-hidden">
               {/* BOTAO VOLTAR PARA MOBILE */}
-              <div className="md:hidden p-2.5 bg-[#fbf5f2] border-b border-[#f0ded8] flex items-center shrink-0">
+              <div className="md:hidden p-2.5 bg-surface-low border-b border-outline-variant flex items-center shrink-0">
                 <button
                   onClick={() => setSelectedId(null)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#5d0c1d] p-1"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary p-1"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Voltar para a lista de pacientes</span>
@@ -199,14 +199,14 @@ function ClientesContent() {
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center whatsapp-bg">
-              <div className="bg-white p-8 rounded-3xl border border-[#e5e0da] max-w-md shadow-xs space-y-4">
-                <div className="w-16 h-16 rounded-full bg-[#fbf5f2] text-[#5d0c1d] flex items-center justify-center mx-auto shadow-inner">
+              <div className="bg-white p-8 rounded-3xl border border-outline-variant max-w-md shadow-xs space-y-4">
+                <div className="w-16 h-16 rounded-full bg-surface-low text-primary flex items-center justify-center mx-auto shadow-inner">
                   <MessageSquareText className="w-8 h-8" />
                 </div>
-                <h3 className="font-serif text-xl font-bold text-[#5d0c1d]">
+                <h3 className="font-serif text-xl font-bold text-primary">
                   Painel de Atendimentos & Anamneses
                 </h3>
-                <p className="text-xs text-[#5f5456] leading-relaxed">
+                <p className="text-xs text-on-surface-variant leading-relaxed">
                   Selecione um paciente na lista ao lado para visualizar a ficha de anamnese completa, anotacoes clinicas e gerar contratos.
                 </p>
               </div>
